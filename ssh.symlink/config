@@ -1,0 +1,15 @@
+ForwardAgent yes
+Host heybtw.com
+  Port 1984
+Host nowmov.com
+  User pipely
+Host staging.nowmov.com
+  User pipely
+Host feedreader.production.nowmov.com
+  User pipely
+Host feedreader.staging.nowmov.com
+  User pipely
+Host postgres.staging.nowmov.com
+  User pipely
+Host postgres.nowmov.com
+  User pipely

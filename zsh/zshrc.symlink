@@ -1,0 +1,104 @@
+# http://aperiodic.net/phil/prompt/
+export PATH=$PATH:$HOME/.dotfiles/bin
+export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH:~/.bundle/ruby/1.8/bin
+export GEM_PATH=~/.bundle/ruby/1.8/
+export TZ=/usr/share/zoneinfo/America/Los_Angeles
+export RUBYOPT=rubygems
+export EDITOR=/usr/bin/vim
+
+TRAPINT() { 
+  if [[ $KEYMAP == main ]] then
+    zle vi-cmd-mode
+  else
+    return $(( 128 + $1 ))
+  fi
+}
+
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' list-colors ''
+zstyle :compinstall filename "$HOME/.zshrc"
+autoload -Uz compinit
+compinit
+
+# history
+HISTFILE=~/.zsh_history
+HISTSIZE=5000
+SAVEHIST=1000
+setopt appendhistory autocd notify
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(lesspipe)"
+
+# enable color support of ls and also add handy aliases
+if [ "$TERM" != "dumb" ] && [ -x /usr/bin/dircolors ]; then
+  eval "`dircolors -b`"
+  alias ls='ls --color=auto'
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+fi
+
+preexec () {
+  if [[ "$TERM" == "screen" ]]; then
+    local CMD=${1[(wr)^(*=*|sudo|-*)]}
+    echo -n "\ek$CMD\e\\"
+  fi
+  source $HOME/.ssh/fixssh
+}
+
+
+setprompt () {
+  setopt prompt_subst
+
+  # See if we can use colors.
+  autoload colors zsh/terminfo
+  if [[ "$terminfo[colors]" -ge 8 ]]; then
+    colors
+  fi
+
+  for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+    eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
+    eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+    (( count = $count + 1 ))
+  done
+  PR_NO_COLOUR="%{$terminfo[sgr0]%}"
+
+
+  # Decide if we need to set titlebar text.
+  case $TERM in
+  xterm*)
+    PR_TITLEBAR=$'%{\e]0;%(!.-=*[ROOT]*=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\a%}'
+    ;;
+  screen)
+    PR_TITLEBAR=$'%{\e_screen \005 (\005t) | %(!.-=[ROOT]=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\e\\%}'
+    ;;
+  *)
+    PR_TITLEBAR=''
+    ;;
+  esac
+    
+    
+    # Decide whether to set a screen title
+  if [[ "$TERM" == "screen" ]]; then
+    PR_STITLE=$'%{\ekzsh\e\\%}'
+  else
+    PR_STITLE=''
+  fi
+    
+    
+  # Finally, the prompt.
+  PROMPT='$PR_SET_CHARSET$PR_STITLE${(e)PR_TITLEBAR}\
+%(?..$PR_LIGHT_RED%?$PR_BLUE:)\
+$PR_CYAN%n@%m$PR_NO_COLOR:$PR_LIGHT_RED%~$PR_NO_COLOUR%# '
+}
+
+setprompt
+
+if [[ "$TERM" != "screen" ]]; then
+  ~/.ssh/grabssh
+fi
+
+WORDCHARS="${WORDCHARS:s#/#}"
+
+alias ls="ls -G"
+export LSCOLORS=Dxfxcxdxbxegedabagacad

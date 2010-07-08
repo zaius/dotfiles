@@ -1,0 +1,73 @@
+syntax enable
+set smartindent
+set autoindent
+filetype plugin on
+filetype indent on
+
+" Get tabs to work well
+set tabstop=2
+set expandtab
+set shiftwidth=2
+"set noexpandtab
+" hilight tabs as errors
+" syn match TAB_CHAR "\t"
+" hi link TAB_CHAR Error
+
+" have command-line completion <Tab> (for filenames, help topics, option names)
+" first list the available options and complete the longest common part, then
+" have further <Tab>s cycle through the possibilities:
+set wildmode=list:longest,full
+
+" display the current mode and partially-typed commands in the status line:
+set showmode
+set showcmd
+
+" don't make it look like there are line breaks where there aren't:
+set nowrap
+
+" enable filetype detection:
+filetype on
+
+" make searches case-insensitive, unless they contain upper-case letters:
+set ignorecase
+set smartcase
+
+" show the `best match so far' as search strings are typed:
+set incsearch
+
+" allow <BkSpc> to delete line breaks, beyond the start of the current
+" insertion, and over indentations:
+set backspace=eol,start,indent
+
+" Always have the status bar on
+set laststatus=2
+set ruler
+
+set background=dark
+
+" Bounce the cursor off the opposite brace
+set showmatch
+
+" Ctrl-j/k to move selection down/up in visual mode
+vmap <C-j> :move '>+1<CR>gv
+vmap <C-k> :move '<-2<CR>gv 
+
+" Fix my inability to use shift properly
+map :W :w
+map :Q :q
+
+map <C-k> :tabp<CR>
+map <C-j> :tabn<CR>
+
+map <F2> :set paste!<CR>:set paste?<CR>
+
+" Set the screen window title to hold the currently edited file
+let &titlestring = "vim(" . expand("%:t") . ")"
+if &term == "screen"
+  set t_ts=k
+  set t_fs=\
+endif
+if &term == "screen" || &term == "xterm"
+  set title
+endif
+
