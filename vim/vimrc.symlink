@@ -56,8 +56,18 @@ vmap <C-k> :move '<-2<CR>gv
 map :W :w
 map :Q :q
 
+
+" Tab navigation
 map <C-k> :tabp<CR>
 map <C-j> :tabn<CR>
+nmap <C-S-tab> :tabprevious<cr>
+nmap <C-tab> :tabnext<cr>
+imap <C-S-tab> <ESC>:tabprevious<cr>i
+imap <C-tab> <ESC>:tabnext<cr>i
+nmap <C-t> :tabnew<cr>
+imap <C-t> <ESC>:tabnew<cr>i
+map <C-w> :tabclose<cr>
+
 
 map <F2> :set paste!<CR>:set paste?<CR>
 
