@@ -6,9 +6,9 @@ ruby install.rb to link all files ending with .symlink into your home directory.
 ## My setup
 Mac OS X on the desktop, Ubuntu on the server.
 
-Mac: brew, macvim
-Ubuntu: screen, vim
-Both: zsh
+* Mac: brew, macvim
+* Ubuntu: screen, vim
+* Both: zsh
 
 ## Cool stuff
 
