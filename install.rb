@@ -27,9 +27,8 @@ end
 Dir['**/**.symlink'].each do |file|
   output_file = HOME + '/.' + File.basename(file, '.symlink')
 
-  # Exists? means it's a valid non-symlink file
-  if File.exists? output_file
-    abort "#{output_file} will be overwritten"
+  if File.exists?(output_file) && !File.symlink?(output_file)
+    abort "ERROR: #{output_file} will be overwritten"
   end
 
   File.delete output_file if File.symlink? output_file
