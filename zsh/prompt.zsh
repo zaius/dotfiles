@@ -1,3 +1,6 @@
+# Thanks to phil for all the title setting stuff
+# http://aperiodic.net/phil/prompt/
+
 preexec () {
   if [[ "$TERM" == "screen" ]]; then
     local CMD=${1[(wr)^(*=*|sudo|-*)]}

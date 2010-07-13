@@ -1,3 +1,6 @@
+# Courtesy of Jason Dusek
+# http://github.com/jsnx
+
 shelltitle '$|bash'        # rename tabs from bash title, needs custom PS1 in .bashrc
 
 caption always "%{+b kG} %=%{-s} %{.K}%-w%{.B}%n %{.G}%t%{.K}%+w%{.G} %{+s} %="

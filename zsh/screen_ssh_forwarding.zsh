@@ -1,3 +1,5 @@
+# Idea courtesy of:
+# http://samrowe.com/wordpress/ssh-agent-and-gnu-screen/
 if [[ "$TERM" != "screen" ]]; then
   ~/.ssh/grabssh
 fi
