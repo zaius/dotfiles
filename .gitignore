@@ -2,3 +2,4 @@ secrets.yml
 git/gitconfig.symlink
 ssh.symlink/known_hosts
 ssh.symlink/fixssh
+system/forward.symlink
