@@ -10,14 +10,7 @@ export GEM_PATH=~/.bundle/ruby/1.8/
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
 export RUBYOPT=rubygems
 export EDITOR=/usr/bin/vim
-
-TRAPINT() { 
-  if [[ $KEYMAP == main ]] then
-    zle vi-cmd-mode
-  else
-    return $(( 128 + $1 ))
-  fi
-}
+bindkey -e
 
 # history
 HISTFILE=~/.zsh_history
