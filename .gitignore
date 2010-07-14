@@ -1,5 +1,8 @@
 secrets.yml
-git/gitconfig.symlink
 ssh.symlink/known_hosts
 ssh.symlink/fixssh
+vim/vim.symlink/.netrwhist
+
+# ERB rendered files
 system/forward.symlink
+git/gitconfig.symlink
