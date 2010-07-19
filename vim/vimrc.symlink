@@ -10,7 +10,6 @@ filetype indent on
 set tabstop=2
 set expandtab
 set shiftwidth=2
-"set noexpandtab
 " hilight tabs as errors
 " syn match TAB_CHAR "\t"
 " hi link TAB_CHAR Error
@@ -50,25 +49,28 @@ set background=dark
 " Bounce the cursor off the opposite brace
 set showmatch
 
-" Ctrl-j/k to move selection down/up in visual mode
-vmap <C-j> :move '>+1<CR>gv
-vmap <C-k> :move '<-2<CR>gv 
-
 " Fix my inability to use shift properly
 map :W :w
 map :Q :q
+map :T :t
 
+" Don't show the macvim toolbar. Who uses a mouse anyway?!
+set go-=T
+set guifont=Inconsolata:h15.00
 
 " Tab navigation
 map <C-k> :tabp<CR>
 map <C-j> :tabn<CR>
 nmap <C-S-tab> :tabprevious<cr>
 nmap <C-tab> :tabnext<cr>
+nmap <C-[> :tabprevious<cr>
+nmap <C-]> :tabnext<cr>
 imap <C-S-tab> <ESC>:tabprevious<cr>i
 imap <C-tab> <ESC>:tabnext<cr>i
 nmap <C-t> :tabnew<cr>
 imap <C-t> <ESC>:tabnew<cr>i
-map <C-w> :tabclose<cr>
+" can't use ctrl-w because it clashes with windows :(
+" map <C-w> :tabclose<cr>
 
 
 map <F2> :set paste!<CR>:set paste?<CR>
@@ -82,4 +84,3 @@ endif
 if &term == "screen" || &term == "xterm"
   set title
 endif
-

@@ -1,15 +1,22 @@
 # shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
 
+export PATH=$PATH:$HOME/.dotfiles/bin
+export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH
+export TZ=/usr/share/zoneinfo/America/Los_Angeles
+export RUBYOPT=rubygems
+export platform=$(uname)
+
 # source every .zsh file in this rep
 for config_file ($ZSH/**/*.zsh) source $config_file
 
-export PATH=$PATH:$HOME/.dotfiles/bin
-export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH:~/.bundle/ruby/1.8/bin
-export GEM_PATH=~/.bundle/ruby/1.8/
-export TZ=/usr/share/zoneinfo/America/Los_Angeles
-export RUBYOPT=rubygems
-export EDITOR=/usr/bin/vim
+if [[ $platform == 'Darwin' ]]; then
+  export EDITOR="mvim -f"
+elif [[ $platform == 'Linux' ]]; then
+  export EDITOR=/usr/bin/vim
+fi
+
+# ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
 
 # history

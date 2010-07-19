@@ -1,5 +1,3 @@
-platform=$(uname)
-
 if [[ $platform == 'Darwin' ]]; then
   export LSCOLORS=Dxfxcxdxbxegedabagacad
   alias ls="ls -G"
