@@ -1,12 +1,11 @@
 if [[ $platform == 'Darwin' ]]; then
-  export LSCOLORS=Dxfxcxdxbxegedabagacad
-  alias ls="ls -G"
+  alias ls='gls --color=auto'
+  alias dircolors='gdircolors'
 elif [[ $platform == 'Linux' ]]; then
-  if [ -x /usr/bin/dircolors ]; then
-    eval "`dircolors -b`"
-  fi
   alias ls='ls --color=auto'
 fi
+
+eval "`dircolors ~/.dircolors`"
 
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
