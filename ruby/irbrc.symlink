@@ -9,6 +9,12 @@ IRB.conf[:PROMPT_MODE] = :SIMPLE
 IRB.conf[:AUTO_INDENT] = true
 
 
+# I'm a sucker for blank? and present?
+# Probably don't need all of rubygems though..
+require 'rubygems'
+require 'active_support'
+require 'active_support/core_ext'
+
 begin
   # load wirble
   require 'wirble'
@@ -29,4 +35,3 @@ class Object
     (obj.methods - obj.class.superclass.instance_methods).sort
   end
 end
-
