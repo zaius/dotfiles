@@ -4,7 +4,6 @@ export ZSH=$HOME/.dotfiles
 export PATH=$PATH:$HOME/.dotfiles/bin
 export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
-export RUBYOPT=rubygems
 export platform=$(uname)
 
 # source every .zsh file in this rep
@@ -26,3 +25,4 @@ SAVEHIST=1000
 setopt appendhistory autocd notify
 
 WORDCHARS="${WORDCHARS:s#/#}"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
