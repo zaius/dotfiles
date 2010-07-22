@@ -1,0 +1,48 @@
+#!/bin/zsh
+autoload colors ; colors
+
+debug() {
+  echo "$fg[red]### $1 $fg[default]"
+}
+
+cd ~/code/nowmov/nowmov
+
+# debug "Starting ssh tunnel"
+# ssh -N -L 16379:localhost:6379 feedreader.staging.nowmov.com &
+# SSH_PID=$!
+
+debug "Starting redis"
+sudo redis-server ~/code/nowmov/etc/redis.conf
+
+debug "Starting postgres"
+postgres -D /var/postgres -r /var/log/postgres.log &
+POSTGRES_PID=$!
+
+debug "Starting read_stream"
+rails runner script/read_stream.rb &
+READ_STREAM_PID=$!
+
+debug "Starting workers"
+rake resque:work --trace &
+WORKER_PID=$!
+
+debug "Starting scheduler"
+rake resque:schedule --trace &
+SCHEDULER_PID=$!
+
+cleanup() {
+  debug "Caught Signal. Cleaning up."
+  kill $READ_STREAM_PID
+  kill $WORKER_PID
+  kill $SCHEDULER_PID
+  kill `cat /var/run/redis.pid`
+  # kill $SSH_PID
+  kill $POSTGRES_PID
+  debug "Done cleanup. Quitting."
+  exit 1
+}
+
+trap 'cleanup' 1 2 3 6
+
+debug "Starting rails"
+rails server
