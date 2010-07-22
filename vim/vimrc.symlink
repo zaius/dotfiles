@@ -44,8 +44,6 @@ set backspace=eol,start,indent
 set laststatus=2
 set ruler
 
-set background=dark
-
 " Bounce the cursor off the opposite brace
 set showmatch
 
@@ -54,26 +52,37 @@ map :W :w
 map :Q :q
 map :T :t
 
-" Don't show the macvim toolbar. Who uses a mouse anyway?!
-set go-=T
-set guifont=Inconsolata:h15.00
+if has("gui_macvim")
+  " Don't show the macvim toolbar. Who uses a mouse anyway?!
+  set go-=T
+  set guifont=Inconsolata:h15.00
+  set anti
+
+  " Make Macvim fullscreen actually fill screen
+  set fuoptions=maxvert,maxhorz 
+endif
 
 " Tab navigation
 map <C-k> :tabp<CR>
 map <C-j> :tabn<CR>
 nmap <C-S-tab> :tabprevious<cr>
 nmap <C-tab> :tabnext<cr>
-nmap <C-[> :tabprevious<cr>
-nmap <C-]> :tabnext<cr>
 imap <C-S-tab> <ESC>:tabprevious<cr>i
 imap <C-tab> <ESC>:tabnext<cr>i
 nmap <C-t> :tabnew<cr>
 imap <C-t> <ESC>:tabnew<cr>i
 " can't use ctrl-w because it clashes with windows :(
 " map <C-w> :tabclose<cr>
+" And C-[ is used in place of escape in a bunch of places. Could probably get
+" around this by changing the window title setting stuff.
+" nmap <C-[> :tabprevious<cr>
+" nmap <C-]> :tabnext<cr>
 
 
-map <F2> :set paste!<CR>:set paste?<CR>
+" Leader commands - so much cooler than function keys
+let mapleader = ","
+map <leader>p :set paste!<CR>:set paste?<CR>
+map <Leader>, :NERDTreeToggle<cr>
 
 " Set the screen window title to hold the currently edited file
 let &titlestring = "vim(" . expand("%:t") . ")"
