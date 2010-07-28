@@ -35,3 +35,15 @@ class Object
     (obj.methods - obj.class.superclass.instance_methods).sort
   end
 end
+
+def copy(str)
+  IO.popen('pbcopy', 'w') { |f| f << str.to_s }
+end
+
+def paste
+  `pbpaste`
+end
+
+def ep
+  eval(paste)
+end
