@@ -1,10 +1,18 @@
 #!/usr/bin/ruby
 require 'erb'
 require 'yaml'
+require 'fileutils'
 
 ROOT = File.expand_path('../', __FILE__)
 HOME = ENV['HOME']
-SECRETS = YAML.load_file("#{ROOT}/secrets.yml")
+
+secrets_file = "#{ROOT}/secrets.yml"
+unless File.exists? secrets_file
+  puts 'Secrets file missing. Grabbing from kelso.id.au.'
+  `scp kelso.id.au:~/.dotfiles/secrets.yml #{ROOT}`
+end
+
+SECRETS = YAML.load_file secrets_file
 
 
 # Parse any ERB files first
@@ -28,7 +36,14 @@ Dir['**/**.symlink'].each do |file|
   output_file = HOME + '/.' + File.basename(file, '.symlink')
 
   if File.exists?(output_file) && !File.symlink?(output_file)
-    abort "ERROR: #{output_file} will be overwritten"
+
+    print "#{output_file} will be overwritten. Delete it? "
+    if gets.chomp.upcase == 'Y'
+      # Have to use recursive as it could be a directory (eg. vim)
+      FileUtils.rm_rf output_file
+    else
+      abort "Aborted."
+    end
   end
 
   File.delete output_file if File.symlink? output_file
