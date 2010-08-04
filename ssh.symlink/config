@@ -5,7 +5,7 @@ Host nowmov.com
   User pipely
 Host staging.nowmov.com
   User pipely
-Host feedreader.production.nowmov.com
+Host feedreader.nowmov.com
   User pipely
 Host feedreader.staging.nowmov.com
   User pipely
