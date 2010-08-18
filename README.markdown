@@ -42,8 +42,8 @@ Also, thanks to all those random people I copied great tidbits off over the
 last 10 years.
 
 ## Todo
-* Unified ls colors between mac and linux
-* prompt for secrets that don't exist
+* git branch in prompt
+* zsh completion colours aren't the same as ls colours
 * split vimrc into managable parts - how to source multiple files?
 * don't hard code the ~/.dotfiles location
 * better / bold vim colors
