@@ -1,8 +1,15 @@
 syntax enable
 colorscheme ir_black
+set nocompatible
+let mapleader = ","
+inoremap jj <ESC>
 
 set smartindent
 set autoindent
+set copyindent
+
+" enable filetype detection:
+filetype on
 filetype plugin on
 filetype indent on
 
@@ -10,9 +17,20 @@ filetype indent on
 set tabstop=2
 set expandtab
 set shiftwidth=2
+
 " hilight tabs as errors
 " syn match TAB_CHAR "\t"
 " hi link TAB_CHAR Error
+
+" No need for swap files.
+set nobackup
+set noswapfile
+" Use a persistent undo file instead
+set undodir=~/.vim/undo
+set undofile
+
+" relative line numbers to make whole line commands easier
+set relativenumber
 
 " have command-line completion <Tab> (for filenames, help topics, option names)
 " first list the available options and complete the longest common part, then
@@ -26,15 +44,19 @@ set showcmd
 " don't make it look like there are line breaks where there aren't:
 set nowrap
 
-" enable filetype detection:
-filetype on
-
 " make searches case-insensitive, unless they contain upper-case letters:
 set ignorecase
 set smartcase
 
+" Show a colored column at line 80
+set colorcolumn=80
+
 " show the `best match so far' as search strings are typed:
 set incsearch
+" Keep searches highlighted after the search is finished.
+set hlsearch
+" Clear the search highlight with leader slash
+nnoremap <leader>/ :let @/=''<cr>
 
 " allow <BkSpc> to delete line breaks, beyond the start of the current
 " insertion, and over indentations:
@@ -78,11 +100,25 @@ imap <C-t> <ESC>:tabnew<cr>i
 " nmap <C-[> :tabprevious<cr>
 " nmap <C-]> :tabnext<cr>
 
+" Easier non-interactive command insertion
+nnoremap <Space> :
+
+" Ruby shortcuts. Maybe should put these into a specific ruby file. My
+" vim-config-fu isn't strong enough yet.
+imap <C-l> <Space>=><Space>'
+
 
 " Leader commands - so much cooler than function keys
-let mapleader = ","
 map <leader>p :set paste!<CR>:set paste?<CR>
 map <Leader>, :NERDTreeToggle<cr>
+map <Leader>a :Ack<space>
+" Strip ending whitespace with ,W
+nnoremap <leader>w :%s/\s\+$//<cr>:let @/=''<CR>
+
+" I only use nerd comments for toggling. Disable all other shortcuts.
+let g:NERDCreateDefaultMappings = 0
+map <leader>c <plug>NERDCommenterToggle
+vmap <leader>c <plug>NERDCommenterToggle
 
 " Set the screen window title to hold the currently edited file
 let &titlestring = "vim(" . expand("%:t") . ")"

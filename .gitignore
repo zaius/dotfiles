@@ -2,6 +2,7 @@ secrets.yml
 ssh.symlink/known_hosts
 ssh.symlink/fixssh
 vim/vim.symlink/.netrwhist
+vim/vim.symlink/undo/*
 ssh.symlink/id_rsa*
 
 # ERB rendered files
