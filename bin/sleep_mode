@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$1" = "show" ]; then
+  OUTPUT=`pmset -g | grep hibernatemode`
+  if [ "${OUTPUT: -1}" = "0" ]; then
+    echo 'sleep'
+  elif [ "${OUTPUT: -1}" = "1" ]; then
+    echo 'hibernate'
+  fi
+
+elif [ "$1" = "set" ]; then
+  if [ "$2" = "sleep" ]; then
+  	sudo pmset -a hibernatemode 0
+  elif [ "$2" = "hibernate" ]; then
+  	sudo pmset -a hibernatemode 1
+  else
+    echo "Usage: $0 set [hibernate|sleep]"
+  fi
+
+else
+  echo "Usage: `basename $0` [show|set]"
+fi
+
