@@ -1,0 +1,8 @@
+set -g prefix C-s
+unbind C-b
+bind C-s send-prefix
+
+bind C-d detach
+bind C-b last-window
+bind C-c new-window
+bind r source-file ~/.tmux.conf
