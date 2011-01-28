@@ -16,16 +16,18 @@ require 'active_support'
 require 'active_support/core_ext'
 
 begin
-  # load wirble
   require 'wirble'
-
-  # start wirble (with color)
   Wirble.init
   Wirble.colorize
 rescue LoadError => err
   warn "Couldn't load Wirble: #{err}"
 end
 
+begin
+  require 'interactive_editor'
+rescue LoadError => err
+  warn "Couldn't load interactive editor"
+end
 
 class Object
   # Return a list of methods defined locally for a particular object.  Useful
