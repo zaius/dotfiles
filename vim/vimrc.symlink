@@ -115,6 +115,10 @@ map <Leader>a :Ack<space>
 " Strip ending whitespace with ,W
 nnoremap <leader>w :%s/\s\+$//<cr>:let @/=''<CR>
 
+" Format XML with xmllint with ,x
+:vmap <Leader>x !xmllint --format -<CR>
+:nmap <Leader>x !!xmllint --format -<CR>
+
 " I only use nerd comments for toggling. Disable all other shortcuts.
 let g:NERDCreateDefaultMappings = 0
 map <leader>c <plug>NERDCommenterToggle
