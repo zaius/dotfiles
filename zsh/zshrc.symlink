@@ -6,8 +6,14 @@ export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
 export platform=$(uname)
 
+# Need extended glob for excluding undo files in the following `for`. Don't
+# know if I want it yet. Could be replaced with find.
+setopt extendedglob
+
 # source every .zsh file in this rep
-for config_file ($ZSH/**/*.zsh) source $config_file
+# Don't source any file with undo in the name - this stops sourcing of vim
+# undo files.
+for config_file ($ZSH/**/*.zsh~*undo*) source $config_file
 
 if [[ $platform == 'Darwin' ]]; then
   export EDITOR="mvim -f"
