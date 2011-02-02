@@ -2,11 +2,15 @@ require 'irb/ext/save-history'
 require 'irb/completion'
 
 
-IRB.conf[:SAVE_HISTORY] = 100
+IRB.conf[:SAVE_HISTORY] = 1000
 IRB.conf[:EVAL_HISTORY] = 100
 IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
 IRB.conf[:PROMPT_MODE] = :SIMPLE
 IRB.conf[:AUTO_INDENT] = true
+
+# Have to make sure RVM is linked to readline. Details here:
+# http://rvm.beginrescueend.com/packages/readline/
+IRB.conf[:USE_READLINE] = true
 
 
 # I'm a sucker for blank? and present?
