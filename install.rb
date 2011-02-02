@@ -17,6 +17,8 @@ SECRETS = YAML.load_file secrets_file
 
 # Parse any ERB files first
 Dir['**/**.erb'].each do |file|
+  next if file.include? 'undo'
+
   path = file.split('/')[0..-2].join('/')
   output_file = path + '/' + File.basename(file, '.erb')
   puts "Generating #{output_file} from ERB"
@@ -31,8 +33,17 @@ Dir['**/**.erb'].each do |file|
 end
 
 
+# Copy files that can't be symlinks (e.g. .forward)
+Dir['**/**.copy'].each do |file|
+  output_file = HOME + '/.' + File.basename(file, '.copy')
+  FileUtils.rm_rf output_file if File.exists?(output_file) || File.symlink?(output_file)
+  FileUtils.cp ROOT + '/' + file, output_file
+end
+
 # Link files into home directory
 Dir['**/**.symlink'].each do |file|
+  next if file.include? 'undo'
+
   output_file = HOME + '/.' + File.basename(file, '.symlink')
 
   if File.exists?(output_file) && !File.symlink?(output_file)
