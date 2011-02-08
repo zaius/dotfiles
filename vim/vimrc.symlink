@@ -25,12 +25,18 @@ set shiftwidth=2
 " No need for swap files.
 set nobackup
 set noswapfile
-" Use a persistent undo file instead
-set undodir=~/.vim/undo
-set undofile
 
-" relative line numbers to make whole line commands easier
-set relativenumber
+if version >= 730
+  " Use a persistent undo file instead
+  set undodir=~/.vim/undo
+  set undofile
+
+  " relative line numbers to make whole line commands easier
+  set relativenumber
+
+  " Show a colored column at line 80
+  set colorcolumn=80
+endif
 
 " have command-line completion <Tab> (for filenames, help topics, option names)
 " first list the available options and complete the longest common part, then
@@ -47,9 +53,6 @@ set nowrap
 " make searches case-insensitive, unless they contain upper-case letters:
 set ignorecase
 set smartcase
-
-" Show a colored column at line 80
-set colorcolumn=80
 
 " show the `best match so far' as search strings are typed:
 set incsearch
