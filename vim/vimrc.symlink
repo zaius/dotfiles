@@ -26,7 +26,7 @@ set shiftwidth=2
 set nobackup
 set noswapfile
 
-if version >= 730
+if version >= 703
   " Use a persistent undo file instead
   set undodir=~/.vim/undo
   set undofile
