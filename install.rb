@@ -9,7 +9,7 @@ HOME = ENV['HOME']
 secrets_file = "#{ROOT}/secrets.yml"
 unless File.exists? secrets_file
   puts 'Secrets file missing. Grabbing from kelso.id.au.'
-  `scp kelso.id.au:~/.dotfiles/secrets.yml #{ROOT}`
+  `scp zaius@kelso.id.au:~/.dotfiles/secrets.yml #{ROOT}`
 end
 
 SECRETS = YAML.load_file secrets_file
