@@ -2,6 +2,7 @@
 export ZSH=$HOME/.dotfiles
 
 export PATH=$PATH:$HOME/.dotfiles/bin
+export PATH=/usr/local/Cellar/python/2.7.1/bin:$PATH
 export PATH=/var/lib/gems/1.8/bin/:/opt/local/bin/:$PATH
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
 export platform=$(uname)
@@ -20,6 +21,8 @@ if [[ $platform == 'Darwin' ]]; then
 elif [[ $platform == 'Linux' ]]; then
   export EDITOR=/usr/bin/vim
 fi
+
+export PYTHONSTARTUP=~/.pythonrc
 
 # ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
