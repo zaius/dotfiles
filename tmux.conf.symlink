@@ -9,3 +9,6 @@ bind C-s last-window
 bind C-d detach
 bind C-c new-window
 bind r source-file ~/.tmux.conf
+
+# Use vim keys in copy mode
+setw -g mode-keys vi
