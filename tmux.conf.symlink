@@ -2,13 +2,15 @@
 set -g prefix C-s
 unbind C-b
 
-# Who wants to ever send a C-s?!
-# bind C-s send-prefix
-bind C-s last-window
+# Need to be able to send C-s for rtorrent...
+bind s send-prefix
 
+# Keep consistent with screen behavior
+bind C-s last-window
 bind C-d detach
 bind C-c new-window
-bind r source-file ~/.tmux.conf
+
+bind r source-file $HOME/.tmux.conf
 
 # Use vim keys in copy mode
 setw -g mode-keys vi
