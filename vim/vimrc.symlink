@@ -1,3 +1,5 @@
+call pathogen#infect()
+
 syntax enable
 colorscheme ir_black
 set nocompatible
@@ -84,7 +86,7 @@ if has("gui_macvim")
   set anti
 
   " Make Macvim fullscreen actually fill screen
-  set fuoptions=maxvert,maxhorz 
+  set fuoptions=maxvert,maxhorz
 endif
 
 " Tab navigation
@@ -115,8 +117,15 @@ imap <C-l> <Space>=><Space>'
 map <leader>p :set paste!<CR>:set paste?<CR>
 map <Leader>, :NERDTreeToggle<cr>
 map <Leader>a :Ack<space>
+
 " Strip ending whitespace with ,W
-nnoremap <leader>w :%s/\s\+$//<cr>:let @/=''<CR>
+func! ClearTrailingWhitespace()
+  %s/\s\+$//ge
+  let @/=''
+endfunc
+
+nnoremap <leader>w :call ClearTrailingWhitespace()<cr>
+autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 
 " Format XML with xmllint with ,x
 :vmap <Leader>x !xmllint --format -<CR>
