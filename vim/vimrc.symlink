@@ -82,7 +82,7 @@ map :T :t
 if has("gui_macvim")
   " Don't show the macvim toolbar. Who uses a mouse anyway?!
   set go-=T
-  set guifont=Inconsolata:h15.00
+  set guifont=Inconsolata:h18.00
   set anti
 
   " Make Macvim fullscreen actually fill screen
