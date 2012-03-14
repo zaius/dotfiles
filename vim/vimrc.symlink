@@ -138,13 +138,10 @@ vmap <leader>c <plug>NERDCommenterToggle
 
 " Set the screen window title to hold the currently edited file
 let &titlestring = "vim(" . expand("%:t") . ")"
-if &term == "screen"
-  set t_ts=k
-  set t_fs=\
-endif
-if &term == "screen" || &term == "xterm"
-  set title
-endif
+set t_ts=\<ESC>k
+set t_fs=\<ESC>\
+set titleold=""
+set title
 
 " Save when any change is made. Try kick my habit of hitting :w every two seconds
 autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall

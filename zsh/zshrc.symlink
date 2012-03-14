@@ -20,6 +20,9 @@ elif [[ $platform == 'Linux' ]]; then
   export EDITOR=vim
 fi
 
+precmd () { title $1 }
+preexec () { title $1 }
+
 export PAGER=less
 
 export PYTHONSTARTUP=~/.pythonrc

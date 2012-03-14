@@ -6,3 +6,8 @@ alias less="less -X -R --quit-if-one-screen"
 
 # Keep user environment when using sudo
 alias sudo="sudo -E"
+
+# Naming of screen titles.
+# Escape sequence is: ESC k name ESC \
+# These are literal esc chars - ctrl-v ESC
+title () { echo -n "k$@\\" }
