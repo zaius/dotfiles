@@ -7,3 +7,6 @@
 [submodule "vim/vim.symlink/bundle/command-t"]
 	path = vim/vim.symlink/bundle/command-t
 	url = git://git.wincent.com/command-t.git
+[submodule "vim/vim.symlink/bundle/handlebars"]
+	path = vim/vim.symlink/bundle/handlebars
+	url = git://github.com/nono/vim-handlebars.git
