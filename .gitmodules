@@ -10,3 +10,15 @@
 [submodule "vim/vim.symlink/bundle/handlebars"]
 	path = vim/vim.symlink/bundle/handlebars
 	url = git://github.com/nono/vim-handlebars.git
+[submodule "vim/vim.symlink/bundle/vim-ruby"]
+	path = vim/vim.symlink/bundle/vim-ruby
+	url = https://github.com/vim-ruby/vim-ruby.git
+[submodule "vim/vim.symlink/bundle/nerdcommenter"]
+	path = vim/vim.symlink/bundle/nerdcommenter
+	url = https://github.com/scrooloose/nerdcommenter.git
+[submodule "vim/vim.symlink/bundle/showmarks"]
+	path = vim/vim.symlink/bundle/showmarks
+	url = https://github.com/vim-scripts/ShowMarks.git
+[submodule "vim/vim.symlink/bundle/mustache.vim"]
+	path = vim/vim.symlink/bundle/mustache.vim
+	url = https://github.com/juvenn/mustache.vim.git
