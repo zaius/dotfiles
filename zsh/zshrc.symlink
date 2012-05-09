@@ -1,7 +1,7 @@
 # shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
 
-export PATH=$HOME/.dotfiles/bin:/usr/local/sbin:/usr/local/bin:$PATH
+export PATH=$HOME/.dotfiles/bin:/usr/local/sbin:/usr/local/bin:/usr/local/Cellar/ruby/1.9.3-p194/bin:$PATH
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
 export platform=$(uname)
 
@@ -46,4 +46,3 @@ setopt HIST_REDUCE_BLANKS
 
 
 WORDCHARS="${WORDCHARS:s#/#}"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
