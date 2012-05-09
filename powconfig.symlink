@@ -1,0 +1,8 @@
+# Pow loses the path as it's not run in a terminal. This ensures it uses brew's
+# ruby instead of system ruby.
+export PATH=/Users/zaius/.dotfiles/bin:/usr/local/sbin:/usr/local/bin:/usr/local/Cellar/ruby/1.9.3-p194/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
+# Keep sites loaded for more than the default 5m.
+export POW_TIMEOUT=86400
+# Allow com domains to be mapped, but don't enable the resolver for them. com
+# sites can be added on a case by case basis to /etc/hosts
+export POW_EXT_DOMAINS=com
