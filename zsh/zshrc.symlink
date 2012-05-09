@@ -29,6 +29,13 @@ export PYTHONSTARTUP=~/.pythonrc
 
 # ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
+# Stop the terminal from sending its own ctrl-w
+stty werase undef
+# Note that zsh doesn't use readline - is uses its own lib called zle. This
+# makes zle's backward-kill-word consistent with readline's .
+export WORDCHARS=''
+# Can also keep use zle's vi mode kill word, which has saner defaults.
+# bindkey '^W' vi-backward-kill-word
 
 # history
 HISTFILE=~/.zsh_history
@@ -43,6 +50,3 @@ setopt APPEND_HISTORY # adds history
 setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
 setopt HIST_IGNORE_ALL_DUPS  # don't record dupes in history
 setopt HIST_REDUCE_BLANKS
-
-
-WORDCHARS="${WORDCHARS:s#/#}"

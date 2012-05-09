@@ -1,0 +1,4 @@
+# Oh man this has been a hard one to track down. Allow readline to overwrite
+# the terminal's ctrl-w. This fixes irb's handling of word boundaries.
+set bind-tty-special-chars off
+"\C-w": backward-kill-word
