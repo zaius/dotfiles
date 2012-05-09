@@ -1,55 +1,83 @@
-require 'irb/ext/save-history'
-require 'irb/completion'
-
-
-IRB.conf[:SAVE_HISTORY] = 1000
-IRB.conf[:EVAL_HISTORY] = 100
-IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
-IRB.conf[:PROMPT_MODE] = :SIMPLE
-IRB.conf[:AUTO_INDENT] = true
-
-# Have to make sure RVM is linked to readline. Details here:
-# http://rvm.beginrescueend.com/packages/readline/
-IRB.conf[:USE_READLINE] = true
-
-
-# I'm a sucker for blank? and present?
-# Probably don't need all of rubygems though..
-require 'rubygems'
-require 'active_support'
-require 'active_support/core_ext'
-
+# IRB silently fails if there's an exception in irbrc. So have to wrap the
+# whole file to catch it.
 begin
-  require 'wirble'
-  Wirble.init
-  Wirble.colorize
-rescue LoadError => err
-  warn "Couldn't load Wirble: #{err}"
-end
+  # Require gems from outside of the bundle.
+  # https://github.com/carlhuda/bundler/issues/183#issuecomment-1149953
+  # https://gist.github.com/932231
+  #
+  # These methods all have a major flaw - they don't load through the gem
+  # system. Instead they add to the load path and require. This works in some
+  # cases, but breaks when requiring wirb, as it makes a call to
+  # `Gem.datadir 'wirb'`, and since gem has no idea what that is, it breaks.
+  #
+  # Adding an outside path to gem after initialization seems impossible.
+  # Loading gems has to be done through manually adding the gemspec to
+  # Gem::Specification. There seems to be two types of gemspecs. The one that
+  # comes with gems, and the 'processed' version that is evaluated and
+  # rewritten when the gem is installed. The former lives in the gem's
+  # directory, the latter lives in the specifications folder.
+  #
+  # Requiring the gemspec that comes with the gem isn't a good solution as
+  # people write gemspecs with more than just the spec in them. E.g. requiring
+  # unicorn's gemspec exits as there's no version specified:
+  # Gem.load Dir.glob("#{Gem.dir}/gems/unicorn-*.gemspec").last
+  # Also Gem also adds an extra 'gem' directory to the load path:
+  # >> Gem.datadir('wirb')
+  # => "/usr/local/Cellar/ruby/1.9.3-p194/lib/ruby/gems/1.9.1/gems/gems/wirb-0.4.2/data/wirb"
+  # So instead, have to require the processed version.
+  #
+  # Note that this is still missing something as the gem still doesn't turn up
+  # when doing Gem::Specification.find_by_name - I clearly don't understand the
+  # gem system enough.
+  def unbundled_require(gem)
+    if defined?(::Bundler)
+      spec_path = Dir.glob("#{Gem.dir}/specifications/#{gem}-*.gemspec").last
+      if spec_path.nil?
+        warn "Couldn't find #{gem}"
+        return
+      end
 
-begin
-  require 'interactive_editor'
-rescue LoadError => err
-  warn "Couldn't load interactive editor"
-end
+      spec = Gem::Specification.load spec_path
+      spec.activate
+    end
 
-class Object
-  # Return a list of methods defined locally for a particular object.  Useful
-  # for seeing what it does whilst losing all the guff that's implemented
-  # by its parents (eg Object).
-  def local_methods(obj = self)
-    (obj.methods - obj.class.superclass.instance_methods).sort
+    begin
+      require gem
+      yield if block_given?
+    rescue Exception => err
+      warn "Couldn't load #{gem}: #{err}"
+    end
   end
-end
 
-def copy(str)
-  IO.popen('pbcopy', 'w') { |f| f << str.to_s }
-end
 
-def paste
-  `pbpaste`
-end
+  unbundled_require 'hirb'
+  unbundled_require 'wirb' do
+    Wirb.start
+  end
 
-def ep
-  eval(paste)
+  class Object
+    # Return a list of methods defined locally for a particular object.  Useful
+    # for seeing what it does whilst losing all the guff that's implemented
+    # by its parents (eg Object).
+    def local_methods(obj = self)
+      (obj.methods - obj.class.superclass.instance_methods).sort
+    end
+  end
+
+  require 'irb/ext/save-history'
+  require 'irb/completion'
+
+  # I'm a sucker for blank? and present?
+  require 'active_support'
+  require 'active_support/core_ext'
+
+
+  IRB.conf[:SAVE_HISTORY] = 1000
+  IRB.conf[:EVAL_HISTORY] = 100
+  IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
+  IRB.conf[:PROMPT_MODE] = :SIMPLE
+  IRB.conf[:AUTO_INDENT] = true
+  IRB.conf[:USE_READLINE] = true
+rescue Exception => e
+  warn "Error loading irbrc: #{e}"
 end
