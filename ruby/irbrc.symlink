@@ -29,15 +29,21 @@ begin
   # Note that this is still missing something as the gem still doesn't turn up
   # when doing Gem::Specification.find_by_name - I clearly don't understand the
   # gem system enough.
-  def unbundled_require(gem)
+  def unbundled_require gem
     if defined?(::Bundler)
-      spec_path = Dir.glob("#{Gem.dir}/specifications/#{gem}-*.gemspec").last
+      # Have to check for a version to avoid gems with dashes, e.g. pry-rails
+      spec_path = Dir.glob("#{Gem.dir}/specifications/#{gem}-[0-9]*.gemspec").last
       if spec_path.nil?
         warn "Couldn't find #{gem}"
         return
       end
 
       spec = Gem::Specification.load spec_path
+      spec.runtime_dependencies.each do |dependency|
+        puts "loading dependency #{dependency}"
+        # TODO: handle versions
+        unbundled_require dependency.name
+      end
       spec.activate
     end
 
@@ -47,12 +53,6 @@ begin
     rescue Exception => err
       warn "Couldn't load #{gem}: #{err}"
     end
-  end
-
-
-  unbundled_require 'hirb'
-  unbundled_require 'wirb' do
-    Wirb.start
   end
 
   class Object
@@ -71,6 +71,11 @@ begin
   require 'active_support'
   require 'active_support/core_ext'
 
+  def log_disable
+    ActiveRecord::Base.logger = nil
+  end
+
+
 
   IRB.conf[:SAVE_HISTORY] = 1000
   IRB.conf[:EVAL_HISTORY] = 100
@@ -78,6 +83,11 @@ begin
   IRB.conf[:PROMPT_MODE] = :SIMPLE
   IRB.conf[:AUTO_INDENT] = true
   IRB.conf[:USE_READLINE] = true
+
+  unbundled_require "pry" do
+    Pry.start
+    exit!
+  end
 rescue Exception => e
   warn "Error loading irbrc: #{e}"
 end
