@@ -6,3 +6,16 @@ export POW_TIMEOUT=86400
 # Allow com domains to be mapped, but don't enable the resolver for them. com
 # sites can be added on a case by case basis to /etc/hosts
 export POW_EXT_DOMAINS=com
+# Let nginx handle the forwarding of connections, that way we can use nginx
+# for hosting other domains if required. This is important to stop google
+# analytics from fucking up.
+# There used to be a way to disable this, but it looks easier to just move the
+# pow forwarding off 80.
+# It looks like pow 0.4 has a separate service for the firewall. just need to
+# make sure that doesn't start?
+# Check for forwarding! Even if the nginx server is listening, if the old forwarding is set up, it won't get through
+# Also, the pow firewall launch daemon doesn't correctly remove the rule
+# sudo ipfw list
+# ipfw delete 00100
+# http://leonid.shevtsov.me/en/how-to-install-nginx-over-pow-in-os-x
+export POW_DST_PORT=8888
