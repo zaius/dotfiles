@@ -115,7 +115,6 @@ imap <C-l> <Space>=><Space>'
 
 " Leader commands - so much cooler than function keys
 map <leader>p :set paste!<CR>:set paste?<CR>
-map <Leader>, :NERDTreeToggle<cr>
 map <Leader>a :Ack<space>
 
 " Strip ending whitespace with ,W
