@@ -1,7 +1,7 @@
 # shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
 
-export PATH=$HOME/.dotfiles/bin:/usr/local/sbin:/usr/local/bin:/usr/local/Cellar/ruby/1.9.3-p194/bin:$PATH
+export PATH=$HOME/.dotfiles/bin:/usr/local/sbin:/usr/local/bin:$PATH
 export TZ=/usr/share/zoneinfo/America/Los_Angeles
 export platform=$(uname)
 
@@ -24,8 +24,6 @@ precmd () { title $1 }
 preexec () { title $1 }
 
 export PAGER=less
-
-export PYTHONSTARTUP=~/.pythonrc
 
 # ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
@@ -50,3 +48,26 @@ setopt APPEND_HISTORY # adds history
 setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
 setopt HIST_IGNORE_ALL_DUPS  # don't record dupes in history
 setopt HIST_REDUCE_BLANKS
+
+
+
+# Python
+export PYTHONSTARTUP=~/.pythonrc
+export PATH=/usr/local/share/python:$PATH
+
+# rbenv
+# Make sure rbenv is linked to a new openssl (and readline?)
+# CONFIGURE_OPTS="--with-openssl-dir=`brew --prefix openssl`" rbenv install 1.9.3-p194
+if which rbenv > /dev/null; then
+  eval "$(rbenv init - --no-rehash)"
+  export PATH=~/.rbenv/shims:$PATH
+fi
+
+# Ruby
+export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
+
+# Node
+# TODO: fix this
+if which npm > /dev/null; then
+  export PATH=/usr/local/share/npm/bin/:$PATH
+fi
