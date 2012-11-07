@@ -1,8 +1,14 @@
 call pathogen#infect()
 
 syntax enable
+
 colorscheme ir_black
-set nocompatible
+" Make sure vim knows I only use 256 color terminals now
+" http://stackoverflow.com/questions/3761770/iterm-vim-colorscheme-not-working
+let &t_Co=256
+
+" http://stackoverflow.com/questions/5845557/in-a-vimrc-is-set-nocompatible-completely-useless
+" set nocompatible
 let mapleader = ","
 inoremap jj <ESC>
 
