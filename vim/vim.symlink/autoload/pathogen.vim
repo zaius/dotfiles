@@ -6,7 +6,7 @@
 "
 " For management of individually installed plugins in ~/.vim/bundle (or
 " ~\vimfiles\bundle), adding `call pathogen#infect()` to your .vimrc
-" prior to `fileype plugin indent on` is the only other setup necessary.
+" prior to `filetype plugin indent on` is the only other setup necessary.
 "
 " The API is documented inline below.  For maximum ease of reading,
 " :set foldmethod=marker
@@ -166,7 +166,7 @@ let s:done_bundles = ''
 function! pathogen#helptags() " {{{1
   let sep = pathogen#separator()
   for dir in pathogen#split(&rtp)
-    if (dir.sep)[0 : strlen($VIMRUNTIME)] !=# $VIMRUNTIME.sep && filewritable(dir.sep.'doc') == 2 && !empty(glob(dir.sep.'doc'.sep.'*')) && (!filereadable(dir.sep.'doc'.sep.'tags') || filewritable(dir.sep.'doc'.sep.'tags'))
+    if (dir.sep)[0 : strlen($VIMRUNTIME)] !=# $VIMRUNTIME.sep && filewritable(dir.sep.'doc') == 2 && !empty(filter(split(glob(dir.sep.'doc'.sep.'*'),"\n>"),'!isdirectory(v:val)')) && (!filereadable(dir.sep.'doc'.sep.'tags') || filewritable(dir.sep.'doc'.sep.'tags'))
       helptags `=dir.'/doc'`
     endif
   endfor
@@ -177,7 +177,23 @@ command! -bar Helptags :call pathogen#helptags()
 " Like findfile(), but hardcoded to use the runtimepath.
 function! pathogen#runtime_findfile(file,count) "{{{1
   let rtp = pathogen#join(1,pathogen#split(&rtp))
-  return fnamemodify(findfile(a:file,rtp,a:count),':p')
+  let file = findfile(a:file,rtp,a:count)
+  if file ==# ''
+    return ''
+  else
+    return fnamemodify(file,':p')
+  endif
+endfunction " }}}1
+
+" Backport of fnameescape().
+function! pathogen#fnameescape(string) " {{{1
+  if exists('*fnameescape')
+    return fnameescape(a:string)
+  elseif a:string ==# '-'
+    return '\-'
+  else
+    return substitute(escape(a:string," \t\n*?[{`$\\%#'\"|!<"),'^[+>]','\\&','')
+  endif
 endfunction " }}}1
 
 function! s:find(count,cmd,file,lcd) " {{{1
@@ -188,9 +204,9 @@ function! s:find(count,cmd,file,lcd) " {{{1
   elseif a:lcd
     let path = file[0:-strlen(a:file)-2]
     execute 'lcd `=path`'
-    return a:cmd.' '.fnameescape(a:file)
+    return a:cmd.' '.pathogen#fnameescape(a:file)
   else
-    return a:cmd.' '.fnameescape(file)
+    return a:cmd.' '.pathogen#fnameescape(file)
   endif
 endfunction " }}}1
 
@@ -208,12 +224,13 @@ function! s:Findcomplete(A,L,P) " {{{1
   else
     let request = a:A
   endif
-  let pattern = substitute(request,'\'.sep,'*'.sep,'g').'*'
+  let pattern = substitute(request,'/\|\'.sep,'*'.sep,'g').'*'
   let found = {}
   for path in pathogen#split(&runtimepath)
+    let path = expand(path, ':p')
     let matches = split(glob(path.sep.pattern),"\n")
     call map(matches,'isdirectory(v:val) ? v:val.sep : v:val')
-    call map(matches,'v:val[strlen(path)+1:-1]')
+    call map(matches,'expand(v:val, ":p")[strlen(path)+1:-1]')
     for match in matches
       let found[match] = 1
     endfor
@@ -221,13 +238,13 @@ function! s:Findcomplete(A,L,P) " {{{1
   return sort(keys(found))
 endfunction " }}}1
 
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Ve       :execute s:find(<count>,'edit<bang>',<q-args>,0)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vedit    :execute s:find(<count>,'edit<bang>',<q-args>,0)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vopen    :execute s:find(<count>,'edit<bang>',<q-args>,1)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vsplit   :execute s:find(<count>,'split',<q-args>,<bang>1)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vvsplit  :execute s:find(<count>,'vsplit',<q-args>,<bang>1)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vtabedit :execute s:find(<count>,'tabedit',<q-args>,<bang>1)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vpedit   :execute s:find(<count>,'pedit',<q-args>,<bang>1)
-command! -bar -bang -count=1 -nargs=1 -complete=customlist,s:Findcomplete Vread    :execute s:find(<count>,'read',<q-args>,<bang>1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Ve       :execute s:find(<count>,'edit<bang>',<q-args>,0)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vedit    :execute s:find(<count>,'edit<bang>',<q-args>,0)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vopen    :execute s:find(<count>,'edit<bang>',<q-args>,1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vsplit   :execute s:find(<count>,'split',<q-args>,<bang>1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vvsplit  :execute s:find(<count>,'vsplit',<q-args>,<bang>1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vtabedit :execute s:find(<count>,'tabedit',<q-args>,<bang>1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vpedit   :execute s:find(<count>,'pedit',<q-args>,<bang>1)
+command! -bar -bang -range=1 -nargs=1 -complete=customlist,s:Findcomplete Vread    :execute s:find(<count>,'read',<q-args>,<bang>1)
 
-" vim:set ft=vim ts=8 sw=2 sts=2:
+" vim:set et sw=2:
