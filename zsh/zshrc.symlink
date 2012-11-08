@@ -20,7 +20,9 @@ elif [[ $platform == 'Linux' ]]; then
   export EDITOR=vim
 fi
 
-precmd () { title $1 }
+# precmd is called just before the prompt is printed
+precmd () { title 'zsh' }
+# preexec is called just before any command line is executed
 preexec () { title $1 }
 
 export PAGER=less
@@ -69,5 +71,5 @@ export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 # Node
 # TODO: fix this
 if which npm > /dev/null; then
-  export PATH=/usr/local/share/npm/bin/:$PATH
+  export PATH=/usr/local/share/npm/bin:$PATH
 fi
