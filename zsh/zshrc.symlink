@@ -20,10 +20,16 @@ elif [[ $platform == 'Linux' ]]; then
   export EDITOR=vim
 fi
 
+# Fix SSH agent forwarding in screen / tmux
+source  ~/.ssh/grabssh
+
 # precmd is called just before the prompt is printed
 precmd () { title 'zsh' }
 # preexec is called just before any command line is executed
-preexec () { title $1 }
+preexec () { 
+  title $1
+  source $HOME/.ssh/fixssh
+}
 
 export PAGER=less
 
@@ -69,7 +75,6 @@ fi
 export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 
 # Node
-# TODO: fix this
 if which npm > /dev/null; then
   export PATH=/usr/local/share/npm/bin:$PATH
 fi

@@ -1,4 +1,6 @@
 #!/bin/sh
+# Run this at the start of every new incoming SSH connection.
+# http://samrowe.com/wordpress/ssh-agent-and-gnu-screen/
 echo 'grabbing ssh'
 SSHVARS="SSH_CLIENT SSH_TTY SSH_AUTH_SOCK SSH_CONNECTION DISPLAY"
 
