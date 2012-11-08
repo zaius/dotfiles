@@ -133,8 +133,8 @@ nnoremap <leader>w :call ClearTrailingWhitespace()<cr>
 autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 
 " Format XML with xmllint with ,x
-:vmap <Leader>x !xmllint --format -<CR>
-:nmap <Leader>x !!xmllint --format -<CR>
+:vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format -<CR>
+:nmap <Leader>x !!xmllint --nonet --nowarning --nowrap --html --format -<CR>
 
 " I only use nerd comments for toggling. Disable all other shortcuts.
 let g:NERDCreateDefaultMappings = 0
