@@ -22,3 +22,6 @@
 [submodule "vim/vim.symlink/bundle/ctrl-p.vim"]
 	path = vim/vim.symlink/bundle/ctrl-p.vim
 	url = https://github.com/kien/ctrlp.vim.git
+[submodule "vim/vim.symlink/bundle/applescript.vim"]
+	path = vim/vim.symlink/bundle/applescript.vim
+	url = https://github.com/vim-scripts/applescript.vim.git
