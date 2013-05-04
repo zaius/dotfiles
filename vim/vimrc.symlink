@@ -44,6 +44,11 @@ if version >= 703
 
   " Show a colored column at line 80
   set colorcolumn=80
+
+  " Default to yanking to the system clipboard.
+  " Can use fakeclip if clipboard support isn't compiled in
+  " https://github.com/kana/vim-fakeclip
+  set clipboard=unnamed
 endif
 
 " have command-line completion <Tab> (for filenames, help topics, option names)
@@ -90,6 +95,9 @@ if has("gui_macvim")
   set go-=T
   set guifont=Inconsolata:h18.00
   set anti
+
+  " Turn off bell. Macvim has no visual bell, so this does the same thing.
+  set vb
 
   " Make Macvim fullscreen actually fill screen
   set fuoptions=maxvert,maxhorz
@@ -148,5 +156,15 @@ set t_fs=\<ESC>\
 set titleold=""
 set title
 
+" Make ctrl-p ignore generated files in jekyll
+" Might be better to just read this from a folder's gitignore. But in some
+" cases (e.g. yml template files) I still want them to be seen. Maybe a
+" whitelist?
+:let g:ctrlp_custom_ignore='_site$\|tmp/cache'
+
 " Save when any change is made. Try kick my habit of hitting :w every two seconds
 autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall
+
+" http://superuser.com/questions/558876
+autocmd BufEnter * sign define dummy
+autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
