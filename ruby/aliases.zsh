@@ -1,3 +1,5 @@
+alias bundle_production='bundle install --without development test --deployment --binstubs'
+
 gem() {
   # Oh hi future david! You're reading this because you typed `which gem` but
   # gem is actually a function. You can remove it with 'unset -f gem' but this
