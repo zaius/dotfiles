@@ -8,3 +8,5 @@ ssh.symlink/id_rsa*
 # ERB rendered files
 system/forward.symlink
 git/gitconfig.symlink
+
+ssh.symlink/notifications
