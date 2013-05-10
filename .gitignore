@@ -10,3 +10,6 @@ system/forward.symlink
 git/gitconfig.symlink
 
 ssh.symlink/notifications
+
+irssi.symlink/away.log
+irssi.symlink/log/
