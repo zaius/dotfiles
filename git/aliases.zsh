@@ -9,7 +9,7 @@ alias cdg='cd `git rev-parse --show-cdup`'
 # Stash everything except the index in order to run tests
 alias gss='git stash save --include-untracked --keep-index'
 # alias git clone --recursive
-alias textfiles='git ls-files | xargs file -I | grep "text/" | cut -d: -f1'
+alias textfiles='git ls-files | xargs file --mime-type | grep "text/" | cut -d: -f1'
 alias cleanup_line_endings="textfiles | xargs sed -i '' 's///'"
 alias cleanup_tabs="textfiles | xargs sed -i '' 's/	//g'"
 alias cleanup_trailing_whitespace="textfiles | xargs sed -i '' 's/ *$//g'"
