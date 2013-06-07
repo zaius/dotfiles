@@ -1,4 +1,8 @@
 #!/usr/bin/ruby
+
+# In case I forgot to run clone --recursive
+`git submodule update --init`
+
 require 'erb'
 require 'yaml'
 require 'fileutils'
