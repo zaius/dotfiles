@@ -3,7 +3,14 @@
 Pry.config.editor = "mvim -f"
 
 # Prompt with ruby version
-Pry.prompt = [proc { |obj, nest_level| "#{RUBY_VERSION} (#{obj}):#{nest_level} > " }, proc { |obj, nest_level| "#{RUBY_VERSION} (#{obj}):#{nest_level} * " }]
+Pry.prompt = [
+  proc { |obj, nest_level|
+    "#{RUBY_VERSION} (#{obj}):#{nest_level} > "
+  },
+  proc { |obj, nest_level|
+    "#{RUBY_VERSION} (#{obj}):#{nest_level} * "
+  }
+]
 
 # Toys methods
 # Stealed from https://gist.github.com/807492
@@ -28,8 +35,8 @@ def paste
   `pbpaste`
 end
 
-# loading rails configuration if it is running as a rails console
+# Rails specific methods.
 if defined?(Rails) && Rails.env
-  file = File.dirname(__FILE__) + '/.railsrc'
-  load file if File.exist? file
+  # Load all rails helpers
+  extend Rails::ConsoleMethods
 end
