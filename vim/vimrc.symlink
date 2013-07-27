@@ -144,6 +144,10 @@ autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 :vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format -<CR>
 :nmap <Leader>x !!xmllint --nonet --nowarning --nowrap --html --format -<CR>
 
+" Format json with ,j
+:vmap <Leader>j !python -m json.tool <CR>
+:nmap <Leader>j !!python -m json.tool <CR>
+
 " I only use nerd comments for toggling. Disable all other shortcuts.
 let g:NERDCreateDefaultMappings = 0
 map <leader>c <plug>NERDCommenterToggle
