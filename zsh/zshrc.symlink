@@ -47,7 +47,7 @@ export WORDCHARS=''
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
-setopt appendhistory autocd notify
+setopt appendhistory notify
 
 setopt HIST_VERIFY
 setopt SHARE_HISTORY # share history between sessions ???
@@ -74,6 +74,8 @@ if which rbenv > /dev/null; then
 fi
 
 # Ruby
+# If I need more rubies, look at something more lightweight than rvm / rbenv
+# https://github.com/postmodern/chruby
 if which ruby > /dev/null; then
   export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 fi
@@ -81,4 +83,5 @@ fi
 # Node
 if which npm > /dev/null; then
   export PATH=/usr/local/share/npm/bin:$PATH
+  export NODE_PATH="/usr/local/share/npm/lib/node_modules"
 fi
