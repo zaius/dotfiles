@@ -16,3 +16,7 @@ title () { echo -n "k$@\\" }
 # plutil args are impossible to remember
 # alias p2j="plutil -convert json -o - -- - | python -mjson.tool"
 alias p2j="plutil -convert json -r -o - -- -"
+
+ff () {
+  find . -iname "*$@*"
+}
