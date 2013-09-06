@@ -10,6 +10,7 @@ c() {
 }
 
 user_prompt() {
+  [[ $USER == zaius ]] && return;
   # I wasted hours on this. Before I had this:
   # pcolor=%(!.magenta.cyan)
   # echo $pcolor
@@ -23,6 +24,14 @@ user_prompt() {
   echo -n "\
 $(c $pcolor black) %n \
 $(c $1 $pcolor)⮀\
+"
+}
+
+host_prompt() {
+  [[ $HOST == air ]] && return;
+  echo -n "\
+$(c white black) %m \
+$(c $1 white)⮀\
 "
 }
 
@@ -44,8 +53,7 @@ setprompt () {
   PROMPT='\
 $(exit_code blue)\
 $(user_prompt white)\
-$(c white black) %m \
-$(c magenta white)⮀\
+$(host_prompt magenta)\
 $(c magenta black) %~ \
 $(c default magenta)⮀\
 $(c default default) '
