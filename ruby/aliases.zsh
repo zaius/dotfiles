@@ -6,7 +6,7 @@ gem() {
   # is probably what you want to do: command which gem
 
   if [[ $@ == "uninstall all" ]]; then
-    command gem list --no-version | xargs gem uninstall -ax
+    command gem list --no-versions | xargs -L1 gem uninstall -aIx
   else
     command gem "$@";
   fi;
