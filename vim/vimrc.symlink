@@ -160,14 +160,19 @@ set t_fs=\<ESC>\
 set titleold=""
 set title
 
-" Make ctrl-p ignore generated files in jekyll
-" Might be better to just read this from a folder's gitignore. But in some
-" cases (e.g. yml template files) I still want them to be seen. Maybe a
-" whitelist?
-:let g:ctrlp_custom_ignore='_site$\|tmp/cache'
+" This really needs a lot of work.
+"  * Can't work out how to exclude deleted files.
+"  * A project's gitignore file isn't nescessarily the same as the ctrl-p
+"    ignore list. E.g. secrets.yml. How can we do per-project excludes?
+"
+" One option is to write a script which can list the relevant files. Then can
+" have an ignore global similar to git's global gitignore.
+" http://superuser.com/questions/649714/can-i-get-the-vim-ctrlp-plugin-to-ignore-a-specific-folder-in-one-project
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files --cached --other --exclude-standard']
+let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 
 " Save when any change is made. Try kick my habit of hitting :w every two seconds
-autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall
+" autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall
 
 " http://superuser.com/questions/558876
 autocmd BufEnter * sign define dummy
