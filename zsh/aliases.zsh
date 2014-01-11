@@ -1,5 +1,6 @@
 alias socks="ssh -D localhost:8000 kelso.id.au"
 alias vi="vim"
+alias mv="mv -i"
 
 # http://superuser.com/questions/106637/less-command-clearing-screen-upon-exit-how-to-switch-it-off
 # -i case insensitive search
