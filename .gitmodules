@@ -25,3 +25,9 @@
 [submodule "vim/vim.symlink/bundle/ember.vim"]
 	path = vim/vim.symlink/bundle/ember.vim
 	url = https://github.com/dsawardekar/ember.vim
+[submodule "vim/vim.symlink/bundle/vim-markdown"]
+	path = vim/vim.symlink/bundle/vim-markdown
+	url = https://github.com/plasticboy/vim-markdown.git
+[submodule "vim/vim.symlink/bundle/python-syntax"]
+	path = vim/vim.symlink/bundle/python-syntax
+	url = https://github.com/hdima/python-syntax.git
