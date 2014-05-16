@@ -12,7 +12,7 @@ let &t_Co=256
 let mapleader = ","
 inoremap jj <ESC>
 
-set smartindent
+set nosmartindent
 set autoindent
 set copyindent
 
@@ -33,6 +33,7 @@ set shiftwidth=2
 " No need for swap files.
 set nobackup
 set noswapfile
+set directory=~/.vim/swap
 
 if version >= 703
   " Use a persistent undo file instead
@@ -154,11 +155,14 @@ map <leader>c <plug>NERDCommenterToggle
 vmap <leader>c <plug>NERDCommenterToggle
 
 " Set the screen window title to hold the currently edited file
-let &titlestring = "vim(" . expand("%:t") . ")"
-set t_ts=\<ESC>k
-set t_fs=\<ESC>\
-set titleold=""
-set title
+" TODO: this is broken in console vim - keeps inserting the ESC in the current
+" files
+" let &titlestring = "vim(" . expand("%:t") . ")"
+" set t_ts=\<ESC>k
+" set t_fs=\<ESC>\
+" set titleold=""
+" set title
+set notitle
 
 " This really needs a lot of work.
 "  * Can't work out how to exclude deleted files.
@@ -175,5 +179,13 @@ let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 " autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall
 
 " http://superuser.com/questions/558876
-autocmd BufEnter * sign define dummy
-autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+" autocmd BufEnter * sign define dummy
+" autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+
+" Ideally...
+" autocmd filetype python source ~/.vim/pydoc.vim
+autocmd FileType python setlocal tabstop=4 shiftwidth=4
+autocmd FileType python set foldmethod=indent
+
+highlight WhitespaceEOL ctermbg=red guibg=red
+match WhitespaceEOL /\s\+$/
