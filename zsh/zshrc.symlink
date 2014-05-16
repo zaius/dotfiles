@@ -26,7 +26,7 @@ source  ~/.ssh/grabssh
 # precmd is called just before the prompt is printed
 precmd () { title 'zsh' }
 # preexec is called just before any command line is executed
-preexec () { 
+preexec () {
   title $1
   source $HOME/.ssh/fixssh
 }
@@ -62,7 +62,10 @@ setopt HIST_REDUCE_BLANKS
 # Python
 if which python > /dev/null; then
   export PYTHONSTARTUP=~/.pythonrc
-  export PATH=/usr/local/share/python:$PATH
+fi
+
+if which -s python3 > /dev/null; then
+  # export PYTHONPATH=$(brew --prefix)/lib/python3.4/site-packages
 fi
 
 # rbenv
