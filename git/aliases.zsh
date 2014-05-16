@@ -1,5 +1,6 @@
 # Thanks to @holman
 alias gs='git status -sb'
+alias wow='git status -sb'
 alias gd='git diff'
 alias grm="git status | grep deleted | awk '{print \$3}' | xargs git rm"
 alias gp='git push origin HEAD'
