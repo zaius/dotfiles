@@ -1,5 +1,10 @@
 print("Running pythonrc")
 
+import datetime
+import dateutil
+import pytz
+from dateutil.relativedelta import relativedelta
+
 import atexit
 import os
 import readline
@@ -18,5 +23,12 @@ if os.path.exists(historyPath):
     readline.read_history_file(historyPath)
 
 atexit.register(save_history)
+
+import csv
+def save_csv(filename, data):
+  with open(filename, 'w', newline='') as csvfile:
+      writer = csv.DictWriter(csvfile, [type(list(data.keys())[0]), 'value'])
+      for key, value in sorted(data.items()):
+        writer.writerow({type(key): key, 'value': value})
 
 del os, atexit, readline, rlcompleter, save_history, historyPath
