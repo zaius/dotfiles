@@ -59,10 +59,31 @@ setopt HIST_REDUCE_BLANKS
 
 
 
+check_virtualenv() {
+  if [ -e .venv/bin/activate ]; then
+    if [ ! $VIRTUAL_ENV ]; then
+      echo "Found .venv in directory. Starting virtualenv"
+      source .venv/bin/activate
+    fi
+  else
+    if [ $VIRTUAL_ENV ]; then
+      echo "Deactivating virtual env"
+      deactivate
+    fi
+  fi
+}
+venv_cd () {
+  builtin cd "$@" && check_virtualenv
+}
+
 # Python
 if which python > /dev/null; then
   export PYTHONSTARTUP=~/.pythonrc
+  alias cd="venv_cd"
+  # If cwd is a venv, enter it immediately
+  check_virtualenv
 fi
+
 
 if which -s python3 > /dev/null; then
   # export PYTHONPATH=$(brew --prefix)/lib/python3.4/site-packages
