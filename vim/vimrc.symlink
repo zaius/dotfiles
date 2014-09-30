@@ -185,7 +185,7 @@ let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
 autocmd FileType python setlocal tabstop=4 shiftwidth=4
-autocmd FileType python set foldmethod=indent
+" autocmd FileType python set foldmethod=indent
 
 highlight WhitespaceEOL ctermbg=red guibg=red
 match WhitespaceEOL /\s\+$/
