@@ -85,7 +85,7 @@ if which python > /dev/null; then
 fi
 
 
-if which -s python3 > /dev/null; then
+if which python3 > /dev/null; then
   # export PYTHONPATH=$(brew --prefix)/lib/python3.4/site-packages
 fi
 
@@ -108,4 +108,14 @@ fi
 if which npm > /dev/null; then
   export PATH=/usr/local/share/npm/bin:$PATH
   export NODE_PATH="/usr/local/share/npm/lib/node_modules"
+fi
+
+# Java
+# export PATH=/Library/Java/Home/bin:$PATH
+
+# Perl
+if [[ -d /usr/local/perlbrew ]]; then
+  # export PERLBREW_ROOT=/usr/local/perlbrew
+  # export PATH=\$PATH:/usr/local/perlbrew/bin
+  # source /usr/local/perlbrew/etc/bashrc
 fi
