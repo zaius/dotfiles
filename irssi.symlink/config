@@ -1,102 +1,36 @@
 servers = (
-  { address = "irc.ubuntu.com"; chatnet = "Ubuntu"; port = "8001"; },
-  { address = "irc.stealth.net"; chatnet = "IRCnet"; port = "6668"; },
-  { address = "irc.efnet.org"; chatnet = "EFNet"; port = "6667"; },
-  { 
-    address = "irc.undernet.org";
-    chatnet = "Undernet";
-    port = "6667";
-  },
-  { address = "irc.dal.net"; chatnet = "DALnet"; port = "6667"; },
-  { 
-    address = "irc.quakenet.org";
-    chatnet = "QuakeNet";
-    port = "6667";
-  },
-  { address = "silc.silcnet.org"; chatnet = "SILC"; port = "706"; }
+  { address = "irc.freenode.net"; chatnet = "Freenode"; port = "6667"; },
 );
 
 chatnets = {
-  IRCnet = {
-    type = "IRC";
-    max_kicks = "4";
-    max_msgs = "5";
-    max_whois = "4";
-    max_query_chans = "5";
-  };
-  EFNet = { 
-    type = "IRC";
-    max_kicks = "4";
-    max_msgs = "3";
-    max_whois = "1";
-  };
-  Undernet = {
-    type = "IRC";
-    max_kicks = "1";
-    max_msgs = "3";
-    max_whois = "30";
-  };
-  DALnet = {
-    type = "IRC";
-    max_kicks = "4";
-    max_msgs = "3";
-    max_whois = "30";
-  };
-  QuakeNet = {
-    type = "IRC";
-    max_kicks = "1";
-    max_msgs = "3";
-    max_whois = "30";
-  };
-  SILC = { type = "SILC"; };
-  Ubuntu = { type = "IRC"; };
+  Freenode = { type = "IRC"; };
 };
 
 channels = (
-  { name = "#irssi"; chatnet = "ircnet"; autojoin = "No"; },
-  { name = "silc"; chatnet = "silc"; autojoin = "No"; }
+  { name = "#techendo"; chatnet = "Freenode"; autojoin = "Yes"; }
 );
 
 aliases = {
   J = "join";
-  WJOIN = "join -window";
-  WQUERY = "query -window";
-  LEAVE = "part";
-  BYE = "quit";
-  EXIT = "quit";
-  SIGNOFF = "quit";
-  DESCRIBE = "action";
   DATE = "time";
   HOST = "userhost";
   LAST = "lastlog";
   SAY = "msg *";
-  WI = "whois";
-  WII = "whois $0 $0";
-  WW = "whowas";
   W = "who";
   N = "names";
   M = "msg";
   T = "topic";
   C = "clear";
   CL = "clear";
-  K = "kick";
-  KB = "kickban";
-  KN = "knockout";
-  BANS = "ban";
   B = "ban";
-  MUB = "unban *";
   UB = "unban";
   IG = "ignore";
   UNIG = "unignore";
   SB = "scrollback";
   UMODE = "mode $N";
-  WC = "window close";
-  WN = "window new hide";
-  SV = "say Irssi $J ($V) - http://irssi.org/";
   GOTO = "sb goto";
   CHAT = "dcc chat";
   RUN = "SCRIPT LOAD";
-  CALC = "exec - if which bc &>/dev/null\\; then echo '$*' | bc | awk '{print \"$*=\"$$1}'\\; else echo bc was not found\\; fi";
   SBAR = "STATUSBAR";
   INVITELIST = "mode $C +I";
   Q = "QUERY";
@@ -231,9 +165,10 @@ settings = {
 };
 ignores = (
   { level = "JOINS PARTS QUITS"; channels = ( "#rubyonrails" ); },
+  { level = "JOINS PARTS QUITS NICKS"; channels = ( "#django" ); },
   { level = "JOINS PARTS QUITS NICKS"; channels = ( "#ubuntu" ); },
-  { level = "JOINS PARTS QUITS NICKS"; channels = ( "#rethinkdb" ); },
   { level = "JOINS PARTS QUITS NICKS"; channels = ( "#emberjs" ); },
+  { level = "JOINS PARTS QUITS NICKS"; channels = ( "#emberjs-dev" ); },
   { level = "JOINS PARTS QUITS NICKS"; channels = ( "#sentry" ); }
 );
 hilights = (
