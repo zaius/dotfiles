@@ -16,9 +16,20 @@ alias sudo="sudo -E"
 title () { echo -n "k$@\\" }
 
 # plutil args are impossible to remember
-# alias p2j="plutil -convert json -o - -- - | python -mjson.tool"
 alias p2j="plutil -convert json -r -o - -- -"
 
 ff () {
   find . -iname "*$@*"
 }
+
+# Work in progress
+ssh() {
+  export local_hash=$(git --work-tree=$HOME/.dotfiles --git-dir=$HOME/.dotfiles/.git rev-parse --verify HEAD)
+  command ssh "$@" -t "env origin_hash=$local_hash zsh -i"
+}
+
+# Run upon login
+export local_hash=$(git --work-tree=$HOME/.dotfiles --git-dir=$HOME/.dotfiles/.git rev-parse --verify HEAD)
+if [[ ("${origin_hash}" != "") && ("${origin_hash}" != $local_hash) ]]; then
+  echo "dotfiles don't match"
+fi
