@@ -31,4 +31,7 @@ def save_csv(filename, data):
       for key, value in sorted(data.items()):
         writer.writerow({type(key): key, 'value': value})
 
+import logging
+log = logging.getLogger(__name__)
+
 del os, atexit, readline, rlcompleter, save_history, historyPath
