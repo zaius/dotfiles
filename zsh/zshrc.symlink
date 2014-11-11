@@ -32,6 +32,9 @@ preexec () {
 }
 
 export PAGER=less
+# Keep the output on the screen, keep colors working. Same as git's pager
+# defaults. See `git config core.pager`
+export LESS='-FRSX'
 
 # ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
@@ -56,7 +59,6 @@ setopt APPEND_HISTORY # adds history
 setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
 setopt HIST_IGNORE_ALL_DUPS  # don't record dupes in history
 setopt HIST_REDUCE_BLANKS
-
 
 
 check_virtualenv() {
@@ -84,18 +86,6 @@ if which python > /dev/null; then
   check_virtualenv
 fi
 
-
-if which python3 > /dev/null; then
-  # export PYTHONPATH=$(brew --prefix)/lib/python3.4/site-packages
-fi
-
-# rbenv
-# Make sure rbenv is linked to a new openssl (and readline?)
-# CONFIGURE_OPTS="--with-openssl-dir=`brew --prefix openssl`" rbenv install 1.9.3-p194
-if which rbenv > /dev/null; then
-  eval "$(rbenv init - --no-rehash)"
-  export PATH=~/.rbenv/shims:$PATH
-fi
 
 # Ruby
 # If I need more rubies, look at something more lightweight than rvm / rbenv
