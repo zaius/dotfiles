@@ -4,8 +4,7 @@ alias mv="mv -i"
 command which gawk > /dev/null && alias awk=gawk
 
 # http://superuser.com/questions/106637/less-command-clearing-screen-upon-exit-how-to-switch-it-off
-# -i case insensitive search
-alias less="less -i -X -R --quit-if-one-screen"
+alias less="less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --quit-at-eof"
 
 # Keep user environment when using sudo
 alias sudo="sudo -E"
