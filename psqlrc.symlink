@@ -1,0 +1,37 @@
+-- http://www.postgresql.org/docs/9.4/static/app-psql.html
+
+-- Other good examples
+--  https://gist.github.com/jaytaylor/e5aa89c8f3aaab3f576f
+\pset linestyle unicode
+\pset border 2
+
+\pset format wrapped
+\pset pager on
+
+\timing
+
+-- Tab complete to upper case
+\set COMP_KEYWORD_CASE upper
+
+-- Don't invalidate the transaction on a query error
+\set ON_ERROR_ROLLBACK on
+
+-- Verbose error reports.
+\set VERBOSITY verbose
+-- Use a separate history file per-database.
+\set HISTFILE ~/.psql_history- :DBNAME
+-- If a command is run more than once in a row, only store it once in the
+-- history.
+\set HISTCONTROL ignoredups
+
+
+-- export YELLOW=`echo -e '\033[1;33m'`
+-- export LIGHT_CYAN=`echo -e '\033[1;36m'`
+-- export NOCOLOR=`echo -e '\033[0m'`
+
+-- PAGER="sed \"s/\([[:space:]]\+[0-9.\-]\+\)$/${LIGHT_CYAN}\1$NOCOLOR/;"
+-- PAGER+="s/\([[:space:]]\+[0-9.\-]\+[[:space:]]\)/${LIGHT_CYAN}\1$NOCOLOR/g;"
+-- PAGER+="s/|/$YELLOW|$NOCOLOR/g;s/^\([-+]\+\)/$YELLOW\1$NOCOLOR/\" 2>/dev/null  | less"
+-- export PAGER
+
+\setenv PAGER "/usr/bin/less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --chop-long-lines"
