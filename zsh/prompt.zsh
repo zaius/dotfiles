@@ -28,7 +28,7 @@ $(c $1 $pcolor)⮀\
 }
 
 host_prompt() {
-  [[ $HOST == air ]] && return;
+  [[ $HOST == pro ]] && return;
   echo -n "\
 $(c white black) %m \
 $(c $1 white)⮀\
