@@ -1,6 +1,6 @@
 [user]
         name = David Kelso
-        email = <%= SECRETS[:email] %>
+        email = david@kelso.id.au
 [color]
         diff = auto
         status = auto
@@ -9,15 +9,12 @@
         ui = true
         pager = true
 
-[github]
-        user = zaius
-        token = <%= SECRETS[:github_token] %>
 [core]
-        excludesfile = <%= ENV['HOME'] %>/.gitignore
+        excludesfile = /Users/zaius/.gitignore
         pager = less -FRSX
         whitespace=fix,trailing-space
 
-[diff]  
+[diff]
       renamelimit = 0
 
 [color "branch"]

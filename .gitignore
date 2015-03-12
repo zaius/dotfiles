@@ -5,9 +5,6 @@ vim/vim.symlink/.netrwhist
 vim/vim.symlink/undo/*
 ssh.symlink/id_rsa*
 
-# ERB rendered files
-git/gitconfig.symlink
-
 ssh.symlink/notifications
 
 irssi.symlink/away.log
