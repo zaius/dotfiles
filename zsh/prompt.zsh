@@ -1,4 +1,13 @@
+# For more inspiration, check out oh my zsh themes:
+#  * https://github.com/robbyrussell/oh-my-zsh/wiki/themes
+# In hindsight, probably should have just copied these:
+#  * https://gist.github.com/agnoster/3712874
+#  * https://github.com/jeremyFreeAgent/oh-my-zsh-powerline-theme
 autoload colors && colors
+
+# Variable scoping in zsh is weird...
+last_bg='none'
+RETVAL=0
 
 c() {
   # Nesting vars between %{ and %} tells zsh to ignore them when determining
@@ -21,18 +30,18 @@ user_prompt() {
   # echo $pcolor | hexdump -c
   [[ $UID -eq 0 ]] && pcolor=red || pcolor=cyan
 
-  echo -n "\
-$(c $pcolor black) %n \
-$(c $1 $pcolor)⮀\
-"
+  arrow $pcolor
+  c $pcolor black
+  echo -n ' %n '
 }
 
 host_prompt() {
   [[ $HOST == pro ]] && return;
-  echo -n "\
-$(c white black) %m \
-$(c $1 white)⮀\
-"
+
+  arrow white
+  c white black
+  echo -n ' %m '
+}
 
 # ZSH has a vcs_info command for pulling out the branch info - no need to do it
 # by hand.
@@ -60,24 +69,48 @@ git_info() {
 # Maybe look at tr for stripping out leading spaces to fix the shitty formatting
 # http://stackoverflow.com/questions/369758/how-to-trim-whitespace-from-bash-variable
 exit_code() {
-  [[ $? == 0 ]] && return;
+  [[ $RETVAL == 0 ]] && return
 
-  echo -n "\
-$(c black red) %? \
-$(c $1 black)⮀\
-"
+  arrow black
+  c black red
+  echo -n "$RETVAL "
 }
 
-setprompt () {
-  setopt prompt_subst
-
-  PROMPT='\
-$(exit_code blue)\
-$(user_prompt white)\
-$(host_prompt magenta)\
-$(c magenta black) %~ \
-$(c default magenta)⮀\
-$(c default default) '
+directory() {
+  arrow magenta
+  c magenta black
+  echo -n ' %~ '
 }
 
-setprompt
+arrow() {
+  if [[ $last_bg == 'none' ]]; then
+    last_bg=$1
+    return
+  fi
+
+  c $1 $last_bg
+  echo -n '⮀'
+  last_bg=$1
+}
+
+build_prompt() {
+  # NOTE: this has to go first, before any variable assignment or subcommands.
+  RETVAL=$?
+  last_bg='none'
+
+  exit_code
+  git_info
+  user_prompt
+  host_prompt
+  directory
+  arrow black
+  c default default
+}
+
+prompt_precmd() {
+  PROMPT='$(build_prompt)'
+}
+
+setopt prompt_subst
+prompt_opts=(cr subst percent)
+add-zsh-hook precmd prompt_precmd
