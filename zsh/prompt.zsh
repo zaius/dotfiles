@@ -33,6 +33,27 @@ host_prompt() {
 $(c white black) %m \
 $(c $1 white)⮀\
 "
+
+# ZSH has a vcs_info command for pulling out the branch info - no need to do it
+# by hand.
+# http://arjanvandergaag.nl/blog/customize-zsh-prompt-with-vcs-info.html
+#
+# Don't want to override an existing precmd here - can append to it.
+# TODO: probably should move this add-zsh-hook to zshrc
+autoload -Uz add-zsh-hook
+autoload -Uz vcs_info
+add-zsh-hook precmd vcs_info
+zstyle ':vcs_info:*' enable git
+
+# http://zsh.sourceforge.net/Doc/Release/User-Contributions.html
+zstyle ':vcs_info:git:*' formats       'git:%b'
+zstyle ':vcs_info:git:*' actionformats ' GIT ACTION! [%b|%a]'
+
+git_info() {
+  [[ -z "$vcs_info_msg_0_" ]] && return;
+  arrow green
+  c green black
+  echo -n "$vcs_info_msg_0_ "
 }
 
 
