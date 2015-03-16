@@ -6,8 +6,8 @@
 set -g prefix C-s
 unbind C-b
 
-# Need to be able to send C-s for rtorrent...
-bind s send-prefix
+# If we need to actually send C-s for any reason.
+# bind s send-prefix
 
 # Keep consistent with screen behavior
 bind C-s last-window
