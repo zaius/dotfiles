@@ -3,18 +3,33 @@
 # In hindsight, probably should have just copied these:
 #  * https://gist.github.com/agnoster/3712874
 #  * https://github.com/jeremyFreeAgent/oh-my-zsh-powerline-theme
-autoload colors && colors
+#  * http://joshsymonds.com/blog/2014/06/12/shell-awesomeness-with-prezto/
+#
+# Test font support with:
+#   echo '⮀ ± ⭠ ➦ ✔ ✘'
+#
+#   Tons of different codes for powerline chars
+#   forward arrow: \ue0b0
+#   back arrow: \ue0b2
 
 # Variable scoping in zsh is weird...
 last_bg='none'
+side='left'
 RETVAL=0
+local orange=210
+local red=128
+local cyan=084
+local magenta=111
+local black=000
+local white=007
 
 c() {
   # Nesting vars between %{ and %} tells zsh to ignore them when determining
-  # prompt length.
+  # prompt length. (P) tells zsh to lookup the variable name inside the local
+  # scope. See: http://stackoverflow.com/questions/8376395/zsh-and-dynamic-variable
   echo -n "\
-%{$bg[$1]%}\
-%{$fg[$2]%}\
+%{$BG[${(P)1}]%}\
+%{$FG[${(P)2}]%}\
 "
 }
 
@@ -55,14 +70,14 @@ add-zsh-hook precmd vcs_info
 zstyle ':vcs_info:*' enable git
 
 # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html
-zstyle ':vcs_info:git:*' formats       'git:%b'
+zstyle ':vcs_info:git:*' formats ':%b'
 zstyle ':vcs_info:git:*' actionformats ' GIT ACTION! [%b|%a]'
 
 git_info() {
   [[ -z "$vcs_info_msg_0_" ]] && return;
-  arrow green
-  c green black
-  echo -n "$vcs_info_msg_0_ "
+  arrow orange
+  c orange black
+  echo -n " $vcs_info_msg_0_ "
 }
 
 
@@ -83,13 +98,22 @@ directory() {
 }
 
 arrow() {
+  if [[ $side == 'right' ]]; then
+    c $last_bg $1
+    echo -n ''
+    last_bg=$1
+    c $1 $last_bg
+    echo -n ' '
+    return
+  fi
+
   if [[ $last_bg == 'none' ]]; then
     last_bg=$1
     return
   fi
 
   c $1 $last_bg
-  echo -n '⮀'
+  echo -n ''
   last_bg=$1
 }
 
@@ -97,20 +121,30 @@ build_prompt() {
   # NOTE: this has to go first, before any variable assignment or subcommands.
   RETVAL=$?
   last_bg='none'
+  side='left'
 
   exit_code
-  git_info
   user_prompt
   host_prompt
   directory
   arrow black
-  c default default
+  # TODO: transparent instead of black? default instead of white?
+  c black white
 }
 
-prompt_precmd() {
-  PROMPT='$(build_prompt)'
+right_prompt() {
+  last_bg='none'
+  side='right'
+
+  git_info
+  c black white
 }
+
 
 setopt prompt_subst
-prompt_opts=(cr subst percent)
-add-zsh-hook precmd prompt_precmd
+PROMPT='$(build_prompt) '
+RPROMPT='$(right_prompt) '
+# What does this do? Can't find doc for it anywhere...
+#   prompt_opts=(cr subst percent)
+# A bunch of scripts put the prompt setting in the pre-cmd. Is there any point?
+#   add-zsh-hook precmd prompt_precmd
