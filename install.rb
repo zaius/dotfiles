@@ -29,10 +29,11 @@ Dir["#{ROOT}/**/**.symlink"].each do |file|
 
     print "#{output_file} will be overwritten. Delete it? "
     if gets.chomp.upcase.start_with? 'Y'
+      puts "Overwriting #{output_file}"
       # Have to use recursive as it could be a directory (eg. vim)
       FileUtils.rm_rf output_file
     else
-      abort "Aborted."
+      puts "Ignoring #{output_file}"
     end
   end
 
