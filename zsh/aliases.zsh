@@ -23,12 +23,23 @@ ff () {
 
 # Work in progress
 ssh() {
-  export local_hash=$(git --work-tree=$HOME/.dotfiles --git-dir=$HOME/.dotfiles/.git rev-parse --verify HEAD)
+  export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
   command ssh "$@" -t "env origin_hash=$local_hash zsh -i"
 }
 
 # Run upon login
-export local_hash=$(git --work-tree=$HOME/.dotfiles --git-dir=$HOME/.dotfiles/.git rev-parse --verify HEAD)
+export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
 if [[ ("${origin_hash}" != "") && ("${origin_hash}" != $local_hash) ]]; then
   echo "dotfiles don't match"
+  # tmux keeps hold of old dotfiles somehow. There's probably a way to tell it
+  # not to, but this is my hacky workaround.
+  if [[ -z "$TMUX_PANE" ]]; then
+    git -C $HOME/.dotfiles pull
+    # can't run logout here as we're not in a login shelll
+    exit
+  fi
 fi
+
+install-dotfiles() {
+  command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles && ruby .dotfiles/install.rb'
+}
