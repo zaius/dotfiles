@@ -2,11 +2,12 @@
 #  * https://github.com/robbyrussell/oh-my-zsh/wiki/themes
 # In hindsight, probably should have just copied these:
 #  * https://gist.github.com/agnoster/3712874
+#  * http://www.paradox.io/posts/9-my-new-zsh-prompt
 #  * https://github.com/jeremyFreeAgent/oh-my-zsh-powerline-theme
 #  * http://joshsymonds.com/blog/2014/06/12/shell-awesomeness-with-prezto/
 #
 # Test font support with:
-#   echo '⮀ ± ⭠ ➦ ✔ ✘'
+#   echo -e "\ue0a0\ue0a1\ue0a2\ue0b0\ue0b1\ue0b2"
 #
 #   Tons of different codes for powerline chars
 #   forward arrow: \ue0b0
@@ -74,10 +75,10 @@ zstyle ':vcs_info:git:*' formats ':%b'
 zstyle ':vcs_info:git:*' actionformats ' GIT ACTION! [%b|%a]'
 
 git_info() {
-  [[ -z "$vcs_info_msg_0_" ]] && return;
+  [[ -z "$vcs_info_msg_0_" ]] && return
   arrow orange
   c orange black
-  echo -n " $vcs_info_msg_0_ "
+  echo -n "$vcs_info_msg_0_ "
 }
 
 
@@ -143,7 +144,7 @@ right_prompt() {
 
 setopt prompt_subst
 PROMPT='$(build_prompt) '
-RPROMPT='$(right_prompt) '
+RPROMPT='$(right_prompt)'
 # What does this do? Can't find doc for it anywhere...
 #   prompt_opts=(cr subst percent)
 # A bunch of scripts put the prompt setting in the pre-cmd. Is there any point?
