@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function quit {
+  echo $@
+  exit 1
+}
+
+[[ $1 ]] || quit 'Must provide a branch to switch to'
+
+git diff-index --cached --quiet HEAD --ignore-submodules
+[[ $? ]] || quit 'You have a dirty, dirty index.'
+
+git add --all . && git commit -m '--PENDING--'
+git checkout $1
+
+last_msg=`git log --max-count=1 --format=format:'%s' HEAD`
+[[ $last_msg == '--PENDING--' ]] || exit 0
+
+echo 'Last commit was a pending commit - reverting'
+git reset 'HEAD^'
