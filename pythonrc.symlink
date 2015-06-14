@@ -1,9 +1,19 @@
+# vim:filetype=python
 print("Running pythonrc")
 
 import datetime
-import dateutil
-import pytz
-from dateutil.relativedelta import relativedelta
+
+try:
+    pytz = __import__('pytz')
+except ImportError:
+    print("Can't find pytz - run: pip install pytz")
+
+try:
+    dateutil = __import__('dateutil')
+except ImportError:
+    print("Can't find dateutil - run: pip install python-dateutil")
+else:
+    from dateutil.relativedelta import relativedelta
 
 import atexit
 import os
