@@ -34,7 +34,8 @@ preexec () {
 export PAGER=less
 # Keep the output on the screen, keep colors working. Same as git's pager
 # defaults. See `git config core.pager`
-export LESS='-FRSX'
+# export LESS='-FRSX'
+export LESS='--ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --chop-long-lines'
 
 # ZSH "helpfully" sets your bindkey to vim mode when you set the editor to vim.
 bindkey -e
