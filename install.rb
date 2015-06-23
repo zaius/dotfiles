@@ -44,5 +44,21 @@ Dir["#{ROOT}/**/**.symlink"].each do |file|
 end
 
 # TODO: overwriting .ssh sucks. Want to leave what's in there, and maybe even
-# append to authorized_keys. No good way to append, no good way to link into
-# a directory
+# append to authorized_keys. I've been toying with the idea of a .append file
+# type, but there's no good way to have these (or any files) go into a
+# subdirectory with the above setup as it ignores hierarchy.
+#
+# Here's some discussion on creating a config.d type setup:
+#  * http://superuser.com/questions/247564/is-there-a-way-for-one-ssh-config-file-to-include-another-one
+#
+# We can also use sed to drop existing declarations rather than rebuilding
+# config files every time:
+#   sed -i .bak -n '/Host beyond.dev/,/^$/ ! p' ~/.ssh/config
+#
+# Anyway, work in progress. For now, just treat it as a special case.
+ssh_dir = "#{Dir.home}/.ssh"
+File.delete ssh_dir if File.symlink? ssh_dir
+FileUtils.mkdir_p ssh_dir
+open("#{ssh_dir}/authorized_keys2", 'a+') do |f|
+  f.puts File.read("#{ROOT}/ssh/authorized_keys2.append")
+end
