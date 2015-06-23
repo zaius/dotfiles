@@ -1,4 +1,2 @@
 ForwardAgent yes
 ServerAliveInterval 60
-Host 192.168.1.1
-  User root

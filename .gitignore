@@ -1,10 +1,10 @@
 secrets.yml
-ssh.symlink/known_hosts
-ssh.symlink/fixssh
 vim/vim.symlink/.netrwhist
 vim/vim.symlink/undo/*
-ssh.symlink/id_rsa*
 
+ssh/known_hosts
+
+# TODO: fix notifications
 ssh.symlink/notifications
 
 irssi.symlink/away.log
