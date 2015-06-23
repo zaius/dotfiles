@@ -35,11 +35,15 @@ if [[ ("${origin_hash}" != "") && ("${origin_hash}" != $local_hash) ]]; then
   # not to, but this is my hacky workaround.
   if [[ -z "$TMUX_PANE" ]]; then
     git -C $HOME/.dotfiles pull
+    ruby $HOME/.dotfiles/install.rb
     # can't run logout here as we're not in a login shelll
     exit
   fi
 fi
 
 install-dotfiles() {
-  command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles && ruby .dotfiles/install.rb'
+  command ssh $@ 'sudo chsh -s `which zsh` `whoami`'
+  command ssh $@ 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+  command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles'
+  command ssh $@ 'ruby .dotfiles/install.rb'
 }
