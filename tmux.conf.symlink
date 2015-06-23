@@ -56,7 +56,8 @@ setw -g aggressive-resize on
 
 # Set window notifications
 setw -g monitor-activity on
-set -g visual-activity on
+# Don't show the "Activity in window..." alert. Bolding the name is enough.
+set -g visual-activity off
 
 # Woah.. tmux you rule
 setw -g automatic-rename
