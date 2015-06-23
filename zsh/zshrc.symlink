@@ -21,7 +21,7 @@ elif [[ $platform == 'Linux' ]]; then
 fi
 
 # Fix SSH agent forwarding in screen / tmux
-source  ~/.ssh/grabssh
+source  ~/.dotfiles/bin/grabssh
 
 # precmd is called just before the prompt is printed
 precmd () { title 'zsh' }
