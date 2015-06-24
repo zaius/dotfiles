@@ -22,6 +22,7 @@ end
 # Link files into home directory
 Dir["#{ROOT}/**/**.symlink"].each do |file|
   next if file.include? 'undo'
+  next if file.include? 'ssh.symlink'
 
   output_file = HOME + '/.' + File.basename(file, '.symlink')
 
