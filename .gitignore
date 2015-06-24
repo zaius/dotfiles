@@ -9,3 +9,6 @@ ssh.symlink/notifications
 
 irssi.symlink/away.log
 irssi.symlink/log/
+
+ipython.symlink
+!ipython.symlink/profile_default/ipython_config.py
