@@ -67,3 +67,10 @@ install-dotfiles() {
   command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles'
   command ssh $@ 'ruby .dotfiles/install.rb'
 }
+
+beyond-dev-init() {
+  sed -i .bak -n '/Host beyond.dev/,/^$/ ! p' ~/.ssh/config
+  cd ~/code/beyondpricing-devops
+  vagrant ssh-config --host beyond.dev >> ~/.ssh/config
+  install-dotfiles beyond.dev
+}
