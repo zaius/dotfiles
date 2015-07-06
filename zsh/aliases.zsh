@@ -42,8 +42,10 @@ ff () {
 }
 
 # Work in progress
+# This was originally against HEAD, but that means unpushed local changes will
+# always trigger a re-install but will never match the local hash.
 ssh() {
-  export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
+  export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify origin/master)
   command ssh "$@" -t "env origin_hash=$local_hash zsh -i"
 }
 
