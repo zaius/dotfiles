@@ -34,4 +34,4 @@
 -- PAGER+="s/|/$YELLOW|$NOCOLOR/g;s/^\([-+]\+\)/$YELLOW\1$NOCOLOR/\" 2>/dev/null  | less"
 -- export PAGER
 
-\setenv PAGER "/usr/bin/less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --chop-long-lines"
+-- \setenv PAGER "/usr/bin/less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --chop-long-lines"
