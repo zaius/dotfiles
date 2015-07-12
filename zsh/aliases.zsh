@@ -64,7 +64,12 @@ if [[ ("${origin_hash}" != "") && ("${origin_hash}" != $local_hash) ]]; then
 fi
 
 install-dotfiles() {
-  command ssh $@ 'sudo chsh -s `which zsh` `whoami`'
+  command ssh $@ 'which git && which ruby && which zsh'
+  if [[ $? != 0 ]]; then
+    echo 'Dependency missing'
+    return 1
+  fi
+  command ssh $@ 'sudo chsh -s `which zsh` zaius'
   command ssh $@ 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
   command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles'
   command ssh $@ 'ruby .dotfiles/install.rb'
