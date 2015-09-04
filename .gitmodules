@@ -10,15 +10,9 @@
 [submodule "vim/vim.symlink/bundle/vim-ruby"]
 	path = vim/vim.symlink/bundle/vim-ruby
 	url = https://github.com/vim-ruby/vim-ruby.git
-[submodule "vim/vim.symlink/bundle/nerdcommenter"]
-	path = vim/vim.symlink/bundle/nerdcommenter
-	url = https://github.com/scrooloose/nerdcommenter.git
 [submodule "vim/vim.symlink/bundle/ctrl-p.vim"]
 	path = vim/vim.symlink/bundle/ctrl-p.vim
 	url = https://github.com/kien/ctrlp.vim.git
-[submodule "vim/vim.symlink/bundle/applescript.vim"]
-	path = vim/vim.symlink/bundle/applescript.vim
-	url = https://github.com/vim-scripts/applescript.vim.git
 [submodule "vim/vim.symlink/bundle/vim-gitgutter"]
 	path = vim/vim.symlink/bundle/vim-gitgutter
 	url = https://github.com/airblade/vim-gitgutter.git
