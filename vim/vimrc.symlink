@@ -1,4 +1,28 @@
-execute pathogen#infect()
+" Pathogen is driving me crazy. If there is a `filetype on` in the system
+" vimrc then it shits itself. There are a million people discussing it from
+" 2010, when `filetype on` was included in debian default vimrc, and a patch
+" was put in to fix it, but pathogen has removed all the workarounds since
+" then. Wasted a day on trying to work out what is going on. Ditched it and
+" went with vim-plug.
+"
+" vim-plug also lets me ditch git submodules, which is always a good thing.
+"
+" See: https://github.com/junegunn/vim-plug/wiki/faq#automatic-installation
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall
+endif
+
+call plug#begin('~/.vim/plugged')
+  Plug 'kien/ctrlp.vim'
+  Plug 'kchmck/vim-coffee-script'
+  Plug 'mustache/vim-mustache-handlebars'
+  Plug 'vim-ruby/vim-ruby'
+  Plug 'airblade/vim-gitgutter'
+  Plug 'plasticboy/vim-markdown'
+  Plug 'hdima/python-syntax'
+call plug#end()
 
 syntax enable
 

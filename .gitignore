@@ -1,6 +1,7 @@
 secrets.yml
 vim/vim.symlink/.netrwhist
 vim/vim.symlink/undo/*
+vim/vim.symlink/plugged/
 
 ssh/known_hosts
 
