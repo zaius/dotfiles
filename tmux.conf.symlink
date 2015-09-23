@@ -22,42 +22,27 @@ setw -g mode-keys vi
 set -g default-terminal "screen-256color"
 
 # Set status bar
-set -g status-bg colour234
-set -g status-fg white
-set -g pane-border-fg colour245
-set -g window-status-activity-attr bold
-
-set -g status-bg colour234
-set -g window-status-activity-attr bold
-set -g pane-border-fg colour245
-set -g pane-active-border-fg colour39
-set -g message-fg colour16
-set -g message-bg colour221
-set -g message-attr bold
-
+set -g status-utf8 on
 set -g status-left-length 32
-set -g status-right-length 150
+set -g status-right-length 0
 set -g status-interval 5
+set -g status-right ''
+set -g status-left \
+  "#[fg=colour16,bg=colour254,bold] $USER@#h #[fg=colour254,bg=colour234,nobold] "
+set -g window-status-format \
+  "#[fg=white,bg=colour234] #I #W "
+set -g window-status-current-format \
+  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold]"
 
-
-# Don't have time in the status - it makes terminal notify every minute
-set -g status-left ''
-set -g status-right '#[fg=colour254,bg=colour234,nobold]#[fg=colour16,bg=colour254,bold] #h '
-set -g window-status-format "#[fg=white,bg=colour234] #I #W "
-set -g window-status-current-format "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold]"
-
-# Highlight active window
-set-window-option -g window-status-current-bg red
+# Set window notifications by bolding the title.
+setw -g monitor-activity on
+set -g window-status-activity-attr bold
+set -g visual-activity off
 
 # Rather than constraining window size to the maximum size of any client
 # connected to the *session*, constrain window size to the maximum size of any
 # client connected to *that window*. Much more reasonable.
 setw -g aggressive-resize on
-
-# Set window notifications
-setw -g monitor-activity on
-# Don't show the "Activity in window..." alert. Bolding the name is enough.
-set -g visual-activity off
 
 # Woah.. tmux you rule
 setw -g automatic-rename
