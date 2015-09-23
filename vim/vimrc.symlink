@@ -20,6 +20,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'airblade/vim-gitgutter'
   Plug 'plasticboy/vim-markdown'
   Plug 'hdima/python-syntax'
+  Plug 'derekwyatt/vim-scala'
 call plug#end()
 
 syntax enable
@@ -208,6 +209,10 @@ let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 " autocmd filetype python source ~/.vim/pydoc.vim
 autocmd FileType python setlocal tabstop=4 shiftwidth=4
 " autocmd FileType python set foldmethod=indent
+
+" Markdown
+autocmd BufNewFile,BufRead *.md set filetype=markdown
+let g:vim_markdown_folding_disabled=1
 
 highlight WhitespaceEOL ctermbg=red guibg=red
 match WhitespaceEOL /\s\+$/
