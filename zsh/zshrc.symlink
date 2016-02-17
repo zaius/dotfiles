@@ -24,7 +24,7 @@ fi
 source  ~/.dotfiles/bin/grabssh
 
 # precmd is called just before the prompt is printed
-precmd () { title 'zsh' }
+precmd () { }
 # preexec is called just before any command line is executed
 preexec () {
   title $1
@@ -59,8 +59,11 @@ setopt EXTENDED_HISTORY # add timestamps to history
 setopt APPEND_HISTORY # adds history
 setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
 setopt HIST_IGNORE_ALL_DUPS  # don't record dupes in history
-setopt HIST_REDUCE_BLANKS
 setopt NO_FLOW_CONTROL # Disable ctrl-s / ctrl-q
+
+# Bug with zsh 5.0.2 and newlines in history
+# http://www.zsh.org/mla/workers/2014/msg00617.html
+unsetopt histreduceblanks
 
 
 # Python
