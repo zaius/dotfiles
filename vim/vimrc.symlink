@@ -21,6 +21,10 @@ call plug#begin('~/.vim/plugged')
   Plug 'plasticboy/vim-markdown'
   Plug 'hdima/python-syntax'
   Plug 'derekwyatt/vim-scala'
+
+  Plug 'othree/yajs.vim'
+  Plug 'othree/es.next.syntax.vim'
+  Plug 'cakebaker/scss-syntax.vim'
 call plug#end()
 
 syntax enable
@@ -113,6 +117,10 @@ set showmatch
 map :W :w
 map :Q :q
 map :T :t
+
+" Allow saving of files as sudo when I forgot to start vim using sudo.
+" http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
+cmap w!! w !sudo tee > /dev/null %
 
 if has("gui_macvim")
   " Don't show the macvim toolbar. Who uses a mouse anyway?!
