@@ -6,14 +6,15 @@
 \pset border 2
 
 \pset format wrapped
-\pset pager on
+\pset pager always
 
+\x auto
 \timing
 
 -- Tab complete to upper case
 \set COMP_KEYWORD_CASE upper
 
--- Don't invalidate the transaction on a query error
+-- Stop invalidation of transaction on a query error
 \set ON_ERROR_ROLLBACK on
 
 -- Verbose error reports.
@@ -24,6 +25,8 @@
 -- history.
 \set HISTCONTROL ignoredups
 
+# Tab complete in upper case
+\set COMP_KEYWORD_CASE upper
 
 -- export YELLOW=`echo -e '\033[1;33m'`
 -- export LIGHT_CYAN=`echo -e '\033[1;36m'`
@@ -35,3 +38,8 @@
 -- export PAGER
 
 -- \setenv PAGER "/usr/bin/less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --chop-long-lines"
+
+-- Approximate count:
+--   SELECT reltuples::bigint AS estimate
+--   FROM   pg_class
+--   WHERE  oid = 'myschema.mytable'::regclass;
