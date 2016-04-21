@@ -44,12 +44,6 @@ set -g visual-activity off
 # client connected to *that window*. Much more reasonable.
 setw -g aggressive-resize on
 
-# Woah.. tmux you rule
 setw -g automatic-rename
-
-
-# Mouse stuff
-setw -g mode-mouse on
-setw -g mouse-select-window on
-setw -g mouse-select-pane on
-setw -g mouse-resize-pane on
+set-option -g -q mouse on
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
