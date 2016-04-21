@@ -92,3 +92,8 @@ if [[ -e $iterm2 ]]; then
   echo 'Sourcing iterm2 shell integration'
   source $iterm2
 fi
+
+if which go > /dev/null; then
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+  export GOPATH=$HOME/.go
+fi

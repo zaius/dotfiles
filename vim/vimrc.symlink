@@ -18,6 +18,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'mustache/vim-mustache-handlebars'
   Plug 'vim-ruby/vim-ruby'
   Plug 'airblade/vim-gitgutter'
+  Plug 'godlygeek/tabular'
   Plug 'plasticboy/vim-markdown'
   Plug 'hdima/python-syntax'
   Plug 'derekwyatt/vim-scala'
@@ -25,6 +26,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'othree/yajs.vim'
   Plug 'othree/es.next.syntax.vim'
   Plug 'cakebaker/scss-syntax.vim'
+  Plug 'fatih/vim-go'
 call plug#end()
 
 syntax enable
@@ -221,6 +223,9 @@ autocmd FileType python setlocal tabstop=4 shiftwidth=4
 " Markdown
 autocmd BufNewFile,BufRead *.md set filetype=markdown
 let g:vim_markdown_folding_disabled=1
+
+" New line (with `o`) in a markdown list shouldn't indent
+let g:vim_markdown_new_list_item_indent = 0
 
 highlight WhitespaceEOL ctermbg=red guibg=red
 match WhitespaceEOL /\s\+$/
