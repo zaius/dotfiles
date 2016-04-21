@@ -25,6 +25,7 @@ if [[ -r ~/.ssh/known_hosts ]]; then
 fi
 if [[ $#h -gt 0 ]]; then
   zstyle ':completion:*:ssh:*' hosts $h
+  zstyle ':completion:*:hosts:*' hosts $h
   zstyle ':completion:*:slogin:*' hosts $h
 fi
 
