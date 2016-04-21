@@ -4,6 +4,11 @@ print("Running pythonrc")
 import datetime
 
 try:
+    get_ipython().confirm_exit = False
+except:
+    print('Not running in ipython')
+
+try:
     pytz = __import__('pytz')
 except ImportError:
     print("Can't find pytz - run: pip install pytz")
