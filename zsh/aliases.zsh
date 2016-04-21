@@ -2,29 +2,11 @@ alias socks="ssh -D localhost:8000 kelso.id.au"
 alias vi="vim"
 alias mv="mv -i"
 command which gawk > /dev/null && alias awk=gawk
-command which grc > /dev/null && diff() { grc diff -u $@ | less }
 
-
-# Use colors for man pages. Courtesy of:
-#   http://superuser.com/questions/602295/how-do-you-change-the-background-color-of-man-pages
-#
-# I also looked into most - but I can't kick the habit of vim scroll key
-# bindings. I'm sure there's remapping, but I didn't get too far into it.
-#   http://www.jedsoft.org/most/
-man() {
-    env \
-    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-    LESS_TERMCAP_md=$(printf "\e[1;31m") \
-    LESS_TERMCAP_me=$(printf "\e[0m") \
-    LESS_TERMCAP_se=$(printf "\e[0m") \
-    LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-    LESS_TERMCAP_ue=$(printf "\e[0m") \
-    LESS_TERMCAP_us=$(printf "\e[1;32m") \
-    man "$@"
-}
+alias iostat='sudo iostat -xtc 5'
 
 # http://superuser.com/questions/106637/less-command-clearing-screen-upon-exit-how-to-switch-it-off
-alias less="less --ignore-case --no-init --RAW-CONTROL-CHARS --quit-if-one-screen --quit-at-eof"
+alias less="less --ignore-case --RAW-CONTROL-CHARS --quit-if-one-screen"
 
 # Keep user environment when using sudo
 alias sudo="sudo -E"
