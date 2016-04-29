@@ -40,7 +40,7 @@ ssh() {
 
 # Run upon login
 export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
-if [[ ("${LC_local_hash}" != "") && ("${origin_hash}" != $LC_local_hash) ]]; then
+if [[ ("${LC_local_hash}" != "") && ("${local_hash}" != $LC_local_hash) ]]; then
   echo "dotfiles don't match"
   # tmux keeps hold of old dotfiles somehow. There's probably a way to tell it
   # not to, but this is my hacky workaround.
