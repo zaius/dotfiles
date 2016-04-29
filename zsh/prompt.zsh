@@ -56,7 +56,11 @@ host_prompt() {
 
   arrow white
   c white black
-  echo -n ' %m '
+  if [[ $HOST == *bnd]]; then
+    echo -n ' %M '
+  else
+    echo -n ' %m '
+  fi
 }
 
 # ZSH has a vcs_info command for pulling out the branch info - no need to do it
