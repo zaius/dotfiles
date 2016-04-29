@@ -56,7 +56,7 @@ host_prompt() {
 
   arrow white
   c white black
-  if [[ $HOST == *bnd]]; then
+  if [[ $HOST == *bnd ]]; then
     echo -n ' %M '
   else
     echo -n ' %m '
