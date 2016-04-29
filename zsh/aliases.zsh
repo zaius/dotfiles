@@ -26,14 +26,21 @@ ff () {
 # Work in progress
 # This was originally against HEAD, but that means unpushed local changes will
 # always trigger a re-install but will never match the local hash.
+#
+# Assuming zsh on remote causes all sorts of issues. Breaks when sshing to routers, breaks when zsh not installed, etc.
+# ssh() {
+#   export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify origin/master)
+#   command ssh "$@" -t "env origin_hash=$local_hash zsh -i -l"
+#   # command ssh "$@" -t "env origin_hash=$local_hash echo 'hi there'; \$(which zsh > /dev/null) && zsh -i || bash -i"
+# }
 ssh() {
   export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify origin/master)
-  command ssh "$@" -t "env origin_hash=$local_hash zsh -i"
+  LC_local_hash=$local_hash command ssh $@
 }
 
 # Run upon login
 export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
-if [[ ("${origin_hash}" != "") && ("${origin_hash}" != $local_hash) ]]; then
+if [[ ("${LC_local_hash}" != "") && ("${origin_hash}" != $LC_local_hash) ]]; then
   echo "dotfiles don't match"
   # tmux keeps hold of old dotfiles somehow. There's probably a way to tell it
   # not to, but this is my hacky workaround.
