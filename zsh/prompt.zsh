@@ -19,8 +19,8 @@ side='left'
 RETVAL=0
 local orange=210
 local red=128
-local cyan=084
-local magenta=111
+local cyan=081
+local magenta=201
 local black=000
 local white=007
 
@@ -28,10 +28,7 @@ c() {
   # Nesting vars between %{ and %} tells zsh to ignore them when determining
   # prompt length. (P) tells zsh to lookup the variable name inside the local
   # scope. See: http://stackoverflow.com/questions/8376395/zsh-and-dynamic-variable
-  echo -n "\
-%{$BG[${(P)1}]%}\
-%{$FG[${(P)2}]%}\
-"
+  echo -n "$BG[${(P)1}]$FG[${(P)2}]"
 }
 
 user_prompt() {
@@ -93,7 +90,7 @@ exit_code() {
 
   arrow black
   c black red
-  echo -n "$RETVAL "
+  echo -n " $RETVAL "
 }
 
 directory() {
@@ -132,9 +129,11 @@ build_prompt() {
   user_prompt
   host_prompt
   directory
-  arrow black
-  # TODO: transparent instead of black? default instead of white?
-  c black white
+
+  # No way to reset just the background - have to do a full reset
+  echo -n "%{$FX[reset]$FG[${(P)last_bg}]%}"
+  echo -n ''
+  echo -n "%{$FX[reset]%} "
 }
 
 right_prompt() {
@@ -142,12 +141,13 @@ right_prompt() {
   side='right'
 
   git_info
-  c black white
+  echo -n $FX[reset]
+  # c black white
 }
 
 
 setopt prompt_subst
-PROMPT='$(build_prompt) '
+PROMPT='$(build_prompt)'
 RPROMPT='$(right_prompt)'
 # What does this do? Can't find doc for it anywhere...
 #   prompt_opts=(cr subst percent)
