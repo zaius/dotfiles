@@ -31,7 +31,9 @@ call plug#end()
 
 syntax enable
 
-colorscheme ir_black
+set background=dark
+let base16colorspace=256
+colorscheme base16-zaius
 " Make sure vim knows I only use 256 color terminals now
 " http://stackoverflow.com/questions/3761770/iterm-vim-colorscheme-not-working
 let &t_Co=256
@@ -155,10 +157,6 @@ imap <C-t> <ESC>:tabnew<cr>i
 
 " Easier non-interactive command insertion
 nnoremap <Space> :
-
-" Ruby shortcuts. Maybe should put these into a specific ruby file. My
-" vim-config-fu isn't strong enough yet.
-imap <C-l> <Space>=><Space>'
 
 
 " Leader commands - so much cooler than function keys

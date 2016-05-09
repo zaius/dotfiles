@@ -23,6 +23,11 @@ fi
 # Fix SSH agent forwarding in screen / tmux
 source  ~/.dotfiles/bin/grabssh
 
+# Base16 with iterm reappropriates the bright color codes. If we use this
+# remap, we can keep sane bright color codes, and remap them to our colors for
+# consistency across ssh sessions without messing with iterm.
+source $HOME/.dotfiles/zsh/base16-zaius.dark.sh
+
 # precmd is called just before the prompt is printed
 precmd () { }
 # preexec is called just before any command line is executed
