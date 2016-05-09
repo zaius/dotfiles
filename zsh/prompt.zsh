@@ -19,8 +19,8 @@ side='left'
 RETVAL=0
 local orange=210
 local red=128
-local cyan=081
-local magenta=201
+local cyan=006
+local magenta=005
 local black=000
 local white=007
 
