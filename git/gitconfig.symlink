@@ -16,27 +16,3 @@
 
 [diff]
       renamelimit = 0
-
-[color "branch"]
-        current = yellow reverse
-        local = yellow
-        remote = green
-
-[color "diff"]
-        meta = yellow bold
-        frag = magenta bold
-        old = red bold
-        new = green bold
-
-[color "status"]
-        added = yellow
-        changed = red
-        untracked = cyan
-
-# Added wth this command:
-# git config --local alias.pullall '!f(){ git pull "$@" && git submodule update --init --recursive; }; f'
-# http://stackoverflow.com/questions/4611512/is-there-a-way-to-make-git-pull-automatically-update-submodules
-[alias]
-	pullall = "!f(){ git pull \"$@\" && git submodule update --init --recursive; }; f"
-[push]
-	default = simple
