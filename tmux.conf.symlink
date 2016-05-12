@@ -23,16 +23,16 @@ set -g default-terminal "screen-256color"
 
 # Set status bar
 set -g status-utf8 on
-set -g status-left-length 32
+set -g status-left-length 8
 set -g status-right-length 0
 set -g status-interval 5
 set -g status-right ''
 set -g status-left \
-  "#[fg=colour16,bg=colour254,bold] $USER@#h #[fg=colour254,bg=colour234,nobold] "
+  "#[fg=colour6,bg=colour4,bold] $USER@#h #[fg=colour4,bg=colour234,nobold] "
 set -g window-status-format \
-  "#[fg=white,bg=colour234] #I #10W"
+  "#[fg=white,bg=colour234] #I #W#F"
 set -g window-status-current-format \
-  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #20W #[fg=colour39,bg=colour234,nobold]"
+  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold]"
 
 # Set window notifications by bolding the title.
 setw -g monitor-activity on
@@ -44,6 +44,6 @@ set -g visual-activity off
 # client connected to *that window*. Much more reasonable.
 setw -g aggressive-resize on
 
-setw -g automatic-rename
+setw -g automatic-rename on
 set-option -g -q mouse on
 bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
