@@ -131,9 +131,9 @@ build_prompt() {
   directory
 
   # No way to reset just the background - have to do a full reset
-  echo -n "%{$FX[reset]$FG[${(P)last_bg}]%}"
+  echo -n "$FX[reset]$FG[${(P)last_bg}]"
   echo -n ''
-  echo -n "%{$FX[reset]%} "
+  echo -n "$FX[reset] "
 }
 
 right_prompt() {
