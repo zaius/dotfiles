@@ -1,11 +1,4 @@
 alias socks="ssh -D localhost:8000 kelso.id.au"
-if which mvim > /dev/null; then
-  alias vi='mvim'
-elif which nvim > /dev/null; then
-  alias vi='nvim'
-elif which vim > /dev/null; then
-  alias vi='vim'
-fi
 alias mv="mv -i"
 command which gawk > /dev/null && alias awk=gawk
 
