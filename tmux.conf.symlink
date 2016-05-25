@@ -23,7 +23,7 @@ set -g default-terminal "screen-256color"
 
 # Set status bar
 set -g status-utf8 on
-set -g status-left-length 8
+set -g status-left-length 16
 set -g status-right-length 0
 set -g status-interval 5
 set -g status-right ''
