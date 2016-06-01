@@ -47,3 +47,8 @@ setw -g aggressive-resize on
 setw -g automatic-rename on
 set-option -g -q mouse on
 bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
+
+
+# Eliminate pause when hitting escape in vim.
+# https://www.johnhawthorn.com/2012/09/vi-escape-delays/
+set -s escape-time 0
