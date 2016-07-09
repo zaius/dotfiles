@@ -27,6 +27,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'othree/es.next.syntax.vim'
   Plug 'cakebaker/scss-syntax.vim'
   Plug 'fatih/vim-go'
+  Plug 'ekalinin/Dockerfile.vim'
 call plug#end()
 
 syntax enable
