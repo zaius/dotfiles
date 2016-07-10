@@ -52,15 +52,19 @@ if [[ ("${LC_local_hash}" != "") && ("${local_hash}" != $LC_local_hash) ]]; then
 fi
 
 install-dotfiles() {
-  command ssh $@ 'which git && which ruby && which zsh'
+  usage='Usage: install-dotfiles host'
+  [[ $1 ]] || (echo $usage; return 1)
+  host=$1
+
+  ssh $host 'which git && which zsh'
   if [[ $? != 0 ]]; then
     echo 'Dependency missing'
     return 1
   fi
-  command ssh $@ 'sudo chsh -s `which zsh` zaius'
-  command ssh $@ 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
-  command ssh $@ 'git clone git@github.com:zaius/dotfiles.git .dotfiles'
-  command ssh $@ 'ruby .dotfiles/install.rb'
+  command ssh $host 'sudo chsh -s `which zsh` `whoami`'
+  command ssh $host 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+  command ssh $host 'git clone git@github.com:zaius/dotfiles.git .dotfiles'
+  command ssh $host 'bash .dotfiles/install.sh'
 }
 
 beyond-dev-init() {
