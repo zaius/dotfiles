@@ -62,14 +62,18 @@ set shiftwidth=2
 " syn match TAB_CHAR "\t"
 " hi link TAB_CHAR Error
 
-" No need for swap files.
-set nobackup
-set noswapfile
-set directory=~/.vim/swap
+" I don't really know the difference between swap and backup - I just know I
+" need something to stop losing unsaved files when my computer crashes.
+" set backup
+" set swapfile
+
+" Trailing double slash means uses full path in filename to stop clashes in a
+" global location.
+set directory=~/.vim/swap//
 
 if version >= 703
   " Use a persistent undo file instead
-  set undodir=~/.vim/undo
+  set undodir=~/.vim/undo//
   set undofile
 
   " relative line numbers to make whole line commands easier
