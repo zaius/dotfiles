@@ -27,8 +27,10 @@ import rlcompleter
 import readline
 import rlcompleter
 
-readline.parse_and_bind("tab: complete")
-historyPath = os.path.expanduser("~/.pyhistory")
+readline.parse_and_bind('tab: complete')
+# Don't trust expanduser with just ~ - it defaults to the pre-sudo username
+user = os.environ['USER']
+historyPath = os.path.expanduser('~{}/.pyhistory'.format(user))
 
 def save_history(historyPath=historyPath):
     import readline
