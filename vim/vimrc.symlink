@@ -145,14 +145,26 @@ if has("gui_macvim")
 endif
 
 " Tab navigation
-map <C-k> :tabp<CR>
-map <C-j> :tabn<CR>
-nmap <C-S-tab> :tabprevious<cr>
-nmap <C-tab> :tabnext<cr>
-imap <C-S-tab> <ESC>:tabprevious<cr>i
-imap <C-tab> <ESC>:tabnext<cr>i
-nmap <C-t> :tabnew<cr>
-imap <C-t> <ESC>:tabnew<cr>i
+" Can't use ctrl-J as it causes problems with newlines and neovim
+" map <C-k> :tabp<CR>
+" map <C-j> :tabn<CR>
+nmap <C-S-tab> :tabprevious<CR>
+nmap <C-tab> :tabnext<CR>
+nmap <D-}> :tabnext<CR>
+nmap <D-{> :tabprevious<CR>
+" Have to use some ctrl based switching, otherwise switching tabs inside
+" terminal vim is impossible
+nmap <C-}> :tabnext<CR>
+nmap <C-{> :tabprevious<CR>
+nmap <C-t> :tabnew<CR>
+
+imap <C-S-tab> <ESC>:tabprevious<CR>
+imap <C-tab> <ESC>:tabnext<CR>
+imap <D-}>  <ESC>:tabnext<CR>
+imap <D-{> <ESC>:tabprevious<CR>
+imap <C-}>  <ESC>:tabnext<CR>
+imap <C-{> <ESC>:tabprevious<CR>
+imap <C-t> <ESC>:tabnew<CR>
 " can't use ctrl-w because it clashes with windows :(
 " map <C-w> :tabclose<cr>
 " And C-[ is used in place of escape in a bunch of places. Could probably get
