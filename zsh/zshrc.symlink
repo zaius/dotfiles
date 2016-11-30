@@ -14,12 +14,6 @@ setopt extendedglob
 # undo files.
 for config_file ($ZSH/**/*.zsh~*undo*) source $config_file
 
-if [[ $platform == 'Darwin' ]]; then
-  export EDITOR="mvim -f"
-elif [[ $platform == 'Linux' ]]; then
-  export EDITOR=vim
-fi
-
 # Fix SSH agent forwarding in screen / tmux
 source  ~/.dotfiles/bin/grabssh
 
