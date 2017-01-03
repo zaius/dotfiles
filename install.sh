@@ -25,6 +25,8 @@ home-link() {
 
 # Link .ssh first so that password only require once
 home-link ssh.symlink ~/.ssh
+chmod g-w ~/.dotfiles/ssh.symlink
+
 home-link config.symlink ~/.config
 home-link vim/vim.symlink ~/.vim
 
