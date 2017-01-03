@@ -13,7 +13,7 @@ if empty(glob('~/.vim/plugged'))
 endif
 
 call plug#begin('~/.vim/plugged')
-  Plug 'kien/ctrlp.vim'
+  Plug 'ctrlpvim/ctrlp.vim'
   Plug 'kchmck/vim-coffee-script'
   Plug 'mustache/vim-mustache-handlebars'
   Plug 'vim-ruby/vim-ruby'
