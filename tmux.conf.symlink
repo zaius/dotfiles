@@ -1,19 +1,6 @@
 # Ideas sourced from:
 # https://github.com/milkbikis/dotfiles-mac#bash
 # https://github.com/myusuf3/dotfiles/blob/master/tmux
-
-# Remap prefix to ctrl-s - keeps ctrl-a free for start of line
-set -g prefix C-s
-unbind C-b
-
-# If we need to actually send C-s for any reason.
-# bind s send-prefix
-
-# Keep consistent with screen behavior
-bind C-s last-window
-bind C-d detach
-bind C-c new-window
-
 bind C-r source-file $HOME/.tmux.conf
 
 # Use vim keys in copy mode
@@ -22,17 +9,18 @@ setw -g mode-keys vi
 set -g default-terminal "screen-256color"
 
 # Set status bar
-set -g status-utf8 on
 set -g status-left-length 16
 set -g status-right-length 0
 set -g status-interval 5
 set -g status-right ''
+set -g status-style "bg=colour234"
+
 set -g status-left \
-  "#[fg=colour6,bg=colour4,bold] $USER@#h #[fg=colour4,bg=colour234,nobold] "
+  "#[fg=colour6,bg=colour4,bold] $USER@#h #[fg=colour4,bg=colour234,nobold]"
 set -g window-status-format \
-  "#[fg=white,bg=colour234] #I #W#F"
+  "#[fg=white,bg=colour234] #I  #W#F"
 set -g window-status-current-format \
-  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold]"
+  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold] "
 
 # Set window notifications by bolding the title.
 setw -g monitor-activity on
@@ -45,10 +33,22 @@ set -g visual-activity off
 setw -g aggressive-resize on
 
 setw -g automatic-rename on
-set-option -g -q mouse on
-bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e'"
+set -g mouse on
 
+# Allow git-gutter to refresh status when the window gets focus
+set -g focus-events on
+
+# Stop scrolling on status bar from changing windows
+unbind-key -T root WheelUpStatus
+unbind-key -T root WheelDownStatus
 
 # Eliminate pause when hitting escape in vim.
 # https://www.johnhawthorn.com/2012/09/vi-escape-delays/
 set -s escape-time 0
+
+
+# Another option for handling nested windows - use up/down to move through
+# levels. e.g.: http://stahlke.org/dan/tmux-nested/
+if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.mac.conf'
+# TODO: this should be checking for outer tmux?
+if 'uname | grep -q Linux' 'source ~/.dotfiles/tmux.inner.conf'
