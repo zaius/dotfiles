@@ -4,6 +4,7 @@
 #  * check if symlink already exists
 #  * drop symlink naming?
 #  * notice when files added and error out? would have to keep symlink notation...
+#  * ensure shell set to zsh
 #
 set -e
 base=~/.dotfiles
@@ -46,3 +47,4 @@ home-link ruby/pryrc.symlink
 home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link zsh/zshrc.symlink
+home-link alacritty.yml.symlink
