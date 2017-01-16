@@ -1,4 +1,4 @@
-if [[ $platform == 'Darwin' ]]; then
+if [ "$platform" = 'Darwin' -a -z "$TMUX_PANE" ]; then
   alias vi='vimr'
   alias vim='vimr'
   # Stick with neovim until I can patch vimr to block
