@@ -13,6 +13,7 @@ if empty(glob('~/.vim/plugged'))
 endif
 
 call plug#begin('~/.vim/plugged')
+  Plug 'tmux-plugins/vim-tmux-focus-events'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'kchmck/vim-coffee-script'
   Plug 'mustache/vim-mustache-handlebars'
@@ -71,22 +72,20 @@ set shiftwidth=2
 " global location.
 set directory=~/.vim/swap//
 
-if version >= 703
-  " Use a persistent undo file instead
-  set undodir=~/.vim/undo//
-  set undofile
+" Use a persistent undo file instead
+set undodir=~/.vim/undo//
+set undofile
 
-  " relative line numbers to make whole line commands easier
-  set relativenumber
+" relative line numbers to make whole line commands easier
+set relativenumber
 
-  " Show a colored column at line 80
-  set colorcolumn=80
+" Show a colored column at line 80
+set colorcolumn=80
 
-  " Default to yanking to the system clipboard.
-  " Can use fakeclip if clipboard support isn't compiled in
-  " https://github.com/kana/vim-fakeclip
-  set clipboard=unnamed
-endif
+" Default to yanking to the system clipboard.
+" Can use fakeclip if clipboard support isn't compiled in
+" https://github.com/kana/vim-fakeclip
+set clipboard=unnamed
 
 " have command-line completion <Tab> (for filenames, help topics, option names)
 " first list the available options and complete the longest common part, then
