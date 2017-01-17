@@ -22,19 +22,21 @@ alias egrep='egrep --color=auto'
 
 # Use colors for man pages. Courtesy of:
 #   http://superuser.com/questions/602295/how-do-you-change-the-background-color-of-man-pages
+# Also see:
+#   http://boredzo.org/blog/archives/2016-08-15/colorized-man-pages-understood-and-customized
 #
 # I also looked into most - but I can't kick the habit of vim scroll key
 # bindings. I'm sure there's remapping, but I didn't get too far into it.
 #   http://www.jedsoft.org/most/
 man() {
     env \
-    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-    LESS_TERMCAP_md=$(printf "\e[1;31m") \
-    LESS_TERMCAP_me=$(printf "\e[0m") \
-    LESS_TERMCAP_se=$(printf "\e[0m") \
-    LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-    LESS_TERMCAP_ue=$(printf "\e[0m") \
-    LESS_TERMCAP_us=$(printf "\e[1;32m") \
+      LESS_TERMCAP_mb=$(printf "\x1b[38;2;255;200;200m") \
+      LESS_TERMCAP_md=$(printf "\x1b[38;2;255;100;200m") \
+      LESS_TERMCAP_me=$(printf "\x1b[0m") \
+      LESS_TERMCAP_so=$(printf "\x1b[38;2;60;90;90;48;2;40;40;40m") \
+      LESS_TERMCAP_se=$(printf "\x1b[0m") \
+      LESS_TERMCAP_us=$(printf "\x1b[38;2;150;100;200m") \
+      LESS_TERMCAP_ue=$(printf "\x1b[0m") \
     man "$@"
 }
 
