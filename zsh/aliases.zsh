@@ -34,12 +34,16 @@ ff () {
 # }
 ssh() {
   export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify origin/master)
-  LC_local_hash=$local_hash command ssh $@
+  LC_local_hash=$local_hash command ssh -R 22222:localhost:22 $@
 }
+
+if ! which pbcopy 2> /dev/null; then
+  alias pbcopy='LC_oneshot=1 command ssh -p 22222 localhost pbcopy'
+fi
 
 # Run upon login
 export local_hash=$(git -C $HOME/.dotfiles rev-parse --verify HEAD)
-if [[ ("${LC_local_hash}" != "") && ("${local_hash}" != $LC_local_hash) ]]; then
+if [[ ( -z "${LC_oneshot}") && ("${LC_local_hash}" != "") && ("${local_hash}" != $LC_local_hash) ]]; then
   # tmux keeps hold of old dotfiles somehow. There's probably a way to tell it
   # not to, but this is my hacky workaround.
   if [[ -z "$TMUX_PANE" ]]; then
