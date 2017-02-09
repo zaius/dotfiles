@@ -5,6 +5,10 @@ bind C-r source-file $HOME/.tmux.conf
 
 # Use vim keys in copy mode
 setw -g mode-keys vi
+unbind-key -t vi-copy v
+bind-key -t vi-copy 'v' begin-selection    # Begin selection in copy mode.
+bind-key -t vi-copy 'C-v' rectangle-toggle # Begin selection in copy mode.
+bind-key -t vi-copy 'y' copy-selection     # Yank selection in copy mode.
 
 set -g default-terminal "screen-256color"
 
@@ -18,9 +22,9 @@ set -g status-style "bg=colour234"
 set -g status-left \
   "#[fg=colour6,bg=colour4,bold] $USER@#h #[fg=colour4,bg=colour234,nobold]"
 set -g window-status-format \
-  "#[fg=white,bg=colour234] #I  #W#F"
+  "#[fg=white,bg=colour234]  #I  #W #F "
 set -g window-status-current-format \
-  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #W #[fg=colour39,bg=colour234,nobold] "
+  "#[fg=colour234,bg=colour39]#[fg=colour16,bg=colour39,noreverse,bold] #I  #{=20:window_name} #[fg=colour39,bg=colour234,nobold] "
 
 # Set window notifications by bolding the title.
 setw -g monitor-activity on
