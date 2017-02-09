@@ -37,8 +37,8 @@ ssh() {
   LC_local_hash=$local_hash command ssh -R 22222:localhost:22 $@
 }
 
-if ! which pbcopy 2> /dev/null; then
-  alias pbcopy='LC_oneshot=1 command ssh -p 22222 localhost pbcopy'
+if ! which pbcopy > /dev/null; then
+  alias pbcopy='LC_oneshot=1 command ssh -p 22222 zaius@localhost pbcopy'
 fi
 
 # Run upon login
