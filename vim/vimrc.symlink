@@ -29,16 +29,18 @@ call plug#begin('~/.vim/plugged')
   Plug 'cakebaker/scss-syntax.vim'
   Plug 'fatih/vim-go'
   Plug 'ekalinin/Dockerfile.vim'
+
+  Plug 'nathanaelkane/vim-indent-guides'
 call plug#end()
 
 syntax enable
 
 set background=dark
-let base16colorspace=256
-colorscheme base16-zaius
+" let base16colorspace=256
 " Make sure vim knows I only use 256 color terminals now
 " http://stackoverflow.com/questions/3761770/iterm-vim-colorscheme-not-working
 let &t_Co=256
+colorscheme wombat256
 
 " http://stackoverflow.com/questions/5845557/in-a-vimrc-is-set-nocompatible-completely-useless
 " set nocompatible
