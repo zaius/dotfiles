@@ -1,10 +1,19 @@
 # Configuration for Alacritty, the GPU enhanced terminal emulator
+# Window dimensions in character columns and lines
+# (changes require restart)
+dimensions:
+  columns: 80
+  lines: 40
 
 # The FreeType rasterizer needs to know the device DPI for best results
 # (changes require restart)
 dpi:
   x: 96.0
   y: 96.0
+
+visual_bell:
+  animation: EaseOutExpo
+  duration: 0
 
 # Display tabs using this many cells (changes require restart)
 tabspaces: 8
@@ -16,21 +25,17 @@ draw_bold_text_with_bright_colors: true
 font:
   # The normal (roman) font face to use.
   normal:
-    # family: Inconsolata For Powerline
-    # style: Medium
-    # family: Ubuntu Mono derivative Powerline
-    # style: Regular
-    family: DejaVu Sans Mono for Powerline
+    family: 'DejaVu Sans Mono for Powerline'
     style: Book
 
   # The bold font face
   bold:
-    family: DejaVu Sans Mono for Powerline
+    family: 'DejaVu Sans Mono for Powerline'
     style: Book
 
   # The italic font face
   italic:
-    family: DejaVu Sans Mono for Powerline
+    family: 'DejaVu Sans Mono for Powerline'
     style: Book
 
   # Point size of the font
@@ -41,12 +46,15 @@ font:
     x: 0.0
     y: 0.0
 
+  # OS X only: use thin stroke font rendering. Thin strokes are suitable
+  # for retina displays, but for non-retina you probably want this set to
+  # false.
+  use_thin_strokes: true
+
 # Should display the render timer
 render_timer: false
 
-# Colors (Tomorrow Night Bright)
 colors:
-  # Default colors
   primary:
     background: '0x252525'
     foreground: '0xeaeaea'
@@ -73,34 +81,10 @@ colors:
     cyan:    '0x6bffff'
     white:   '0xd4d4d4'
 
-# Colors (Solarized Dark)
-# colors:
-#   # Default colors
-#   primary:
-#     background: '0x002b36'
-#     foreground: '0x839496'
-#
-#   # Normal colors
-#   normal:
-#     black:   '0x073642'
-#     red:     '0xdc322f'
-#     green:   '0x859900'
-#     yellow:  '0xb58900'
-#     blue:    '0x268bd2'
-#     magenta: '0xd33682'
-#     cyan:    '0x2aa198'
-#     white:   '0xeee8d5'
-#
-#   # Bright colors
-#   bright:
-#     black:   '0x002b36'
-#     red:     '0xcb4b16'
-#     green:   '0x586e75'
-#     yellow:  '0x657b83'
-#     blue:    '0x839496'
-#     magenta: '0x6c71c4'
-#     cyan:    '0x93a1a1'
-#     white:   '0xfdf6e3'
+# Use custom cursor colors. If true, display the cursor in the cursor.foreground
+# and cursor.background colors, otherwise invert the colors of the cursor.
+custom_cursor_colors: false
+
 
 # Key bindings
 #
@@ -133,6 +117,8 @@ colors:
 key_bindings:
   - { key: V,        mods: Command, action: Paste                        }
   - { key: C,        mods: Command, action: Copy                         }
+  - { key: Q,        mods: Command, action: Quit                         }
+  - { key: W,        mods: Command, action: Quit                         }
   - { key: Home,                    chars: "\x1b[H",   mode: ~AppCursor  }
   - { key: Home,                    chars: "\x1b[1~",  mode: AppCursor   }
   - { key: End,                     chars: "\x1b[F",   mode: ~AppCursor  }
@@ -159,6 +145,7 @@ key_bindings:
   - { key: Down,     mods: Alt,     chars: "\x1b[1;3B"                   }
   - { key: Down,                    chars: "\x1b[B",   mode: ~AppCursor  }
   - { key: Down,                    chars: "\x1bOB",   mode: AppCursor   }
+  - { key: Tab,      mods: Shift,   chars: "\x1b[Z"                      }
   - { key: F1,                      chars: "\x1bOP"                      }
   - { key: F2,                      chars: "\x1bOQ"                      }
   - { key: F3,                      chars: "\x1bOR"                      }
@@ -174,12 +161,16 @@ key_bindings:
   - { key: Back,                    chars: "\x7f"                        }
   - { key: Delete,                  chars: "\x1b[3~",  mode: AppKeypad   }
   - { key: Delete,                  chars: "\x1b[P",   mode: ~AppKeypad  }
-
 # Move keyboard combos that I want to support to F1-F12 keys, then remap those
 # in tmux. Ideally we'd use F13-F20, but I can't get them working inside tmux
   - { key: LBracket, mods: Command|Shift, chars: "\x1bOP"                }
   - { key: RBracket, mods: Command|Shift, chars: "\x1bOQ"                }
   - { key: T,        mods: Command,       chars: "\x1bOR"                }
+  - { key: Key1,     mods: Command,       chars: "\x1b1"                }
+  - { key: Key2,     mods: Command,       chars: "\x1b2"                }
+  - { key: Key3,     mods: Command,       chars: "\x1b3"                }
+  - { key: Key4,     mods: Command,       chars: "\x1b4"                }
+  - { key: Key5,     mods: Command,       chars: "\x1b5"                }
 
 # Mouse bindings
 #
@@ -199,3 +190,12 @@ key_bindings:
 mouse_bindings:
   - { mouse: Middle, action: PasteSelection }
 
+# Shell
+#
+# You can set shell.program to the path of your favorite shell, e.g. /bin/fish.
+# Entries in shell.args are passed unmodified as arguments to the shell.
+#
+#shell:
+#  program: /bin/bash
+#  args:
+#    - --login
