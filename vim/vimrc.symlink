@@ -31,6 +31,20 @@ call plug#begin('~/.vim/plugged')
   Plug 'ekalinin/Dockerfile.vim'
 
   Plug 'nathanaelkane/vim-indent-guides'
+
+  " Python plugins
+  " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
+  Plug 'w0rp/ale'
+  " pip3 install yapf
+  Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
+  Plug 'fisadev/vim-isort'
+
+  " Better session management on crashes
+  Plug 'xolox/vim-misc'
+  Plug 'xolox/vim-session'
+
+  " Themes
+  Plug 'sheerun/vim-wombat-scheme'
 call plug#end()
 
 syntax enable
@@ -150,20 +164,31 @@ endif
 " map <C-j> :tabn<CR>
 nmap <C-S-tab> :tabprevious<CR>
 nmap <C-tab> :tabnext<CR>
-nmap <D-}> :tabnext<CR>
-nmap <D-{> :tabprevious<CR>
+nmap <S-D-{> :tabprevious<CR>
+nmap <S-D-}> :tabnext<CR>
 " Have to use some ctrl based switching, otherwise switching tabs inside
 " terminal vim is impossible
-nmap <C-}> :tabnext<CR>
-nmap <C-{> :tabprevious<CR>
 nmap <C-t> :tabnew<CR>
+nmap <C-{> :tabprevious<CR>
+imap <C-{> <ESC>:tabprevious<CR>
+nmap <C-}> :tabnext<CR>
+imap <C-}> <ESC>:tabnext<CR>
+
+" In alacritty, we have to repurpose F keys to get things working. If we're
+" not in alacritty, vim should handle them in a similar way.
+map <F1> :tabprevious<CR>
+map <F2> :tabnext<CR>
+map <F3> :tabnew<CR>
+imap <F1> <ESC>:tabprevious<CR>
+imap <F2> <ESC>:tabnext<CR>
+imap <F3> <ESC>:tabnew<CR>
 
 imap <C-S-tab> <ESC>:tabprevious<CR>
 imap <C-tab> <ESC>:tabnext<CR>
-imap <D-}>  <ESC>:tabnext<CR>
+imap <D-}> <ESC>:tabnext<CR>
 imap <D-{> <ESC>:tabprevious<CR>
-imap <C-}>  <ESC>:tabnext<CR>
-imap <C-{> <ESC>:tabprevious<CR>
+imap <C-S-]> <ESC>:tabnext<CR>
+imap <C-S-[> <ESC>:tabprevious<CR>
 imap <C-t> <ESC>:tabnew<CR>
 " can't use ctrl-w because it clashes with windows :(
 " map <C-w> :tabclose<cr>
@@ -196,11 +221,6 @@ autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 " Format json with ,j
 :vmap <Leader>j !python -m json.tool <CR>
 :nmap <Leader>j !!python -m json.tool <CR>
-
-" I only use nerd comments for toggling. Disable all other shortcuts.
-let g:NERDCreateDefaultMappings = 0
-map <leader>c <plug>NERDCommenterToggle
-vmap <leader>c <plug>NERDCommenterToggle
 
 " Set the screen window title to hold the currently edited file
 " TODO: this is broken in console vim - keeps inserting the ESC in the current
