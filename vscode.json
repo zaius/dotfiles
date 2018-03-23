@@ -1,0 +1,41 @@
+
+{
+    "editor.cursorBlinking": "solid",
+    "window.zoomLevel": 0,
+    "editor.fontSize": 16,
+    "editor.renderWhitespace": "boundary",
+    "vim.leader": ",",
+    "vim.searchHighlightColor": "rgba(150, 150, 255, 0.3)",
+    "vim.insertModeKeyBindingsNonRecursive": [
+        {
+            "before": ["j", "j"],
+            "after": ["<Esc>"]
+        }
+    ],
+    "vim.useSolidBlockCursor": true,
+    "editor.fontFamily": "DejaVu Sans Mono for Powerline",
+    "editor.rulers": [
+        80
+    ],
+    "editor.autoClosingBrackets": false,
+    "vim.otherModesKeyBindingsNonRecursive": [{
+        "before": ["<Space>"],
+        "after": [":"]
+    }, {
+         "before":["<leader>", ","],
+        "after":[],
+        "commands": ["editor.action.trimTrailingWhitespace"]
+    }],
+    "files.insertFinalNewline": true,
+    "vim.statusBarColorControl": true,
+    "vim.statusBarColors" : {
+        "normal": "#005f5f",
+        "insert": "#5f0000",
+        "visual": "#5f00af",
+        "visualline": "#005f87",
+        "visualblock": "#86592d",
+        "replace": "#000000"
+    },
+    "vim.useSystemClipboard": true,
+    "workbench.colorTheme": "Dracula"
+}
