@@ -1,0 +1,77 @@
+# vi: set ft=bash :
+
+bold="\[$(tput bold)\]"
+green="\[$(tput setaf 2)\]"
+cyan="\[$(tput setaf 6)\]"
+red="\[$(tput setaf 9)\]"
+default="\[$(tput sgr0)\]"
+
+
+export PAGER='less -R'
+export PATH=~/.dotfiles/bin:$PATH
+
+if [[ -d /usr/local/opt/python/libexec/bin ]]; then
+  export PATH=/usr/local/opt/python/libexec/bin:$PATH
+fi
+
+title() {
+  echo -ne "\033]0;$@\007"
+}
+source ~/.dotfiles/preexec.bash
+preexec () {
+  title $@
+}
+precmd () {
+  title 'bash'
+}
+
+fromhex(){
+    hex=${1#"#"}
+    r=$(printf '0x%0.2s' "$hex")
+    g=$(printf '0x%0.2s' ${hex#??})
+    b=$(printf '0x%0.2s' ${hex#????})
+    printf '%03d' "$(( (r<75?0:(r-35)/40)*6*6 +
+                       (g<75?0:(g-35)/40)*6   +
+                       (b<75?0:(b-35)/40)     + 16 ))"
+}
+
+function build_prompt() {
+    local EXIT="$?"
+    PS1="$bold"
+    if [ $EXIT != 0 ]; then
+        PS1+="$red$EXIT "
+    fi
+    PS1+="$green\u$red@$cyan\H:$red\w$default\$ "
+}
+
+export PROMPT_COMMAND=build_prompt
+# preexec overrides PROMPT_COMMAND - make sure it's called after.
+preexec_install
+
+# Case-insensitive tab complete
+bind 'set completion-ignore-case on'
+
+alias gs="git status"
+alias gd="git diff"
+alias gp="git push origin HEAD"
+alias glog="git log --graph --pretty=format:'%C(red)%h%C(reset) %<(8)%aN - %<(56,trunc)%s  %C(yellow)%ar'"
+alias cdg='cd $(git rev-parse --show-cdup)'
+alias gss='git stash save --include-untracked --keep-index'
+alias gsp='git stash pop'
+alias dc="docker-compose"
+
+function ff() {
+  find . -iname '*$@*'
+}
+
+
+[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+
+
+# $(pip completion --bash)
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'; fi
