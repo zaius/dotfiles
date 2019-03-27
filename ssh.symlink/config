@@ -1,0 +1,19 @@
+HashKnownHosts yes
+
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ecdsa
+  ForwardAgent yes
+
+Host vpn
+  HostName 107.178.216.174
+  User beyond
+
+Host *.bnd
+  ProxyCommand ssh vpn -W `echo %h |sed 's|\.bnd||g'`:%p
+  User beyond
+  ForwardAgent yes
+
+Host signuptwo.local
+  User pi
