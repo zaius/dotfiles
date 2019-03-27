@@ -9,6 +9,8 @@ ssh/known_hosts
 
 # TODO: fix notifications
 ssh.symlink/notifications
+ssh.symlink/*
+!ssh.symlink/*.pub
 
 irssi.symlink/away.log
 irssi.symlink/log/
