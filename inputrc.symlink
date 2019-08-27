@@ -2,3 +2,7 @@
 # the terminal's ctrl-w. This fixes irb's handling of word boundaries.
 set bind-tty-special-chars off
 "\C-w": backward-kill-word
+
+# Make history search case-insensitive
+set show-all-if-ambiguous on
+set completion-ignore-case on
