@@ -1,31 +1,53 @@
-" Pathogen is driving me crazy. If there is a `filetype on` in the system
-" vimrc then it shits itself. There are a million people discussing it from
-" 2010, when `filetype on` was included in debian default vimrc, and a patch
-" was put in to fix it, but pathogen has removed all the workarounds since
-" then. Wasted a day on trying to work out what is going on. Ditched it and
-" went with vim-plug.
-"
-" vim-plug also lets me ditch git submodules, which is always a good thing.
-"
 " See: https://github.com/junegunn/vim-plug/wiki/faq#automatic-installation
 if empty(glob('~/.vim/plugged'))
   autocmd VimEnter * PlugInstall
 endif
 
+let g:ale_use_global_executables = 1
+
+let g:ale_python_pylint_executable = 'python3'
+let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
+" let g:ale_python_pylint_use_global = 0
+let g:ale_fixers = {
+\ 'javascript': ['prettier', 'eslint'],
+\ 'scss': ['prettier'],
+\}
+let g:ale_linters = {
+\ 'javascript': ['eslint'],
+\ 'python': ['pylint'],
+\}
+let g:ale_linters_explicit = 1
+
+let g:ale_javascript_prettier_use_local_config = 0
+
+let g:ale_javascript_eslint_use_global = 1
+let g:ale_javascript_eslint_executable = '/usr/local/bin/eslint'
+let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
+
+let g:ale_javascript_prettier_use_global = 1
+let g:ale_javascript_prettier_executable = '/usr/local/bin/prettier'
+let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
+
+let g:ale_fix_on_save = 1
+let g:ale_use_global_executables = 1
+
+
 call plug#begin('~/.vim/plugged')
   Plug 'tmux-plugins/vim-tmux-focus-events'
   Plug 'ctrlpvim/ctrlp.vim'
-  Plug 'kchmck/vim-coffee-script'
   Plug 'mustache/vim-mustache-handlebars'
-  Plug 'vim-ruby/vim-ruby'
+  " Plug 'vim-ruby/vim-ruby'
   Plug 'airblade/vim-gitgutter'
   Plug 'godlygeek/tabular'
   Plug 'plasticboy/vim-markdown'
-  Plug 'hdima/python-syntax'
   Plug 'derekwyatt/vim-scala'
 
-  Plug 'othree/yajs.vim'
-  Plug 'othree/es.next.syntax.vim'
+  " Plug 'Chiel92/vim-autoformat'
+
+  " Noted performance issues in their readme. Trying something else.
+  " Plug 'othree/yajs.vim'
+  " Plug 'othree/es.next.syntax.vim'
+  Plug 'pangloss/vim-javascript'
   Plug 'cakebaker/scss-syntax.vim'
   Plug 'fatih/vim-go'
   Plug 'ekalinin/Dockerfile.vim'
@@ -35,19 +57,28 @@ call plug#begin('~/.vim/plugged')
   " Python plugins
   " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
   Plug 'w0rp/ale'
-  " pip3 install yapf
-  Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-  Plug 'fisadev/vim-isort'
+  Plug 'ambv/black', { 'tag': '18.9b0' }
+  " Plug 'tmhedberg/SimpylFold'
+  " Causing me serious issues on first completion load
+  " Plug 'davidhalter/jedi-vim'
+
+  " Extremely slow...
+  " Plug 'posva/vim-vue'
 
   " Better session management on crashes
-  Plug 'xolox/vim-misc'
-  Plug 'xolox/vim-session'
+  " Plug 'xolox/vim-misc'
+  " Plug 'xolox/vim-session'
 
   " Themes
   Plug 'sheerun/vim-wombat-scheme'
 call plug#end()
 
 syntax enable
+
+" Newer neovim has true color
+if has('nvim-0.1.5')
+    set termguicolors
+endif
 
 set background=dark
 " Make sure vim knows I only use 256 color terminals now
@@ -94,8 +125,9 @@ set undofile
 " relative line numbers to make whole line commands easier
 set relativenumber
 
-" Show a colored column at line 80
-set colorcolumn=80
+" Show a colored column at line 88
+set colorcolumn=88
+set textwidth=88
 
 " Default to yanking to the system clipboard.
 " Can use fakeclip if clipboard support isn't compiled in
@@ -137,9 +169,12 @@ set ruler
 set showmatch
 
 " Fix my inability to use shift properly
-map :W :w
-map :Q :q
-map :T :t
+"https://stackoverflow.com/questions/117150/can-i-remap-ex-commands-in-vim
+command WQ wq
+command Wq wq
+command W w
+command Q q
+" ca WQ wq
 
 " Allow saving of files as sudo when I forgot to start vim using sudo.
 " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
@@ -148,7 +183,7 @@ cmap w!! w !sudo tee > /dev/null %
 if has("gui_macvim")
   " Don't show the macvim toolbar. Who uses a mouse anyway?!
   set go-=T
-  set guifont=Inconsolata:h18.00
+  set guifont=Fira\ Code:h18
   set anti
 
   " Turn off bell. Macvim has no visual bell, so this does the same thing.
@@ -162,40 +197,38 @@ endif
 " Can't use ctrl-J as it causes problems with newlines and neovim
 " map <C-k> :tabp<CR>
 " map <C-j> :tabn<CR>
-nmap <C-S-tab> :tabprevious<CR>
-nmap <C-tab> :tabnext<CR>
-nmap <S-D-{> :tabprevious<CR>
-nmap <S-D-}> :tabnext<CR>
-" Have to use some ctrl based switching, otherwise switching tabs inside
-" terminal vim is impossible
-nmap <C-t> :tabnew<CR>
-nmap <C-{> :tabprevious<CR>
-imap <C-{> <ESC>:tabprevious<CR>
-nmap <C-}> :tabnext<CR>
-imap <C-}> <ESC>:tabnext<CR>
 
-" In alacritty, we have to repurpose F keys to get things working. If we're
-" not in alacritty, vim should handle them in a similar way.
-map <F1> :tabprevious<CR>
-map <F2> :tabnext<CR>
-map <F3> :tabnew<CR>
-imap <F1> <ESC>:tabprevious<CR>
-imap <F2> <ESC>:tabnext<CR>
+nmap <C-t> :tabnew<CR>
+imap <C-t> <ESC>:tabnew<CR>
+
+nmap <S-D-}> :tabnext<CR>
+imap <S-D-}> <ESC>:tabnext<CR>
+nmap <S-D-{> :tabprevious<CR>
+imap <S-D-{> <ESC>:tabprevious<CR>
+
+nmap <C-S-tab> :tabprevious<CR>
+imap <C-S-tab> <ESC>:tabprevious<CR>
+nmap <C-tab> :tabnext<CR>
+imap <C-tab> <ESC>:tabnext<CR>
+
+nmap <D-]> :tabnext<CR>
+imap <D-]> <ESC>:tabnext<CR>
+nmap <D-[> :tabprevious<CR>
+imap <D-[> <ESC>:tabprevious<CR>
+
+" nmap <C-]> :tabnext<CR>
+" imap <C-]> <ESC>:tabnext<CR>
+" nmap <C-[> :tabprevious<CR>
+" imap <C-[> <ESC>:tabprevious<CR>
+
+" Alacritty neovim
+nmap <F3> :tabnew<CR>
 imap <F3> <ESC>:tabnew<CR>
 
-imap <C-S-tab> <ESC>:tabprevious<CR>
-imap <C-tab> <ESC>:tabnext<CR>
-imap <D-}> <ESC>:tabnext<CR>
-imap <D-{> <ESC>:tabprevious<CR>
-imap <C-S-]> <ESC>:tabnext<CR>
-imap <C-S-[> <ESC>:tabprevious<CR>
-imap <C-t> <ESC>:tabnew<CR>
-" can't use ctrl-w because it clashes with windows :(
-" map <C-w> :tabclose<cr>
-" And C-[ is used in place of escape in a bunch of places. Could probably get
-" around this by changing the window title setting stuff.
-" nmap <C-[> :tabprevious<cr>
-" nmap <C-]> :tabnext<cr>
+nmap <F2> :tabnext<CR>
+imap <F2> <ESC>:tabnext<CR>
+nmap <F1> :tabprevious<CR>
+imap <F1> <ESC>:tabprevious<CR>
 
 " Easier non-interactive command insertion
 nnoremap <Space> :
@@ -219,17 +252,9 @@ autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 :nmap <Leader>x !!xmllint --nonet --nowarning --nowrap --html --format -<CR>
 
 " Format json with ,j
-:vmap <Leader>j !python -m json.tool <CR>
-:nmap <Leader>j !!python -m json.tool <CR>
+:vmap <Leader>j !python3 -m json.tool <CR>
+:nmap <Leader>j !!python3 -m json.tool <CR>
 
-" Set the screen window title to hold the currently edited file
-" TODO: this is broken in console vim - keeps inserting the ESC in the current
-" files
-" let &titlestring = "vim(" . expand("%:t") . ")"
-" set t_ts=\<ESC>k
-" set t_fs=\<ESC>\
-" set titleold=""
-" set title
 set notitle
 
 " This really needs a lot of work.
@@ -243,9 +268,6 @@ set notitle
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files --cached --other --exclude-standard']
 let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 
-" Save when any change is made. Try kick my habit of hitting :w every two seconds
-" autocmd CursorMoved,CursorHold,InsertLeave,BufLeave,FocusLost * silent! wall
-
 " http://superuser.com/questions/558876
 " autocmd BufEnter * sign define dummy
 " autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
@@ -253,7 +275,20 @@ let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
 autocmd FileType python setlocal tabstop=4 shiftwidth=4
-" autocmd FileType python set foldmethod=indent
+autocmd FileType python set foldmethod=indent
+" default is tcq in python
+" help fo-table for info
+autocmd FileType python set formatoptions=cqnrblj
+set foldlevel=99
+let g:python3_host_prog = '/usr/local/bin/python3'
+let g:black_fast = 1
+let g:black_skip_string_normalization = 1
+let g:black_linelength = 88
+autocmd BufWritePre *.py execute ':Black'
+
+" Javascript
+" default is croql
+autocmd FileType javascript set formatoptions=cqnrblj
 
 " Markdown
 autocmd BufNewFile,BufRead *.md set filetype=markdown
@@ -261,6 +296,7 @@ let g:vim_markdown_folding_disabled=1
 
 " New line (with `o`) in a markdown list shouldn't indent
 let g:vim_markdown_new_list_item_indent = 0
+
 
 highlight WhitespaceEOL ctermbg=red guibg=red
 match WhitespaceEOL /\s\+$/
