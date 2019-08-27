@@ -1,4 +1,4 @@
-# vi: set ft=bash :
+# vim: set ft=sh:
 
 bold="\[$(tput bold)\]"
 green="\[$(tput setaf 2)\]"
@@ -13,6 +13,11 @@ export PATH=~/.dotfiles/bin:$PATH
 if [[ -d /usr/local/opt/python/libexec/bin ]]; then
   export PATH=/usr/local/opt/python/libexec/bin:$PATH
 fi
+
+if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
+  export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
+fi
+
 
 title() {
   echo -ne "\033]0;$@\007"
@@ -52,26 +57,66 @@ preexec_install
 bind 'set completion-ignore-case on'
 
 alias gs="git status"
-alias gd="git diff"
+alias gd="git diff --color-moved"
 alias gp="git push origin HEAD"
 alias glog="git log --graph --pretty=format:'%C(red)%h%C(reset) %<(8)%aN - %<(56,trunc)%s  %C(yellow)%ar'"
 alias cdg='cd $(git rev-parse --show-cdup)'
-alias gss='git stash save --include-untracked --keep-index'
-alias gsp='git stash pop'
-alias dc="docker-compose"
+alias gss="git add . && git commit --no-verify -m '-- PENDING --'"
+function gsp() {
+  last_msg=$(git log -1 --pretty=%B)
+  if [[ $last_msg == "-- PENDING --" ]]; then
+    git reset "HEAD^"
+  else
+    echo 'Error - last commit not a stash'
+  fi
+}
+
+alias dc="docker-compose --file=docker-compose.direct.yml"
+
+alias less="less --ignore-case --RAW-CONTROL-CHARS "
+alias ls="ls -lG"
 
 function ff() {
-  find . -iname '*$@*'
+  find . -iname "*$@*"
 }
 
 
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
 
-# $(pip completion --bash)
+
+alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
+
+if which go > /dev/null; then
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+  export GOPATH=$HOME/.go
+fi
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'; fi
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then
+  source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'
+fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
+  source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'
+fi
+
+if which fzf > /dev/null; then
+  # $(brew --prefix)/opt/fzf/install
+  # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+  source ~/.dotfiles/bash/fzf.bash
+fi
+
+
+alias manage.py='\
+  docker-compose \
+    --file=docker-compose.direct.yml \
+    run \
+    --rm \
+    -v ~/.ipython/:/root/.ipython \
+    -v ~/response-log/:/beyond/response-log \
+    uwsgi-beyond \
+    /var/beyond/venv/bin/python /beyond/manage.py'
+
+alias refresh-tags='ctags --exclude="@.gitignore" --python-kinds=-i -R .'
