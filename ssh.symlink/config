@@ -1,4 +1,5 @@
-HashKnownHosts yes
+# Reminder - this stops ssh tab completion from working
+# HashKnownHosts yes
 
 Host *
   AddKeysToAgent yes
