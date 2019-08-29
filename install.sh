@@ -47,4 +47,5 @@ home-link ruby/pryrc.symlink
 home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link zsh/zshrc.symlink
+home-link profile.symlink
 home-link alacritty.yml.symlink
