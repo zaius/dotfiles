@@ -57,7 +57,7 @@ call plug#begin('~/.vim/plugged')
   " Python plugins
   " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
   Plug 'w0rp/ale'
-  Plug 'ambv/black', { 'tag': '18.9b0' }
+  Plug 'psf/black', { 'tag': '18.9b0' }
   " Plug 'tmhedberg/SimpylFold'
   " Causing me serious issues on first completion load
   " Plug 'davidhalter/jedi-vim'
@@ -112,6 +112,9 @@ set shiftwidth=2
 " I don't really know the difference between swap and backup - I just know I
 " need something to stop losing unsaved files when my computer crashes.
 " set backup
+set nobackup
+set nowritebackup
+" set backupdir=~/.vim/backup//
 " set swapfile
 
 " Trailing double slash means uses full path in filename to stop clashes in a
