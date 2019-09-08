@@ -13,6 +13,9 @@ export PATH=~/.dotfiles/bin:/usr/local/bin:$PATH
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
 fi
+if [[ -d /Applications/MacVim.app/Contents/bin ]]; then
+  export PATH=$PATH:/Applications/MacVim.app/Contents/bin
+fi
 
 export EDITOR=/usr/local/bin/vim
 
