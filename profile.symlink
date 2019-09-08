@@ -7,22 +7,21 @@ red="\[$(tput setaf 9)\]"
 default="\[$(tput sgr0)\]"
 
 
-export PAGER='less -R'
-export PATH=~/.dotfiles/bin:$PATH
-
-if [[ -d /usr/local/opt/python/libexec/bin ]]; then
-  export PATH=/usr/local/opt/python/libexec/bin:$PATH
-fi
+export PAGER='less --quit-if-one-screen --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS'
+export PATH=~/.dotfiles/bin:/usr/local/bin:$PATH
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
 fi
 
+export EDITOR=/usr/local/bin/vim
+
 
 title() {
   echo -ne "\033]0;$@\007"
 }
-source ~/.dotfiles/preexec.bash
+# preexec breaks fzf
+# source ~/.dotfiles/preexec.bash
 preexec () {
   title $@
 }
@@ -51,10 +50,34 @@ function build_prompt() {
 
 export PROMPT_COMMAND=build_prompt
 # preexec overrides PROMPT_COMMAND - make sure it's called after.
-preexec_install
+# preexec_install
 
 # Case-insensitive tab complete
 bind 'set completion-ignore-case on'
+
+
+
+## COMPLETIONS
+
+if [ -d /usr/local/etc/bash_completion.d ]; then
+  for file in /usr/local/etc/bash_completion.d/*; do
+    source $file
+  done
+fi
+
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
+# TODO: move these into .dotfiles
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then
+  source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'
+fi
+
+if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
+  source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'
+fi
+
+
+## ALIASES
 
 alias gs="git status"
 alias gd="git diff --color-moved"
@@ -79,12 +102,6 @@ alias ls="ls -lG"
 function ff() {
   find . -iname "*$@*"
 }
-
-
-[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
-
-
-
 alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
 
 if which go > /dev/null; then
@@ -92,21 +109,14 @@ if which go > /dev/null; then
   export GOPATH=$HOME/.go
 fi
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then
-  source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'
-fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
-  source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'
-fi
 
 if which fzf > /dev/null; then
   # $(brew --prefix)/opt/fzf/install
   # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
   source ~/.dotfiles/bash/fzf.bash
 fi
+
+export VIM_APP_DIR=/usr/local/Cellar/macvim/8.1-157
 
 
 alias manage.py='\
