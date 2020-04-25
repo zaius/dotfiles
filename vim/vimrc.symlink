@@ -5,7 +5,7 @@ endif
 
 let g:ale_use_global_executables = 1
 
-let g:ale_python_pylint_executable = 'python3'
+let g:ale_python_pylint_executable = 'pylint'
 let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
 " let g:ale_python_pylint_use_global = 0
 let g:ale_fixers = {
@@ -33,11 +33,19 @@ let g:ale_use_global_executables = 1
 
 
 call plug#begin('~/.vim/plugged')
-  Plug 'tmux-plugins/vim-tmux-focus-events'
-  Plug 'ctrlpvim/ctrlp.vim'
-  Plug 'mustache/vim-mustache-handlebars'
+  " Plug 'tmux-plugins/vim-tmux-focus-events'
+  " Plug 'ctrlpvim/ctrlp.vim'
+  Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
+  Plug 'junegunn/fzf.vim'
+
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+  " Plug 'mustache/vim-mustache-handlebars'
+  Plug 'joukevandermaas/vim-ember-hbs'
+
   " Plug 'vim-ruby/vim-ruby'
   Plug 'airblade/vim-gitgutter'
+  Plug 'tpope/vim-fugitive'
   Plug 'godlygeek/tabular'
   Plug 'plasticboy/vim-markdown'
   Plug 'derekwyatt/vim-scala'
@@ -57,7 +65,8 @@ call plug#begin('~/.vim/plugged')
   " Python plugins
   " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
   Plug 'w0rp/ale'
-  Plug 'psf/black', { 'tag': '18.9b0' }
+  Plug 'psf/black', { 'tag': '19.10b0' }
+  Plug 'vim-python/python-syntax'
   " Plug 'tmhedberg/SimpylFold'
   " Causing me serious issues on first completion load
   " Plug 'davidhalter/jedi-vim'
@@ -186,7 +195,7 @@ cmap w!! w !sudo tee > /dev/null %
 if has("gui_macvim")
   " Don't show the macvim toolbar. Who uses a mouse anyway?!
   set go-=T
-  set guifont=Fira\ Code:h18
+  set guifont=Fira\ Code:h16
   set anti
 
   " Turn off bell. Macvim has no visual bell, so this does the same thing.
@@ -268,12 +277,28 @@ set notitle
 " One option is to write a script which can list the relevant files. Then can
 " have an ignore global similar to git's global gitignore.
 " http://superuser.com/questions/649714/can-i-get-the-vim-ctrlp-plugin-to-ignore-a-specific-folder-in-one-project
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files --cached --other --exclude-standard']
-let g:ctrlp_custom_ignore='_site$\|tmp/cache'
+" let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files --cached --other --exclude-standard']
+" let g:ctrlp_custom_ignore='_site$\|tmp/cache'
 
 " http://superuser.com/questions/558876
 " autocmd BufEnter * sign define dummy
 " autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+
+vmap <Leader>t, :Tabularize /,<CR>
+vmap <Leader>T, :Tabularize /,\zs<CR>
+vmap <Leader>t: :Tabularize /\:<CR>
+vmap <Leader>T: :Tabularize /\:\zs<CR>
+vmap <Leader>t\| :Tabularize /\|<CR>
+vmap <Leader>T\| :Tabularize /\|\zs<CR>
+vmap <Leader>t= :Tabularize /=<CR>
+vmap <Leader>T= :Tabularize /=\zs<CR>
+
+" https://github.com/junegunn/fzf.vim
+map <C-p> :GFiles<CR>
+map <C-S-p> :GFiles?<CR>
+
+" TODO: switch to git-better-blame (in /bin)
+map <Leader>gb :Git blame<CR>
 
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
@@ -288,6 +313,10 @@ let g:black_fast = 1
 let g:black_skip_string_normalization = 1
 let g:black_linelength = 88
 autocmd BufWritePre *.py execute ':Black'
+" vim-python/python-syntax
+" https://github.com/vim-python/python-syntax
+let g:python_highlight_string_templates = 1
+" let g:python_highlight_all = 1
 
 " Javascript
 " default is croql
