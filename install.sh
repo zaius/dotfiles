@@ -36,16 +36,9 @@ home-link git/gitconfig.symlink
 home-link git/gitignore.symlink
 home-link inputrc.symlink
 home-link ipython.symlink
-home-link irssi.symlink
 home-link pdbrc.symlink
-home-link powconfig.symlink
 home-link psqlrc.symlink
 home-link pythonrc.symlink
-home-link ruby/gemrc.symlink
-home-link ruby/irbrc.symlink
-home-link ruby/pryrc.symlink
 home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
-home-link zsh/zshrc.symlink
 home-link profile.symlink
-home-link alacritty.yml.symlink
