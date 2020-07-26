@@ -8,15 +8,19 @@ let g:ale_use_global_executables = 1
 let g:ale_python_pylint_executable = 'pylint'
 let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
 " let g:ale_python_pylint_use_global = 0
+" \ 'php': ['prettier'],
 let g:ale_fixers = {
 \ 'javascript': ['prettier', 'eslint'],
 \ 'scss': ['prettier'],
 \}
 let g:ale_linters = {
 \ 'javascript': ['eslint'],
-\ 'python': ['pylint'],
+\ 'python': ['pyls'],
+\ 'php': ['php', 'langserver', 'phan'],
+\ 'scss': ['scsslint'],
 \}
 let g:ale_linters_explicit = 1
+let g:ale_completion_enabled = 1
 
 let g:ale_javascript_prettier_use_local_config = 0
 
@@ -28,20 +32,40 @@ let g:ale_javascript_prettier_use_global = 1
 let g:ale_javascript_prettier_executable = '/usr/local/bin/prettier'
 let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
 
+let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-language-server.php')
+let g:ale_php_phan_executable = expand('~/.composer/vendor/bin/phan_client')
+let g:ale_php_phan_use_client = 1
+
+
 let g:ale_fix_on_save = 1
 let g:ale_use_global_executables = 1
 
+" https://www.vimfromscratch.com/articles/vim-and-language-server-protocol/
+nmap K :ALEHover<CR>
+let g:ale_set_balloons=1
+nmap gr :ALEFindReferences<CR>
+nmap gd :ALEGoToDefinitionInTab<CR>
+let g:ale_python_pyls_config={
+\   'pyls': {
+\     'plugins': {
+\       'pycodestyle': {
+\         'enabled': v:false
+\       }
+\     }
+\   },
+\ }
+
 
 call plug#begin('~/.vim/plugged')
-  " Plug 'tmux-plugins/vim-tmux-focus-events'
-  " Plug 'ctrlpvim/ctrlp.vim'
   Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
   " Plug 'mustache/vim-mustache-handlebars'
   Plug 'joukevandermaas/vim-ember-hbs'
+  Plug 'hail2u/vim-css3-syntax'
+  Plug 'cakebaker/scss-syntax.vim'
 
   " Plug 'vim-ruby/vim-ruby'
   Plug 'airblade/vim-gitgutter'
@@ -64,7 +88,7 @@ call plug#begin('~/.vim/plugged')
 
   " Python plugins
   " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
-  Plug 'w0rp/ale'
+  Plug 'dense-analysis/ale'
   Plug 'psf/black', { 'tag': '19.10b0' }
   Plug 'vim-python/python-syntax'
   " Plug 'tmhedberg/SimpylFold'
@@ -260,8 +284,9 @@ nnoremap <leader>w :call ClearTrailingWhitespace()<cr>
 autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 
 " Format XML with xmllint with ,x
-:vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format -<CR>
-:nmap <Leader>x !!xmllint --nonet --nowarning --nowrap --html --format -<CR>
+" :vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format --recover -<CR>
+:vmap <Leader>x !xmllint --format --recover -<CR>
+:nmap <Leader>x !!xmllint --nonet --nowarning --nowrap --html --format --recover -<CR>
 
 " Format json with ,j
 :vmap <Leader>j !python3 -m json.tool <CR>
@@ -295,10 +320,13 @@ vmap <Leader>T= :Tabularize /=\zs<CR>
 
 " https://github.com/junegunn/fzf.vim
 map <C-p> :GFiles<CR>
-map <C-S-p> :GFiles?<CR>
+" map <C-S-p> :GFiles?<CR>
 
 " TODO: switch to git-better-blame (in /bin)
 map <Leader>gb :Git blame<CR>
+
+imap <C-space> :ALEComplete<CR>
+
 
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
@@ -332,3 +360,7 @@ let g:vim_markdown_new_list_item_indent = 0
 
 highlight WhitespaceEOL ctermbg=red guibg=red
 match WhitespaceEOL /\s\+$/
+
+" Open tag in new tab
+" https://stackoverflow.com/questions/563616/vim-and-ctags-tips-and-tricks
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
