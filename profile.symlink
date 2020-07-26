@@ -7,7 +7,8 @@ red="\[$(tput setaf 9)\]"
 default="\[$(tput sgr0)\]"
 
 
-export PAGER='less --quit-if-one-screen --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS'
+## PATH
+
 export PATH=~/.dotfiles/bin:/usr/local/bin:$PATH
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
@@ -16,9 +17,32 @@ fi
 if [[ -d /Applications/MacVim.app/Contents/bin ]]; then
   export PATH=$PATH:/Applications/MacVim.app/Contents/bin
 fi
+if [[ -d /usr/local/git-fuzzy/bin ]]; then
+  export PATH=$PATH:/usr/local/git-fuzzy/bin
+fi
+# update PATH for the Google Cloud SDK.
+if [ -f '/usr/local/google-cloud-sdk/path.bash.inc' ]; then
+  . '/usr/local/google-cloud-sdk/path.bash.inc';
+fi
+if which go > /dev/null; then
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+  export GOPATH=$HOME/.go
+fi
+
+
+## VARIABLES
 
 export EDITOR=/usr/local/bin/vim
+export HISTSIZE=20000
+export HISTFILESIZE=20000
+export VIM_APP_DIR=/usr/local/Cellar/macvim/8.1-157
+export VAULT_ADDR="https://vault.prd:8200"
+export VAULT_CAPATH="$HOME/.vault_certs/"
+export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS'
 
+
+
+## PROMPT
 
 title() {
   echo -ne "\033]0;$@\007"
@@ -68,24 +92,27 @@ if [ -d /usr/local/etc/bash_completion.d ]; then
   done
 fi
 
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
-
-# TODO: move these into .dotfiles
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc' ]; then
-  source '/Users/zaius/Downloads/google-cloud-sdk/path.bash.inc'
+if [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]]; then
+  . "/usr/local/etc/profile.d/bash_completion.sh"
 fi
 
-if [ -f '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc' ]; then
-  source '/Users/zaius/Downloads/google-cloud-sdk/completion.bash.inc'
+# shell command completion for gcloud.
+if [ -f '/usr/local/google-cloud-sdk/completion.bash.inc' ];
+  then . '/usr/local/google-cloud-sdk/completion.bash.inc';
 fi
+
 
 
 ## ALIASES
 
+alias less="command $PAGER"
+alias dc="docker-compose"
 alias gs="git status"
 alias gd="git diff --color-moved"
 alias gp="git push origin HEAD"
 alias glog="git log --graph --pretty=format:'%C(red)%h%C(reset) %<(8)%aN - %<(56,trunc)%s  %C(yellow)%ar'"
+alias gfs='git fuzzy status'
+alias gfl='git fuzzy log'
 alias cdg='cd $(git rev-parse --show-cdup)'
 alias gss="git add . && git commit --no-verify -m '-- PENDING --'"
 function gsp() {
@@ -97,20 +124,17 @@ function gsp() {
   fi
 }
 
-alias dc="docker-compose --file=docker-compose.direct.yml"
-
-alias less="less --ignore-case --RAW-CONTROL-CHARS "
-alias ls="ls -lG"
+if which exa > /dev/null; then
+  alias ls="exa -l"
+else
+  alias ls="ls -lG"
+fi
 
 function ff() {
   find . -iname "*$@*"
 }
 alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
-
-if which go > /dev/null; then
-  export PATH=$PATH:/usr/local/opt/go/libexec/bin
-  export GOPATH=$HOME/.go
-fi
+alias fixkitty='kitty +kitten ssh'
 
 
 if which fzf > /dev/null; then
@@ -119,17 +143,26 @@ if which fzf > /dev/null; then
   source ~/.dotfiles/bash/fzf.bash
 fi
 
-export VIM_APP_DIR=/usr/local/Cellar/macvim/8.1-157
-
-
 alias manage.py='\
   docker-compose \
-    --file=docker-compose.direct.yml \
     run \
     --rm \
     -v ~/.ipython/:/root/.ipython \
-    -v ~/response-log/:/beyond/response-log \
     uwsgi-beyond \
     /var/beyond/venv/bin/python /beyond/manage.py'
 
-alias refresh-tags='ctags --exclude="@.gitignore" --python-kinds=-i -R .'
+alias refresh-tags-ignore="cat .gitignore | sed 's/\/$//g' | sed '/^$/d' | sed '/^[\#\|\!]/d' > .ctagsignore"
+alias refresh-tags='refresh-tags-ignore; ctags --exclude="@.ctagsignore" --python-kinds=-i --languages=python -R server/; rm .ctagsignore'
+
+vault_secret_id() {
+  unset TF_VAR_vault_secret_id
+
+  secret_id=$(vault write -field secret_id -f auth/approle/role/terraform/secret-id)
+
+  if [ -n "$secret_id" ]; then
+    export TF_VAR_vault_secret_id=$secret_id
+    echo "Exported TF_VAR_vault_secret_id=$TF_VAR_vault_secret_id"
+  else
+    echo "Failed to get secret_id!"
+  fi
+}
