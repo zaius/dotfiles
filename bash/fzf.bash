@@ -6,8 +6,23 @@ fi
 
 # Auto-completion
 # ---------------
-[[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.bash" 2> /dev/null
+if [[ $- == *i* ]]; then
+  if [[ -e /usr/local/opt/fzf/shell/completion.bash ]]; then
+    source /usr/local/opt/fzf/shell/completion.bash 2> /dev/null
+  elif [[ -e /usr/share/bash-completion/completions/fzf ]]; then
+    source /usr/share/bash-completion/completions/fzf 2> /dev/null
+  else
+    echo '*** FZF completions not found'
+  fi
+fi
 
 # Key bindings
 # ------------
-source "/usr/local/opt/fzf/shell/key-bindings.bash"
+
+if [[ -e /usr/local/opt/fzf/shell/key-bindings.bash ]]; then
+  source "/usr/local/opt/fzf/shell/key-bindings.bash"
+elif [[ -e /usr/share/doc/fzf/examples/key-bindings.bash ]]; then
+  source "/usr/share/doc/fzf/examples/key-bindings.bash"
+else
+  echo '*** FZF keybindings not found'
+fi
