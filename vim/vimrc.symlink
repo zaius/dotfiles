@@ -23,11 +23,9 @@ let g:ale_linters_explicit = 1
 let g:ale_completion_enabled = 1
 
 let g:ale_javascript_prettier_use_local_config = 0
-
 let g:ale_javascript_eslint_use_global = 1
 let g:ale_javascript_eslint_executable = '/usr/local/bin/eslint'
 let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
-
 let g:ale_javascript_prettier_use_global = 1
 let g:ale_javascript_prettier_executable = '/usr/local/bin/prettier'
 let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
@@ -36,7 +34,6 @@ let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-languag
 let g:ale_php_phan_executable = expand('~/.composer/vendor/bin/phan_client')
 let g:ale_php_phan_use_client = 1
 
-
 let g:ale_fix_on_save = 1
 let g:ale_use_global_executables = 1
 
@@ -44,7 +41,7 @@ let g:ale_use_global_executables = 1
 nmap K :ALEHover<CR>
 let g:ale_set_balloons=1
 nmap gr :ALEFindReferences<CR>
-nmap gd :ALEGoToDefinitionInTab<CR>
+nmap gd :ALEGoToDefinition -tab<CR>
 let g:ale_python_pyls_config={
 \   'pyls': {
 \     'plugins': {
@@ -57,50 +54,32 @@ let g:ale_python_pyls_config={
 
 
 call plug#begin('~/.vim/plugged')
+  " Git
+  Plug 'airblade/vim-gitgutter'
+  Plug 'tpope/vim-fugitive'
+
+  " Util
+  Plug 'godlygeek/tabular'
+  Plug 'nathanaelkane/vim-indent-guides'
   Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 
-  " Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-  " Plug 'mustache/vim-mustache-handlebars'
+  " Syntax
+  Plug 'plasticboy/vim-markdown'
+  Plug 'derekwyatt/vim-scala'
+  Plug 'pangloss/vim-javascript'
+  Plug 'cakebaker/scss-syntax.vim'
+  Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+  Plug 'ekalinin/Dockerfile.vim'
   Plug 'joukevandermaas/vim-ember-hbs'
   Plug 'hail2u/vim-css3-syntax'
   Plug 'cakebaker/scss-syntax.vim'
 
-  " Plug 'vim-ruby/vim-ruby'
-  Plug 'airblade/vim-gitgutter'
-  Plug 'tpope/vim-fugitive'
-  Plug 'godlygeek/tabular'
-  Plug 'plasticboy/vim-markdown'
-  Plug 'derekwyatt/vim-scala'
-
-  " Plug 'Chiel92/vim-autoformat'
-
-  " Noted performance issues in their readme. Trying something else.
-  " Plug 'othree/yajs.vim'
-  " Plug 'othree/es.next.syntax.vim'
-  Plug 'pangloss/vim-javascript'
-  Plug 'cakebaker/scss-syntax.vim'
-  Plug 'fatih/vim-go'
-  Plug 'ekalinin/Dockerfile.vim'
-
-  Plug 'nathanaelkane/vim-indent-guides'
 
   " Python plugins
-  " http://www.liuchengxu.org/posts/use-vim-as-a-python-ide/
   Plug 'dense-analysis/ale'
   Plug 'psf/black', { 'tag': '19.10b0' }
   Plug 'vim-python/python-syntax'
-  " Plug 'tmhedberg/SimpylFold'
-  " Causing me serious issues on first completion load
-  " Plug 'davidhalter/jedi-vim'
-
-  " Extremely slow...
-  " Plug 'posva/vim-vue'
-
-  " Better session management on crashes
-  " Plug 'xolox/vim-misc'
-  " Plug 'xolox/vim-session'
 
   " Themes
   Plug 'sheerun/vim-wombat-scheme'
@@ -138,17 +117,11 @@ set tabstop=2
 set expandtab
 set shiftwidth=2
 
-" hilight tabs as errors
-" syn match TAB_CHAR "\t"
-" hi link TAB_CHAR Error
-
 " I don't really know the difference between swap and backup - I just know I
 " need something to stop losing unsaved files when my computer crashes.
 " set backup
 set nobackup
 set nowritebackup
-" set backupdir=~/.vim/backup//
-" set swapfile
 
 " Trailing double slash means uses full path in filename to stop clashes in a
 " global location.
@@ -237,6 +210,7 @@ endif
 nmap <C-t> :tabnew<CR>
 imap <C-t> <ESC>:tabnew<CR>
 
+" Consistent tabs with browser
 nmap <S-D-}> :tabnext<CR>
 imap <S-D-}> <ESC>:tabnext<CR>
 nmap <S-D-{> :tabprevious<CR>
@@ -251,20 +225,6 @@ nmap <D-]> :tabnext<CR>
 imap <D-]> <ESC>:tabnext<CR>
 nmap <D-[> :tabprevious<CR>
 imap <D-[> <ESC>:tabprevious<CR>
-
-" nmap <C-]> :tabnext<CR>
-" imap <C-]> <ESC>:tabnext<CR>
-" nmap <C-[> :tabprevious<CR>
-" imap <C-[> <ESC>:tabprevious<CR>
-
-" Alacritty neovim
-nmap <F3> :tabnew<CR>
-imap <F3> <ESC>:tabnew<CR>
-
-nmap <F2> :tabnext<CR>
-imap <F2> <ESC>:tabnext<CR>
-nmap <F1> :tabprevious<CR>
-imap <F1> <ESC>:tabprevious<CR>
 
 " Easier non-interactive command insertion
 nnoremap <Space> :
@@ -294,20 +254,8 @@ autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 
 set notitle
 
-" This really needs a lot of work.
-"  * Can't work out how to exclude deleted files.
-"  * A project's gitignore file isn't nescessarily the same as the ctrl-p
-"    ignore list. E.g. secrets.yml. How can we do per-project excludes?
-"
-" One option is to write a script which can list the relevant files. Then can
-" have an ignore global similar to git's global gitignore.
-" http://superuser.com/questions/649714/can-i-get-the-vim-ctrlp-plugin-to-ignore-a-specific-folder-in-one-project
-" let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files --cached --other --exclude-standard']
-" let g:ctrlp_custom_ignore='_site$\|tmp/cache'
-
 " http://superuser.com/questions/558876
-" autocmd BufEnter * sign define dummy
-" autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+set signcolumn=yes
 
 vmap <Leader>t, :Tabularize /,<CR>
 vmap <Leader>T, :Tabularize /,\zs<CR>
@@ -320,31 +268,39 @@ vmap <Leader>T= :Tabularize /=\zs<CR>
 
 " https://github.com/junegunn/fzf.vim
 map <C-p> :GFiles<CR>
-" map <C-S-p> :GFiles?<CR>
 
 " TODO: switch to git-better-blame (in /bin)
 map <Leader>gb :Git blame<CR>
 
-imap <C-space> :ALEComplete<CR>
+imap <C-space> <ESC>:ALEComplete<CR>
 
+" Disable folds until manual action is taken
+set nofoldenable
+map <Leader>f0 :set foldlevel=0<CR>
+map <Leader>f1 :set foldlevel=1<CR>
+map <Leader>f2 :set foldlevel=2<CR>
+map <Leader>f3 :set foldlevel=3<CR>
+map <Leader>f4 :set foldlevel=4<CR>
+set foldlevel=99
 
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
 autocmd FileType python setlocal tabstop=4 shiftwidth=4
 autocmd FileType python set foldmethod=indent
+" hilight tabs as errors
+autocmd Filetype python match Error /\t/
 " default is tcq in python
 " help fo-table for info
 autocmd FileType python set formatoptions=cqnrblj
-set foldlevel=99
 let g:python3_host_prog = '/usr/local/bin/python3'
 let g:black_fast = 1
 let g:black_skip_string_normalization = 1
 let g:black_linelength = 88
 autocmd BufWritePre *.py execute ':Black'
+
 " vim-python/python-syntax
 " https://github.com/vim-python/python-syntax
 let g:python_highlight_string_templates = 1
-" let g:python_highlight_all = 1
 
 " Javascript
 " default is croql
