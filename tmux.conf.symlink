@@ -1,14 +1,31 @@
 # Ideas sourced from:
 # https://github.com/milkbikis/dotfiles-mac#bash
 # https://github.com/myusuf3/dotfiles/blob/master/tmux
+# Using meta:
+#   https://zserge.com/posts/tmux/
+#   https://github.com/zserge/dotfiles
+#
+# TO RESEARCH: https://news.ycombinator.com/item?id=23003603&utm_term=comment
+# https://zserge.com/posts/tmux/
 bind C-r source-file $HOME/.tmux.conf
+
+set -g prefix C-s
+unbind C-b
+
+# If we need to actually send C-s for any reason.
+# bind s send-prefix
+
+# Keep consistent with screen behavior
+bind C-s last-window
+bind C-d detach
+bind C-c new-window
 
 # Use vim keys in copy mode
 setw -g mode-keys vi
-unbind-key -t vi-copy v
-bind-key -t vi-copy 'v' begin-selection    # Begin selection in copy mode.
-bind-key -t vi-copy 'C-v' rectangle-toggle # Begin selection in copy mode.
-bind-key -t vi-copy 'y' copy-selection     # Yank selection in copy mode.
+unbind-key -T copy-mode-vi v
+bind-key -T copy-mode-vi 'v' send-keys -X begin-selection    # Begin selection in copy mode.
+bind-key -T copy-mode-vi 'C-v' send-keys -X rectangle-toggle # Begin selection in copy mode.
+bind-key -T copy-mode-vi 'y' send-keys -X copy-selection     # Yank selection in copy mode.
 
 set -g default-terminal "screen-256color"
 
@@ -28,7 +45,7 @@ set -g window-status-current-format \
 
 # Set window notifications by bolding the title.
 setw -g monitor-activity on
-set -g window-status-activity-attr bold
+# set -g window-status-activity-attr bold
 set -g visual-activity off
 
 # Rather than constraining window size to the maximum size of any client
