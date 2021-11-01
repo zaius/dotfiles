@@ -1,6 +1,10 @@
 # Reminder - this stops ssh tab completion from working
 # HashKnownHosts yes
 
+# Allow FQDN for hostnames
+CanonicalizeHostname yes
+CanonicalDomains us-central1-f.c.beyond-pricing-1024.internal
+
 Host *
   AddKeysToAgent yes
   UseKeychain yes
@@ -25,3 +29,18 @@ Host *.prd
 
 Host signuptwo.local
   User pi
+
+Host 162.243.146.98
+  User root
+  IdentityFile ~/Dropbox/Keys/ssh/digital_ocean.id_ecdsa
+
+Host 10.0.0.3
+  User root
+Host 10.0.0.1
+  User root
+
+Host 192.254.234.19
+  IdentityFile ~/Dropbox/Keys/ssh/github_tract_ecdsa
+
+Host *.us-central1-f.c.beyond-pricing-1024.internal
+  User beyond
