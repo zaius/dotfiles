@@ -11,8 +11,16 @@
 
 [core]
         excludesfile = /Users/zaius/.gitignore
-        pager = less -FRSX
+        # pager = delta --plus-color="#012800" --minus-color="#340001" --theme='Monokai Extended'
         whitespace=fix,trailing-space
 
 [diff]
       renamelimit = 0
+
+[interactive]
+      diffFilter = delta --color-only
+
+[includeIf "gitdir:~/code/beyond/"]
+      path = ~/.gitconfig.beyond
+[alias]
+	lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
