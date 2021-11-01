@@ -9,6 +9,8 @@ default="\[$(tput sgr0)\]"
 
 ## PATH
 
+# Homebrew
+export PATH=/usr/local/sbin:$PATH
 export PATH=~/.dotfiles/bin:/usr/local/bin:$PATH
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
@@ -25,20 +27,22 @@ if [ -f '/usr/local/google-cloud-sdk/path.bash.inc' ]; then
   . '/usr/local/google-cloud-sdk/path.bash.inc';
 fi
 if which go > /dev/null; then
-  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin:$HOME/.go/bin
   export GOPATH=$HOME/.go
+  export GOBIN=$HOME/.go/bin
 fi
 
 
 ## VARIABLES
 
 export EDITOR=/usr/local/bin/vim
-export HISTSIZE=20000
-export HISTFILESIZE=20000
+export HISTSIZE=-1
+export HISTFILESIZE=-1
+shopt -s histappend
 export VIM_APP_DIR=/usr/local/Cellar/macvim/8.1-157
 export VAULT_ADDR="https://vault.prd:8200"
 export VAULT_CAPATH="$HOME/.vault_certs/"
-export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS'
+export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
 
 
 
@@ -68,6 +72,9 @@ fromhex(){
 
 function build_prompt() {
     local EXIT="$?"
+    # Append to history after each command
+    history -a
+
     PS1="$bold"
     if [ $EXIT != 0 ]; then
         PS1+="$red$EXIT "
@@ -106,7 +113,23 @@ fi
 ## ALIASES
 
 alias less="command $PAGER"
-alias dc="docker-compose"
+# alias dc="docker-compose --file=docker-compose.local-client.yml"
+alias dc="docker-compose -f docker-compose.yml -f docker-compose.frontend.yml"
+# Use `■` to delimit columns. There is no non-greedy matching in sed, so match 32 non ■
+# characters and truncate / add ellipsis.
+alias gb="\
+  git for-each-ref \
+  --color always \
+  --sort=committerdate refs/heads/ \
+  --format='\
+%(HEAD) %(color:yellow)%(refname:short)%(color:reset)■\
+%(color:red)%(objectname:short)%(color:reset)■\
+%(contents:subject)■\
+%(authorname)■\
+(%(color:green)%(committerdate:relative)%(color:reset))'\
+  | sed -E 's|■([^■]{32})[^■]*■|■\1…■|g' \
+  | column -ts'■'
+"
 alias gs="git status"
 alias gd="git diff --color-moved"
 alias gp="git push origin HEAD"
@@ -135,7 +158,14 @@ function ff() {
 }
 alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
 alias fixkitty='kitty +kitten ssh'
+alias icat='kitty +kitten icat'
+function ssh() {
+  command ssh $@ -t "tmux attach -t zaius -d || tmux attach -t 0 || bash -l"
+}
 
+# https://til.simonwillison.net/til/til/bash_escaping-a-string.md
+# https://news.ycombinator.com/item?id=24659282
+alias escapequotes='echo !:q'
 
 if which fzf > /dev/null; then
   # $(brew --prefix)/opt/fzf/install
@@ -143,13 +173,14 @@ if which fzf > /dev/null; then
   source ~/.dotfiles/bash/fzf.bash
 fi
 
+# -v ~/.ipython/:/root/.ipython \
 alias manage.py='\
   docker-compose \
+    --file=docker-compose.local-client.yml \
     run \
     --rm \
-    -v ~/.ipython/:/root/.ipython \
     uwsgi-beyond \
-    /var/beyond/venv/bin/python /beyond/manage.py'
+    python manage.py'
 
 alias refresh-tags-ignore="cat .gitignore | sed 's/\/$//g' | sed '/^$/d' | sed '/^[\#\|\!]/d' > .ctagsignore"
 alias refresh-tags='refresh-tags-ignore; ctags --exclude="@.ctagsignore" --python-kinds=-i --languages=python -R server/; rm .ctagsignore'
@@ -166,3 +197,33 @@ vault_secret_id() {
     echo "Failed to get secret_id!"
   fi
 }
+export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+
+function lastlog() {
+  vi -p response-log/$1/`command ls -rt response-log/$1 | tail -n 1`
+}
+export NOMAD_ADDR=http://stg-nomad.bpdev:4646
+
+
+## PYENV
+
+if [[ -d $HOME/.pyenv/bin ]]; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+fi
+
+if which pyenv > /dev/null; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+
+  # Fix compilation of 3.6
+  # https://stackoverflow.com/questions/66482346/problems-installing-python-3-6-with-pyenv-on-mac-os-big-sur
+  export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/bzip2/lib"
+  export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/bzip2/include"
+fi
+
+
+## NVM / Node
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
