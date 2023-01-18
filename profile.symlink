@@ -10,8 +10,10 @@ default="\[$(tput sgr0)\]"
 ## PATH
 
 # Homebrew
+# PREFIX=$(brew --prefix)
+HOMEBREW_PREFIX=/opt/homebrew
 export PATH=/usr/local/sbin:$PATH
-export PATH=~/.dotfiles/bin:/usr/local/bin:$PATH
+export PATH=~/.dotfiles/bin:/usr/local/bin:$HOMEBREW_PREFIX/bin:$PATH
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
@@ -22,6 +24,7 @@ fi
 if [[ -d /usr/local/git-fuzzy/bin ]]; then
   export PATH=$PATH:/usr/local/git-fuzzy/bin
 fi
+
 # update PATH for the Google Cloud SDK.
 if [ -f '/usr/local/google-cloud-sdk/path.bash.inc' ]; then
   . '/usr/local/google-cloud-sdk/path.bash.inc';
@@ -35,11 +38,10 @@ fi
 
 ## VARIABLES
 
-export EDITOR=/usr/local/bin/vim
+export EDITOR=$HOMEBREW_PREFIX/bin/vim
 export HISTSIZE=-1
 export HISTFILESIZE=-1
 shopt -s histappend
-export VIM_APP_DIR=/usr/local/Cellar/macvim/8.1-157
 export VAULT_ADDR="https://vault.prd:8200"
 export VAULT_CAPATH="$HOME/.vault_certs/"
 export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
@@ -49,7 +51,8 @@ export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-l
 ## PROMPT
 
 title() {
-  echo -ne "\033]0;$@\007"
+  # echo -ne "\033]0;$@\007"
+  true
 }
 # preexec breaks fzf
 # source ~/.dotfiles/preexec.bash
@@ -71,6 +74,9 @@ fromhex(){
 }
 
 function build_prompt() {
+  if [[ $WARP_IS_LOCAL_SHELL_SESSION = '1' ]]; then
+    return
+  fi
     local EXIT="$?"
     # Append to history after each command
     history -a
@@ -92,15 +98,8 @@ bind 'set completion-ignore-case on'
 
 
 ## COMPLETIONS
-
-if [ -d /usr/local/etc/bash_completion.d ]; then
-  for file in /usr/local/etc/bash_completion.d/*; do
-    source $file
-  done
-fi
-
-if [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]]; then
-  . "/usr/local/etc/profile.d/bash_completion.sh"
+if [ -f $HOMEBREW_PREFIX/etc/bash_completion ]; then
+. $HOMEBREW_PREFIX/etc/bash_completion
 fi
 
 # shell command completion for gcloud.
@@ -114,7 +113,7 @@ fi
 
 alias less="command $PAGER"
 # alias dc="docker-compose --file=docker-compose.local-client.yml"
-alias dc="docker-compose -f docker-compose.yml -f docker-compose.frontend.yml"
+alias dc="docker-compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.m1.yml"
 # Use `■` to delimit columns. There is no non-greedy matching in sed, so match 32 non ■
 # characters and truncate / add ellipsis.
 alias gb="\
@@ -174,13 +173,7 @@ if which fzf > /dev/null; then
 fi
 
 # -v ~/.ipython/:/root/.ipython \
-alias manage.py='\
-  docker-compose \
-    --file=docker-compose.local-client.yml \
-    run \
-    --rm \
-    uwsgi-beyond \
-    python manage.py'
+alias manage.py='dc run --rm uwsgi-beyond python manage.py'
 
 alias refresh-tags-ignore="cat .gitignore | sed 's/\/$//g' | sed '/^$/d' | sed '/^[\#\|\!]/d' > .ctagsignore"
 alias refresh-tags='refresh-tags-ignore; ctags --exclude="@.ctagsignore" --python-kinds=-i --languages=python -R server/; rm .ctagsignore'
@@ -213,8 +206,7 @@ fi
 
 if which pyenv > /dev/null; then
   export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
 
   # Fix compilation of 3.6
   # https://stackoverflow.com/questions/66482346/problems-installing-python-3-6-with-pyenv-on-mac-os-big-sur
@@ -225,5 +217,18 @@ fi
 
 ## NVM / Node
 export NVM_DIR="$HOME/.nvm"
-[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# Keep quiet on mac when using bash
+# https://support.apple.com/en-us/HT208050
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
+if test -n "$KITTY_INSTALLATION_DIR"; then
+    export KITTY_SHELL_INTEGRATION="enabled"
+    source "$KITTY_INSTALLATION_DIR/shell-integration/bash/kitty.bash"
+fi
+
+
+
+alias nomad-shell='NOMAD_ADDR=http://prd-nomad.prd:4646 nomad alloc exec $(python /Users/zaius/code/beyond/server/shell.py -e prd -s zaius -q) tmux att -t app-shell'
