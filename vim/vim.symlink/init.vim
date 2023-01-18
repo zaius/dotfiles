@@ -1,12 +1,8 @@
 let g:neovim = 1
-"let g:black_virtualenv = "~/.config/nvim/black"
-let g:black_skip_string_normalization = 0
 set termguicolors
 
 " Enable Mouse
 set mouse=a
-
-let g:black_virtualenv = "~/.vim/black-latest"
 
 " Set Editor Font
 if exists(':GuiFont')
@@ -20,11 +16,9 @@ if exists(':GuiTabline')
 endif
 
 " Right Click Context Menu (Copy-Cut-Paste)
-nnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>
-inoremap <silent><RightMouse> <Esc>:call GuiShowContextMenu()<CR>
-vnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>gv
-
-let g:neovim = 1
+" nnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>
+" inoremap <silent><RightMouse> <Esc>:call GuiShowContextMenu()<CR>
+" vnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>gv
 
 source ~/.vim/common.vim
 

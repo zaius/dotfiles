@@ -4,30 +4,43 @@ if empty(glob('~/.vim/plugged'))
 endif
 
 let g:ale_use_global_executables = 1
+let g:ale_python_pylint_executable = '/opt/homebrew/bin/pylint'
+let g:ale_python_pylsp_executable = '/opt/homebrew/bin/pyls'
+let g:ale_python_flake8_executable = '/opt/homebrew/bin/flake8'
 
-let g:ale_python_pylint_executable = 'pylint'
 let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
+
+let g:ale_sql_pgformatter_options = '--spaces 2 --wrap-limit 88'
 " let g:ale_python_pylint_use_global = 0
 " \ 'php': ['prettier'],
+
+let g:ale_sql_sqlformat_executable = 'cockroach'
+let g:ale_sql_sqlformat_options = 'sqlfmt'
+
+" \ 'javascript': ['prettier', 'eslint'],
 let g:ale_fixers = {
-\ 'javascript': ['prettier', 'eslint'],
+\ 'javascript': ['prettier'],
+\ 'javascriptreact': ['prettier'],
 \ 'scss': ['prettier'],
+\ 'python': [],
+\ 'sql': ['sqlformat'],
 \}
+" \ 'javascript': ['eslint'],
 let g:ale_linters = {
-\ 'javascript': ['eslint'],
-\ 'python': ['pyls', 'flake8'],
+\ 'python': ['pylsp', 'flake8'],
 \ 'php': ['php', 'langserver', 'phan'],
 \ 'scss': ['scsslint'],
+\ 'sql': ['sql-lint'],
 \}
 let g:ale_linters_explicit = 1
 let g:ale_completion_enabled = 1
 
 let g:ale_javascript_prettier_use_local_config = 0
 let g:ale_javascript_eslint_use_global = 1
-let g:ale_javascript_eslint_executable = '/usr/local/bin/eslint'
+let g:ale_javascript_eslint_executable = '/opt/homebrew/bin/eslint'
 let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
 let g:ale_javascript_prettier_use_global = 1
-let g:ale_javascript_prettier_executable = '/usr/local/bin/prettier'
+let g:ale_javascript_prettier_executable = '/opt/homebrew/bin/prettier'
 let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
 
 let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-language-server.php')
@@ -74,15 +87,20 @@ nmap K :ALEHover<CR>
 let g:ale_set_balloons=1
 nmap gr :ALEFindReferences<CR>
 nmap gd :ALEGoToDefinition -tab<CR>
-let g:ale_python_pyls_config={
+let g:ale_python_pylsp_config={
 \   'pyls': {
 \     'plugins': {
 \       'pycodestyle': {
-\         'enabled': v:false
+\         'enabled': v:false,
+\       },
+\       'flake8': {
+\         'enabled': v:false,
 \       }
-\     }
+\     },
 \   },
 \ }
+
+let g:ale_python_flake8_options = '--max-line-length=88 --config=/dev/null '
 
 
 if exists("g:neovim")
@@ -115,17 +133,15 @@ endif
 
   " Python plugins
   Plug 'dense-analysis/ale'
-  " Plug 'sbdchd/neoformat'
   Plug 'vim-python/python-syntax'
 
   " Themes
   Plug 'sheerun/vim-wombat-scheme'
 
+  Plug 'psf/black', { 'tag': '19.10b0'}
+
   if exists("g:neovim")
-    Plug 'psf/black', { 'tag': '21.5b2' }
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-  else
-    Plug 'psf/black', { 'tag': '19.10b0'}
   endif
 
 call plug#end()
@@ -133,34 +149,20 @@ call plug#end()
 " Black vim version has to be tied to a specific tag, and vim-plug doesn't allow us to
 " install multiple tags of the same plugin. I tried just changing the binary, but the
 " base plugin file changes between tags, so it errors out.
-" let g:neoformat_only_msg_on_error = 1
-" let g:neoformat_verbose = 1
-let g:neoformat_python_black_beyond = {
-\ 'exe': 'black',
-\ 'args': ['--fast', '--skip-string-normalization', '--line-length=88', '-'],
-\ 'stdin': 1,
-\ 'valid_exit_codes': [0],
-\ }
-let g:neoformat_python_black_latest = {
-\ 'exe': '/Users/zaius/.vim/black-latest/bin/black',
-\ 'args': ['--fast', '--line-length=88', '-'],
-\ 'stdin': 1,
-\ 'valid_exit_codes': [0],
-\ }
-
-" let g:neoformat_enabled_python = ['black_beyond']
-" augroup fmt
-"   autocmd!
-"   autocmd BufWritePre *.py undojoin | Neoformat
-" augroup END
 
 syntax enable
 " Fix issues with files losing syntax as we scroll around.
 " See: https://github.com/vim/vim/issues/2790
 syntax sync minlines=10000
 
+" https://unix.stackexchange.com/questions/585019/horizontal-equivalent-of-zz-in-vim
+" remember: zs + zH
+set sidescrolloff=20
+
+
 let g:black_fast = 1
 let g:black_linelength = 88
+let g:black_skip_string_normalization = 1
 autocmd BufWritePre *.py execute ':Black'
 
 set background=dark
@@ -168,6 +170,7 @@ set background=dark
 " http://stackoverflow.com/questions/3761770/iterm-vim-colorscheme-not-working
 let &t_Co=256
 colorscheme wombat
+hi Directory ctermfg=234 ctermbg=228 cterm=none guifg=#242424 guibg=#eae788 gui=none
 
 " http://stackoverflow.com/questions/5845557/in-a-vimrc-is-set-nocompatible-completely-useless
 " set nocompatible
@@ -328,6 +331,9 @@ vmap <Leader>T\| :Tabularize /\|\zs<CR>
 vmap <Leader>t= :Tabularize /=<CR>
 vmap <Leader>T= :Tabularize /=\zs<CR>
 
+" https://www.reddit.com/r/vim/comments/1bwo5z/comment/c9db6t0/
+vmap <Leader>t, :Tabularize /\v,(([^"]*"[^"]*")*[^"]*$)@=<CR>
+
 " https://github.com/junegunn/fzf.vim
 map <C-p> :GFiles<CR>
 
@@ -359,12 +365,19 @@ autocmd Filetype python match Error /\t/
 " default is tcq in python
 " help fo-table for info
 autocmd FileType python set formatoptions=cqnrblj
-let g:python3_host_prog = '/usr/local/bin/python3'
+
+" Use system python for neovim - avoids issues with black when switching between pyenv
+" versions
+let g:python3_host_prog = '/usr/bin/python3'
+" Unfortunately this doesn't work until newer versions of black, but it would solve the
+" init of the virtualenv to the wrong version... i couldn't work it out, but next
+" install, go to the virtualenv and run:
+"   ~/.local/share/nvim/black/bin/pip install black==19.10b0
+let g:black_use_virtualenv = 0
 
 " vim-python/python-syntax
 " https://github.com/vim-python/python-syntax/blob/master/doc/python-syntax.txt
 let g:python_highlight_all = 1
-source ~/.vim/embedded_sql.vim
 
 " Javascript
 " default is croql
