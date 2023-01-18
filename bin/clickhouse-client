@@ -1,0 +1,22 @@
+#!/bin/bash
+CLIENT_IMAGE="lunalabsltd/clickhouse-server:21.7.2.7-arm"
+
+start(){
+  docker run \
+    --rm \
+    -e 'TZ=UTC' \
+    --entrypoint "/bin/sh" \
+    --network insights_analytics \
+    --name test-clickhouse-client \
+    $CLIENT_IMAGE -c 'while :; do sleep 1; done'
+}
+
+# echo docker run --rm -it -e `env | grep ^TZ=` $CLIENT_IMAGE clickhouse-client "$@"
+docker run --rm -it $CLIENT_IMAGE clickhouse-client "$@"
+
+# docker run \
+#   --rm \
+#   -i \
+#   -e 'TZ=UTC' \
+#   --network insights_analytics \
+#   $CLIENT_IMAGE clickhouse-client "$@"

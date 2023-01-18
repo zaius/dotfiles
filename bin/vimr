@@ -1,14 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
-import urllib
+import tempfile
+import urllib.parse
 import subprocess
 import argparse
 import os
 import uuid
 import json
+from enum import Enum
 
 
-class Action:
+class Action(Enum):
     ACTIVATE = "activate"
     OPEN = "open"
     NEW_WINDOW = "open-in-new-window"
@@ -16,7 +18,7 @@ class Action:
     NVIM = "nvim"
 
 
-class QueryParamKey:
+class QueryParamKey(Enum):
     PIPE_PATH = "pipe-path"
     ENV_PATH = "env-path"
     CWD = "cwd"
@@ -35,12 +37,12 @@ def wait_for_ui_to_close(pipe_path):
 
 def call_open(action, query_params, args):
     if args.wait:
-        query_params[QueryParamKey.WAIT] = "true"
+        query_params[QueryParamKey.WAIT.value] = "true"
 
-    url = "vimr://{0}?{1}".format(action, urllib.urlencode(query_params, True).replace('+', '%20'))
+    url = f"vimr://{action.value}?{urllib.parse.urlencode(query_params, True).replace('+', '%20')}"
 
     if args.dry_run:
-        print("/usr/bin/open {0}".format(url))
+        print(f"/usr/bin/open {url}")
     else:
         subprocess.call(["/usr/bin/open", url])
 
@@ -50,10 +52,10 @@ def abspath(path):
 
 
 def vimr_nvim(other_args, nvim_args, query_params):
-    query_params[QueryParamKey.CWD] = os.getcwd()
+    query_params[QueryParamKey.CWD.value] = os.getcwd()
 
     if nvim_args:
-        query_params[QueryParamKey.NVIM_ARGS] = nvim_args
+        query_params[QueryParamKey.NVIM_ARGS.value] = nvim_args
 
     call_open(Action.NVIM, query_params, other_args)
 
@@ -63,42 +65,44 @@ def vimr(action, args, query_params):
     if args.cwd is not None:
         cwd = abspath(args.cwd)
 
-    query_params[QueryParamKey.CWD] = cwd
+    query_params[QueryParamKey.CWD.value] = cwd
 
     files = args.file
     if files:
-        query_params[QueryParamKey.FILE] = [abspath(f) for f in files]
+        query_params[QueryParamKey.FILE.value] = [abspath(f) for f in files]
 
     call_open(action, query_params, args)
 
 
 def main(args):
+    temp_dir_path = tempfile.gettempdir()
     uuid_str = str(uuid.uuid4())
-    pipe_path = "/tmp/com_qvacua_vimr_cli_pipe_{0}".format(uuid_str)
+
+    pipe_path = f"/{temp_dir_path}/com_qvacua_vimr_cli_pipe_{uuid_str}"
     if os.path.exists(pipe_path):
         os.remove(pipe_path)
 
     try:
-        os.mkfifo(pipe_path, 0600)
+        os.mkfifo(pipe_path, 0o600)
     except OSError as error:
-        print("ERROR: {0}\n"
-              "{1} could not be mkfifo'ed.\n"
-              "Please go to https://github.com/qvacua/vimr and create an issue.".format(error, pipe_path))
+        print(f"ERROR: {error}\n"
+              f"{pipe_path} could not be mkfifo'ed.\n"
+              f"Please go to https://github.com/qvacua/vimr and create an issue.")
         raise
 
     query_params = {
-        QueryParamKey.PIPE_PATH: pipe_path
+        QueryParamKey.PIPE_PATH.value: pipe_path
     }
 
     if args.line is not None:
-        query_params[QueryParamKey.LINE] = args.line
+        query_params[QueryParamKey.LINE.value] = args.line
 
     if args.cur_env:
-        env_file = "/tmp/com_qvacua_vimr_env_{0}".format(uuid_str)
+        env_file = f"/{temp_dir_path}/com_qvacua_vimr_env_{uuid_str}"
         with open(env_file, "w") as f:
             f.write(json.dumps({k: v for (k, v) in os.environ.items()}))
-            os.chmod(env_file, 0600)
-            query_params[QueryParamKey.ENV_PATH] = env_file
+            os.chmod(env_file, 0o600)
+            query_params[QueryParamKey.ENV_PATH.value] = env_file
 
     if args.nvim:
         nvim_parser = argparse.ArgumentParser()
