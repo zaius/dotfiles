@@ -38,7 +38,7 @@ fi
 
 ## VARIABLES
 
-export EDITOR=$HOMEBREW_PREFIX/bin/vim
+export EDITOR=$HOMEBREW_PREFIX/bin/nvim
 export HISTSIZE=-1
 export HISTFILESIZE=-1
 shopt -s histappend

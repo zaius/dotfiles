@@ -4,7 +4,6 @@
 #  * check if symlink already exists
 #  * drop symlink naming?
 #  * notice when files added and error out? would have to keep symlink notation...
-#  * ensure shell set to zsh
 #
 set -e
 base=~/.dotfiles
