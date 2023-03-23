@@ -98,9 +98,10 @@ bind 'set completion-ignore-case on'
 
 
 ## COMPLETIONS
-if [ -f $HOMEBREW_PREFIX/etc/bash_completion ]; then
-. $HOMEBREW_PREFIX/etc/bash_completion
+if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
+  . /opt/homebrew/etc/profile.d/bash_completion.sh
 fi
+
 
 # shell command completion for gcloud.
 if [ -f '/usr/local/google-cloud-sdk/completion.bash.inc' ];
@@ -199,6 +200,8 @@ export NOMAD_ADDR=http://stg-nomad.bpdev:4646
 
 
 ## PYENV
+# System python bins last - for pylsp / black from vim
+export PATH="$PATH:/Users/zaius/Library/Python/3.9/bin"
 
 if [[ -d $HOME/.pyenv/bin ]]; then
   export PATH="$HOME/.pyenv/bin:$PATH"

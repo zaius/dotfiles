@@ -4,9 +4,10 @@ if empty(glob('~/.vim/plugged'))
 endif
 
 let g:ale_use_global_executables = 1
-let g:ale_python_pylint_executable = '/opt/homebrew/bin/pylint'
-let g:ale_python_pylsp_executable = '/opt/homebrew/bin/pyls'
-let g:ale_python_flake8_executable = '/opt/homebrew/bin/flake8'
+let pip_base = '/Users/zaius/Library/Python/3.9/bin'
+let g:ale_python_pylint_executable = pip_base . '/pylint'
+let g:ale_python_pylsp_executable = pip_base . '/pylsp'
+let g:ale_python_flake8_executable = pip_base . '/flake8'
 
 let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
 
@@ -27,6 +28,7 @@ let g:ale_fixers = {
 \}
 " \ 'javascript': ['eslint'],
 let g:ale_linters = {
+\ 'javascript': ['eslint', 'prettier',],
 \ 'python': ['pylsp', 'flake8'],
 \ 'php': ['php', 'langserver', 'phan'],
 \ 'scss': ['scsslint'],
@@ -88,7 +90,7 @@ let g:ale_set_balloons=1
 nmap gr :ALEFindReferences<CR>
 nmap gd :ALEGoToDefinition -tab<CR>
 let g:ale_python_pylsp_config={
-\   'pyls': {
+\   'pylsp': {
 \     'plugins': {
 \       'pycodestyle': {
 \         'enabled': v:false,
@@ -138,7 +140,7 @@ endif
   " Themes
   Plug 'sheerun/vim-wombat-scheme'
 
-  Plug 'psf/black', { 'tag': '19.10b0'}
+  Plug 'psf/black', { 'tag': '23.1.0'}
 
   if exists("g:neovim")
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}

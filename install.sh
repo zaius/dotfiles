@@ -32,6 +32,7 @@ home-link vim/vim.symlink ~/.vim
 
 home-link dircolors.symlink
 home-link git/gitconfig.symlink
+home-link git/gitconfig.beyond.symlink
 home-link git/gitignore.symlink
 home-link inputrc.symlink
 home-link ipython.symlink

@@ -3,7 +3,7 @@
 
 # Allow FQDN for hostnames
 CanonicalizeHostname yes
-CanonicalDomains us-central1-f.c.beyond-pricing-1024.internal
+CanonicalDomains us-central1-f.c.beyond-pricing-1024.internal prd
 
 Host *
   # IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
@@ -12,7 +12,8 @@ Host *
   ForwardAgent yes
   ServerAliveInterval 240
   ServerAliveCountMax 30
-  TCPKeepAlive yes
+  # 2023 03 06 - setting to no to avoid timeouts when laptop is asleep
+  TCPKeepAlive no
 
 Host vpn
   HostName 107.178.216.174
@@ -24,6 +25,10 @@ Host *.bnd
   ForwardAgent yes
 
 Host *.prd
+  User beyond
+  ForwardAgent yes
+
+Host *.us-central1-f.c.beyond-pricing-1024.internal
   User beyond
   ForwardAgent yes
 
@@ -41,9 +46,6 @@ Host 10.0.0.1
 
 Host 192.254.234.19
   IdentityFile "~/Dropbox\ (Personal)/Keys/ssh/github_tract_ecdsa"
-
-Host *.us-central1-f.c.beyond-pricing-1024.internal
-  User beyond
 
 Host homebridge.local
   User pi
