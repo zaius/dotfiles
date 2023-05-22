@@ -22,6 +22,10 @@ endif
 
 source ~/.vim/common.vim
 
+" Close file when closing last buffer
+" https://vi.stackexchange.com/questions/37814/how-to-revert-to-close-file-when-buffer-closes-behavior-in-neovim
+set nohidden
+
 " Trailing double slash means uses full path in filename to stop clashes in a
 " global location.
 set directory=~/.vim/neo/swap//

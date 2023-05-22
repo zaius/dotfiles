@@ -26,6 +26,8 @@ unbind-key -T copy-mode-vi v
 bind-key -T copy-mode-vi 'v' send-keys -X begin-selection    # Begin selection in copy mode.
 bind-key -T copy-mode-vi 'C-v' send-keys -X rectangle-toggle # Begin selection in copy mode.
 bind-key -T copy-mode-vi 'y' send-keys -X copy-selection     # Yank selection in copy mode.
+bind -Tcopy-mode WheelUpPane send -N1 -X scroll-up
+bind -Tcopy-mode WheelDownPane send -N1 -X scroll-down
 
 set -g default-terminal "screen-256color"
 

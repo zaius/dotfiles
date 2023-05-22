@@ -18,10 +18,16 @@ let g:ale_sql_pgformatter_options = '--spaces 2 --wrap-limit 88'
 let g:ale_sql_sqlformat_executable = 'cockroach'
 let g:ale_sql_sqlformat_options = 'sqlfmt'
 
+
+let g:ale_typescript_tsserver_executable = '/Users/zaius/.nvm/versions/node/v17.3.0/bin/tsserver'
+
+
 " \ 'javascript': ['prettier', 'eslint'],
 let g:ale_fixers = {
 \ 'javascript': ['prettier'],
 \ 'javascriptreact': ['prettier'],
+\ 'typescript': ['prettier',],
+\ 'typescriptreact': ['prettier',],
 \ 'scss': ['prettier'],
 \ 'python': [],
 \ 'sql': ['sqlformat'],
@@ -29,6 +35,9 @@ let g:ale_fixers = {
 " \ 'javascript': ['eslint'],
 let g:ale_linters = {
 \ 'javascript': ['eslint', 'prettier',],
+\ 'javascriptreact': ['eslint', 'prettier',],
+\ 'typescript': ['tsserver', 'standard', 'eslint', 'prettier',],
+\ 'typescriptreact': ['tsserver', 'standard', 'eslint', 'prettier',],
 \ 'python': ['pylsp', 'flake8'],
 \ 'php': ['php', 'langserver', 'phan'],
 \ 'scss': ['scsslint'],
@@ -40,10 +49,11 @@ let g:ale_completion_enabled = 1
 let g:ale_javascript_prettier_use_local_config = 0
 let g:ale_javascript_eslint_use_global = 1
 let g:ale_javascript_eslint_executable = '/opt/homebrew/bin/eslint'
-let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
+" let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
+" let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/beacon/js/.eslintrc.json'
 let g:ale_javascript_prettier_use_global = 1
 let g:ale_javascript_prettier_executable = '/opt/homebrew/bin/prettier'
-let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
+" let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
 
 let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-language-server.php')
 let g:ale_php_phan_executable = expand('~/.composer/vendor/bin/phan_client')
@@ -131,7 +141,6 @@ endif
   Plug 'cakebaker/scss-syntax.vim'
   Plug 'MaxMEllon/vim-jsx-pretty'
   Plug 'leafgarland/typescript-vim'
-
 
   " Python plugins
   Plug 'dense-analysis/ale'
@@ -314,8 +323,8 @@ nnoremap <leader>w :call ClearTrailingWhitespace()<cr>
 autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 
 " Format XML with xmllint with ,x
-" :vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format --recover -<CR>
-:vmap <Leader>x !xmllint --format --recover -<CR>
+:vmap <Leader>x !xmllint --nonet --nowarning --nowrap --html --format --recover -<CR>
+" :vmap <Leader>x !xmllint --format --recover -<CR>
 :vmap <Leader>j !python3 -m json.tool <CR>
 :nmap <Leader>j !!python3 -m json.tool <CR>
 

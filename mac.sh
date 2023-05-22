@@ -82,3 +82,13 @@ urls=(
   # pkg installers
   'https://zoom.us/client/5.13.7.15481/zoomusInstallerFull.pkg?archType=arm64'
 )
+
+
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+
+command mkdir "$tdir/mp"
+command hdiutil attach "$installer" "-mountpoint" "$tdir/mp" || die "Failed to mount kitty.dmg"
+command ditto -v "$tdir/mp/kitty.app" "$dest"
+command hdiutil detach "$tdir/mp"
+command rm -rf "$tdir"

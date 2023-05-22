@@ -74,9 +74,9 @@ fromhex(){
 }
 
 function build_prompt() {
-  if [[ $WARP_IS_LOCAL_SHELL_SESSION = '1' ]]; then
-    return
-  fi
+  # if [[ $WARP_IS_LOCAL_SHELL_SESSION = '1' ]]; then
+  #   return
+  # fi
     local EXIT="$?"
     # Append to history after each command
     history -a
@@ -85,7 +85,7 @@ function build_prompt() {
     if [ $EXIT != 0 ]; then
         PS1+="$red$EXIT "
     fi
-    PS1+="$green\u$red@$cyan\H:$red\w$default\$ "
+    PS1+="$green\u$red@$cyan\h:$red\w$default\$ "
 }
 
 export PROMPT_COMMAND=build_prompt
@@ -114,7 +114,7 @@ fi
 
 alias less="command $PAGER"
 # alias dc="docker-compose --file=docker-compose.local-client.yml"
-alias dc="docker-compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.m1.yml"
+alias dc="docker compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.m1.yml"
 # Use `■` to delimit columns. There is no non-greedy matching in sed, so match 32 non ■
 # characters and truncate / add ellipsis.
 alias gb="\
@@ -235,3 +235,4 @@ fi
 
 
 alias nomad-shell='NOMAD_ADDR=http://prd-nomad.prd:4646 nomad alloc exec $(python /Users/zaius/code/beyond/server/shell.py -e prd -s zaius -q) tmux att -t app-shell'
+export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"

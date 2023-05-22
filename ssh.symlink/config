@@ -43,9 +43,10 @@ Host 10.0.0.3
   User root
 Host 10.0.0.1
   User root
-
-Host 192.254.234.19
-  IdentityFile "~/Dropbox\ (Personal)/Keys/ssh/github_tract_ecdsa"
+Host 10.10.0.2
+  User root
+  PubkeyAuthentication no
+  PreferredAuthentications password
 
 Host homebridge.local
   User pi
