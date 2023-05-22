@@ -19,7 +19,7 @@ let g:ale_sql_sqlformat_executable = 'cockroach'
 let g:ale_sql_sqlformat_options = 'sqlfmt'
 
 
-let g:ale_typescript_tsserver_executable = '/Users/zaius/.nvm/versions/node/v17.3.0/bin/tsserver'
+let g:ale_typescript_tsserver_executable = '/opt/homebrew/bin/tsserver'
 
 
 " \ 'javascript': ['prettier', 'eslint'],

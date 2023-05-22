@@ -1,6 +1,18 @@
 #!/bin/bash
-set -e
+set -ex
 
+quit() {
+  red=$(tput setaf 1)
+  reset=$(tput sgr0)
+  echo " ${red}-- $@${reset}"
+  exit 1
+}
+
+log() {
+  cyan=$(tput setaf 6)
+  reset=$(tput sgr0)
+  echo " ${cyan}-- $@${reset}"
+}
 brew=/opt/homebrew/bin/brew
 $brew install \
   bash \
@@ -11,9 +23,10 @@ $brew install \
   nomad \
   neovim \
   htop \
-  # For python extensions
-  xz \
-  nmap
+  nmap \
+  wget \
+  `# For python extensions` \
+  xz
 
 mkdir ~/.nvm
 /opt/homebrew/opt/fzf/install
@@ -27,27 +40,32 @@ chsh -s /opt/homebrew/bin/bash zaius
 /usr/bin/pip3 install \
   black==23.1.0 \
   neovim \
-  # python-language-server is unmaintained
+  `# python-language-server is unmaintained` \
   python-lsp-server[all]
 
 
-pyenv install 3.9.5
-pyenv install 3.10.6
+/opt/homebrew/bin/pyenv install 3.9.5
+/opt/homebrew/bin/pyenv install 3.10.6
 
 
-wget https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip
+mkdir fira
+curl --location https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip > fira/fira.zip
+unzip -d fira/ fira.zip
+rm fira.zip
+cp fira/ttf/* /Library/Fonts/
+rm -r fira
 
 
-$brew install prettier
+$brew install \
+  prettier \
+  eslint
+/opt/homebrew/bin/npm install -g typescript
 
 
 # Ensure chrome can actually launch
 # https://www.reddit.com/r/MacOS/comments/q9d772/homebrew_chromium_is_damaged_and_cant_be_openend/
 # https://dev.to/tnzk/install-puppeteer-on-macbook-pro-with-apple-silicon-m1-3kc
 $brew install chromium --no-quarantine
-# Use local chromium for puppeteer so we can avoid rosetta
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-export PUPPETEER_EXECUTABLE_PATH=`which chromium`
 
 defaults write -g ApplePressAndHoldEnabled -bool false
 
@@ -58,8 +76,6 @@ $brew install google-cloud-sdk
 # Git color diffs
 $brew install git-delta
 $brew install libpq
-
-$bew install pyls
 
 
 
@@ -75,20 +91,42 @@ echo nameserver 10.128.0.1 | sudo tee /etc/resolver/internal
 echo search us-central1-f.c.beyond-pricing-1024.internal | sudo tee -a /etc/resolver/internal
 
 
-urls=(
-  # Drag and drop
+# TODO:
+# * wireguard
+# * cron
+
+# Drag and drop
+app_urls=(
   'https://updates.helftone.com/monodraw/downloads/monodraw-latest.dmg'
   'https://get.videolan.org/vlc/3.0.18/macosx/vlc-3.0.18-arm64.dmg'
-  # pkg installers
+  'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.2.8/Obsidian-1.2.8-universal.dmg',
+  'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
+  'https://github.com/qvacua/vimr/releases/download/v0.44.0-20230103.174333/VimR-v0.44.0.tar.bz2'
+)
+# pkg installers
+pkg_urls=(
   'https://zoom.us/client/5.13.7.15481/zoomusInstallerFull.pkg?archType=arm64'
 )
 
 
-curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+# curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
+function install_package() {
+  tdir='/tmp/install'
+  mkdir -p $tdir
+  url=$1
+  file=`basename $url`
+  installer=~/Downloads/$file
+  folder="${tdir}/${file%.*}"
+  mkdir -p $folder
+  curl -L -o $installer $url
+  hdiutil attach "$installer" "-mountpoint" "$folder" || quit "Failed to mount image"
+  ditto -v `ls -d $folder/*.app` /Applications/
+  hdiutil detach "$folder"
+  rm -rf "$folder"
+}
 
-command mkdir "$tdir/mp"
-command hdiutil attach "$installer" "-mountpoint" "$tdir/mp" || die "Failed to mount kitty.dmg"
-command ditto -v "$tdir/mp/kitty.app" "$dest"
-command hdiutil detach "$tdir/mp"
-command rm -rf "$tdir"
+for url in ${app_urls[@]}; do
+  log "Installing: ${url}"
+  install_package $url
+done

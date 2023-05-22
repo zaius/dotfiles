@@ -233,6 +233,12 @@ if test -n "$KITTY_INSTALLATION_DIR"; then
 fi
 
 
+# Use local chromium for puppeteer so we can avoid rosetta
+if which chromium > /dev/null; then
+  export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+  export PUPPETEER_EXECUTABLE_PATH=`which chromium`
+fi
+
 
 alias nomad-shell='NOMAD_ADDR=http://prd-nomad.prd:4646 nomad alloc exec $(python /Users/zaius/code/beyond/server/shell.py -e prd -s zaius -q) tmux att -t app-shell'
 export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
