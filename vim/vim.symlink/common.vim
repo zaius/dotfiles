@@ -46,13 +46,15 @@ let g:ale_linters = {
 let g:ale_linters_explicit = 1
 let g:ale_completion_enabled = 1
 
-let g:ale_javascript_prettier_use_local_config = 0
+let g:ale_typescript_prettier_use_local_config = 1
+
+let g:ale_javascript_prettier_use_local_config = 1
 let g:ale_javascript_eslint_use_global = 1
 let g:ale_javascript_eslint_executable = '/opt/homebrew/bin/eslint'
 " let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/client/.eslintrc.js'
 " let g:ale_javascript_eslint_options = '--config /Users/zaius/code/beyond/beacon/js/.eslintrc.json'
-let g:ale_javascript_prettier_use_global = 1
-let g:ale_javascript_prettier_executable = '/opt/homebrew/bin/prettier'
+let g:ale_javascript_prettier_use_global = 0
+" let g:ale_javascript_prettier_executable = '/opt/homebrew/bin/prettier'
 " let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
 
 let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-language-server.php')
@@ -129,6 +131,7 @@ endif
   Plug 'nathanaelkane/vim-indent-guides'
   Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
+  Plug 'github/copilot.vim'
 
   " Syntax
   Plug 'plasticboy/vim-markdown'
@@ -333,6 +336,7 @@ set notitle
 " http://superuser.com/questions/558876
 set signcolumn=yes
 
+vmap <Leader>t- :Tabularize /-<CR>
 vmap <Leader>t, :Tabularize /,<CR>
 vmap <Leader>T, :Tabularize /,\zs<CR>
 vmap <Leader>t: :Tabularize /\:<CR>
@@ -347,6 +351,20 @@ vmap <Leader>t, :Tabularize /\v,(([^"]*"[^"]*")*[^"]*$)@=<CR>
 
 " https://github.com/junegunn/fzf.vim
 map <C-p> :GFiles<CR>
+
+command! -bang -nargs=* PRg
+  \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1,
+  \ {'dir': system('git -C '.expand('%:p:h').' rev-parse --show-toplevel 2> /dev/null')[:-2]}, <bang>0)
+
+
+" grep within the folder of the current file
+command! -bang -nargs=* GGrep
+  \ call fzf#vim#grep(
+  \   'git grep --line-number -- '.shellescape(<q-args>),
+  \   fzf#vim#with_preview({'dir': expand('%:h')}), <bang>0)
+
+map <C-g> :GGrep<CR>
+
 
 " TODO: switch to git-better-blame (in /bin)
 map <Leader>gb :Git blame<CR>
