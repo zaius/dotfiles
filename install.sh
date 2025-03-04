@@ -14,6 +14,11 @@ home-link() {
   local dst=${2:-$default_dst}
 
   echo "linking $src to $dst"
+  if [[ ! -e $src ]]; then
+    echo "warning - no source file found"
+    return
+  fi
+
   [[ -L $dst ]] && rm $dst
   if [[ -e $dst ]]; then
     echo "warning - removing original $dst"
@@ -36,9 +41,9 @@ home-link git/gitconfig.beyond.symlink
 home-link git/gitignore.symlink
 home-link inputrc.symlink
 home-link ipython.symlink
-home-link pdbrc.symlink
 home-link psqlrc.symlink
 home-link pythonrc.symlink
 home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link profile.symlink
+home-link eslintrc.json.symlink

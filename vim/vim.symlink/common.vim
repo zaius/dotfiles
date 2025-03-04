@@ -131,7 +131,6 @@ endif
   Plug 'nathanaelkane/vim-indent-guides'
   Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
-  Plug 'github/copilot.vim'
 
   " Syntax
   Plug 'plasticboy/vim-markdown'
@@ -153,6 +152,7 @@ endif
   Plug 'sheerun/vim-wombat-scheme'
 
   Plug 'psf/black', { 'tag': '23.1.0'}
+  Plug 'nelsyeung/twig.vim'
 
   if exists("g:neovim")
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
@@ -176,7 +176,7 @@ set sidescrolloff=20
 
 let g:black_fast = 1
 let g:black_linelength = 88
-let g:black_skip_string_normalization = 1
+" let g:black_skip_string_normalization = 1
 autocmd BufWritePre *.py execute ':Black'
 
 set background=dark
@@ -368,6 +368,7 @@ map <C-g> :GGrep<CR>
 
 " TODO: switch to git-better-blame (in /bin)
 map <Leader>gb :Git blame<CR>
+map <Leader>gg :GGrep<CR>
 
 imap <C-space> <ESC>:ALEComplete<CR>
 

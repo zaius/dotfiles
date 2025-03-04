@@ -13,6 +13,12 @@ log() {
   reset=$(tput sgr0)
   echo " ${cyan}-- $@${reset}"
 }
+
+
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+
 brew=/opt/homebrew/bin/brew
 $brew install \
   bash \
@@ -24,7 +30,9 @@ $brew install \
   neovim \
   htop \
   nmap \
+  pyenv \
   wget \
+  1password-cli \
   `# For python extensions` \
   xz
 
@@ -49,7 +57,7 @@ chsh -s /opt/homebrew/bin/bash zaius
 
 
 mkdir fira
-curl --location https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip > fira/fira.zip
+curl --location https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip > fira.zip
 unzip -d fira/ fira.zip
 rm fira.zip
 cp fira/ttf/* /Library/Fonts/
@@ -71,12 +79,13 @@ defaults write -g ApplePressAndHoldEnabled -bool false
 
 
 $brew install google-cloud-sdk
+#
 # pip3 install gcloud gsutil
 #
 # Git color diffs
-$brew install git-delta
-$brew install libpq
-
+$brew install \
+  git-delta \
+  libpq
 
 
 # Avoid wireguard sending all DNS requests via tunnel
@@ -94,13 +103,20 @@ echo search us-central1-f.c.beyond-pricing-1024.internal | sudo tee -a /etc/reso
 # TODO:
 # * wireguard
 # * cron
+# * orbstack
+# * dropbox
+# * 1pass
+# * firefox
+# * rectangle
+# * karabiner
+# * zoom
 
 # Drag and drop
 app_urls=(
   'https://updates.helftone.com/monodraw/downloads/monodraw-latest.dmg'
   'https://get.videolan.org/vlc/3.0.18/macosx/vlc-3.0.18-arm64.dmg'
   'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.2.8/Obsidian-1.2.8-universal.dmg',
-  'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
+  # 'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
   'https://github.com/qvacua/vimr/releases/download/v0.44.0-20230103.174333/VimR-v0.44.0.tar.bz2'
 )
 # pkg installers
@@ -109,7 +125,6 @@ pkg_urls=(
 )
 
 
-# curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 function install_package() {
   tdir='/tmp/install'

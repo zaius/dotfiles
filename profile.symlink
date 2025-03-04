@@ -35,6 +35,18 @@ if which go > /dev/null; then
   export GOBIN=$HOME/.go/bin
 fi
 
+export PNPM_HOME="/Users/zaius/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+. "$HOME/.cargo/env"
+
+# Beyond CLI
+if [[ -d $HOME/.local/bin ]]; then
+  export PATH=$PATH:$HOME/.local/bin
+fi
+
 
 ## VARIABLES
 
@@ -111,6 +123,9 @@ fi
 
 
 ## ALIASES
+if which nvim > /dev/null; then
+  alias vi="nvim"
+fi
 
 alias less="command $PAGER"
 # alias dc="docker-compose --file=docker-compose.local-client.yml"
@@ -220,7 +235,8 @@ fi
 
 ## NVM / Node
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "~/.nvm/nvm.sh" ] && \. "~/.nvm/nvm.sh"  # This loads nvm
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 # Keep quiet on mac when using bash
@@ -241,7 +257,15 @@ fi
 
 
 alias nomad-shell='NOMAD_ADDR=http://prd-nomad.prd:4646 nomad alloc exec $(python /Users/zaius/code/beyond/server/shell.py -e prd -s zaius -q) tmux att -t app-shell'
+
 export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init.bash 2>/dev/null || :
+. "$HOME/.cargo/env"
+
+
+# if [[ -f /Users/zaius/miniconda3/bin/conda ]]; then
+#   eval "$(/Users/zaius/miniconda3/bin/conda shell.bash hook)"
+# fi
