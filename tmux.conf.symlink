@@ -75,6 +75,10 @@ setw -g pane-base-index 1
 
 # Another option for handling nested windows - use up/down to move through
 # levels. e.g.: http://stahlke.org/dan/tmux-nested/
-if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.mac.conf'
+# if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.mac.conf'
+
 # TODO: this should be checking for outer tmux?
 if 'uname | grep -q Linux' 'source ~/.dotfiles/tmux.inner.conf'
+# Source on Darwin unconditionally — checking $TERM_PROGRAM is unreliable
+# because tmux's server env is frozen at server-start time.
+if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.ghostty.conf'
