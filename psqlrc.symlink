@@ -2,11 +2,13 @@
 
 -- Other good examples
 --  https://gist.github.com/jaytaylor/e5aa89c8f3aaab3f576f
+-- https://raw.githubusercontent.com/exhuma/dotfiles/refs/heads/master/.psqlrc
+\setenv PAGER 'pspg --style=24 --ignore-case'
 \pset linestyle unicode
 \pset border 2
 
 \pset format wrapped
-\pset pager always
+\pset pager on
 
 \x auto
 \timing
@@ -25,9 +27,6 @@
 -- history.
 \set HISTCONTROL ignoredups
 
--- Tab complete in upper case
-\set COMP_KEYWORD_CASE upper
-
 -- export YELLOW=`echo -e '\033[1;33m'`
 -- export LIGHT_CYAN=`echo -e '\033[1;36m'`
 -- export NOCOLOR=`echo -e '\033[0m'`
@@ -43,3 +42,10 @@
 --   SELECT reltuples::bigint AS estimate
 --   FROM   pg_class
 --   WHERE  oid = 'myschema.mytable'::regclass;
+
+
+-- '%/%R%x%# '
+\set blue '%[%033[1;33;40m%]'
+\set reset '%[%033[0m%]'
+\set PROMPT1 '%:"blue":%m:%/%R%:"reset":%x%# '
+\set PROMPT2 '%w%R%x%# '
