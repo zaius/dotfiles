@@ -331,7 +331,14 @@ autocmd BufWrite :call ClearTrailingWhitespace()<cr>
 :vmap <Leader>j !python3 -m json.tool <CR>
 :nmap <Leader>j !!python3 -m json.tool <CR>
 
-set notitle
+" Update the terminal title to the current filename so tmux tabs and the
+" ghostty window show what's being edited. Force OSC 2 (t_ts/t_fs) since
+" with TERM=screen-256color vim would otherwise emit screen-style title
+" escapes that tmux drops when allow-rename is off.
+set title
+set titlestring=%t
+let &t_ts = "\e]2;"
+let &t_fs = "\007"
 
 " http://superuser.com/questions/558876
 set signcolumn=yes
@@ -420,7 +427,6 @@ let g:vim_markdown_folding_disabled=1
 
 " New line (with `o`) in a markdown list shouldn't indent
 let g:vim_markdown_new_list_item_indent = 0
-
 
 
 " Open tag in new tab

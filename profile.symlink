@@ -103,6 +103,16 @@ function build_prompt() {
     # Append to history after each command
     history -a
 
+    # Set the terminal title to the current cwd (HOME → `~`). Done here
+    # rather than via PS1 so it fires reliably on every prompt — ghostty's
+    # PS1 title hook has gating that can skip prompts after certain
+    # command sequences, leaving tmux's pane_title stale.
+    case $PWD in
+      "$HOME")   printf '\e]2;~\a' ;;
+      "$HOME"/*) printf '\e]2;~%s\a' "${PWD#$HOME}" ;;
+      *)         printf '\e]2;%s\a' "$PWD" ;;
+    esac
+
     PS1="$bold"
     if [ $EXIT != 0 ]; then
         PS1+="$red$EXIT "

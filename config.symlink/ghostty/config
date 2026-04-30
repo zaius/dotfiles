@@ -1,12 +1,11 @@
 window-decoration = none
 copy-on-select = clipboard
 
-# Auto-attach (or create) a shared tmux session named "main" on every
-# ghostty launch. Side effect: the cmd shortcuts below always have tmux
-# to talk to. Multiple ghostty windows attach to the same session and
-# will mirror — split with `prefix s` / new sessions if you want
-# independent views.
-command = /opt/homebrew/bin/tmux new-session -A -s main
+# Each ghostty window starts its own (auto-numbered) tmux session, so
+# windows are independent — closing a ghostty window ends that session's
+# tabs. To attach to an existing session instead, run `tmux attach` or
+# `tmux a -t <name>` from a fresh ghostty window.
+command = /opt/homebrew/bin/tmux
 
 # cmd+shift+, is remapped to swap tabs left, so reload moves to cmd+opt+,
 keybind = cmd+opt+comma=reload_config
