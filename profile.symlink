@@ -132,9 +132,16 @@ fi
 
 
 ## COMPLETIONS
-if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
-  . /opt/homebrew/etc/profile.d/bash_completion.sh
-fi
+# Lazy-load bash_completion on first <Tab> — saves ~500ms per shell.
+_lazy_bash_completion() {
+  bind -r '\t' 2>/dev/null
+  bind '"\t": complete'
+  if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
+    . /opt/homebrew/etc/profile.d/bash_completion.sh
+  fi
+  unset -f _lazy_bash_completion
+}
+bind -x '"\t": _lazy_bash_completion' 2>/dev/null
 
 
 # shell command completion for gcloud.
