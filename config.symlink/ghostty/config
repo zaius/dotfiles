@@ -1,0 +1,32 @@
+window-decoration = none
+copy-on-select = clipboard
+
+# Auto-attach (or create) a shared tmux session named "main" on every
+# ghostty launch. Side effect: the cmd shortcuts below always have tmux
+# to talk to. Multiple ghostty windows attach to the same session and
+# will mirror — split with `prefix s` / new sessions if you want
+# independent views.
+command = /opt/homebrew/bin/tmux new-session -A -s main
+
+# cmd+shift+, is remapped to swap tabs left, so reload moves to cmd+opt+,
+keybind = cmd+opt+comma=reload_config
+
+# Cmd shortcuts route through tmux's prefix (C-Space, see tmux.ghostty.conf).
+# C-Space is byte \x00 — chosen so C-b and C-s pass through untouched
+# to nested tmux sessions on remote hosts.
+keybind = cmd+t=text:\x00c
+keybind = cmd+w=text:\x00&
+keybind = cmd+shift+left_bracket=text:\x00p
+keybind = cmd+shift+right_bracket=text:\x00n
+keybind = cmd+shift+comma=text:\x00<
+keybind = cmd+shift+period=text:\x00>
+
+keybind = cmd+digit_1=text:\x001
+keybind = cmd+digit_2=text:\x002
+keybind = cmd+digit_3=text:\x003
+keybind = cmd+digit_4=text:\x004
+keybind = cmd+digit_5=text:\x005
+keybind = cmd+digit_6=text:\x006
+keybind = cmd+digit_7=text:\x007
+keybind = cmd+digit_8=text:\x008
+keybind = cmd+digit_9=text:\x009

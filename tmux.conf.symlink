@@ -73,12 +73,21 @@ set -s escape-time 0
 set -g base-index 1
 setw -g pane-base-index 1
 
+
+# Make sure shift-enter (e.g. for claude) works inside tmux
+set -s extended-keys on
+set -as terminal-features 'xterm*:extkeys'
+
+
 # Another option for handling nested windows - use up/down to move through
 # levels. e.g.: http://stahlke.org/dan/tmux-nested/
 # if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.mac.conf'
 
 # TODO: this should be checking for outer tmux?
 if 'uname | grep -q Linux' 'source ~/.dotfiles/tmux.inner.conf'
-# Source on Darwin unconditionally — checking $TERM_PROGRAM is unreliable
-# because tmux's server env is frozen at server-start time.
-if 'uname | grep -q Darwin' 'source ~/.dotfiles/tmux.ghostty.conf'
+
+# Source the ghostty overlay only when the tmux server was started by
+# ghostty. We gate on $GHOSTTY_RESOURCES_DIR (set by ghostty, preserved by
+# tmux) rather than $TERM_PROGRAM — tmux overrides TERM_PROGRAM=tmux in
+# spawned shells, so that check would always fail.
+if-shell '[ -n "$GHOSTTY_RESOURCES_DIR" ]' 'source-file ~/.dotfiles/tmux.ghostty.conf'
