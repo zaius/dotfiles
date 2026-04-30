@@ -259,6 +259,16 @@ set ruler
 " Bounce the cursor off the opposite brace
 set showmatch
 
+" Uhhh why has nvim started messing with my word-wrap all of a sudden?!
+" ALE now uses vim.lsp.start, which triggers nvim's LspAttach defaults and sets
+" formatexpr=v:lua.vim.lsp.formatexpr() buffer-locally — breaking gqq for
+" comments/docstrings (python formatters don't reflow text). Clear it on attach.
+set formatexpr=
+autocmd LspAttach * setlocal formatexpr=
+
+" LSP code formatting (separate from gq prose-wrapping)
+nnoremap <leader>q <cmd>lua vim.lsp.buf.format()<CR>
+
 " Fix my inability to use shift properly
 "https://stackoverflow.com/questions/117150/can-i-remap-ex-commands-in-vim
 command WQ wq
