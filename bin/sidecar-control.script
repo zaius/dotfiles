@@ -1,0 +1,227 @@
+#!/usr/bin/osascript
+
+on speak(msg)
+    do shell script "say --rate 400 " & quoted form of msg & " &"
+end speak
+
+-- Recursive walk via `UI elements`. Errors bubble to the top-level handler.
+-- Pass `missing value` for elName to match any name.
+on findElement(parent, klass, elName)
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            if class of e is klass and my matchesName(e, elName) then
+                return contents of e
+            end if
+            set found to my findElement(e, klass, elName)
+            if found is not missing value then return found
+        end repeat
+    end tell
+    return missing value
+end findElement
+
+on matchesName(e, elName)
+    if elName is missing value then return true
+    tell application "System Events"
+        if name of e is elName then return true
+        if description of e is elName then return true
+        if help of e is elName then return true
+        if exists attribute "AXIdentifier" of e then
+            if (value of attribute "AXIdentifier" of e) is elName then return true
+        end if
+    end tell
+    return false
+end matchesName
+
+on collectElements(parent, klass, acc)
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            if class of e is klass then set end of acc to contents of e
+            my collectElements(e, klass, acc)
+        end repeat
+    end tell
+    return acc
+end collectElements
+
+on describeElement(e)
+    tell application "System Events"
+        set s to "name=" & ((name of e) as text)
+        set s to s & " desc=" & ((description of e) as text)
+        set s to s & " rd=" & ((role description of e) as text)
+        if exists attribute "AXIdentifier" of e then
+            set s to s & " id=" & ((value of attribute "AXIdentifier" of e) as text)
+        end if
+        if exists attribute "AXValue" of e then
+            if (value of e) is not missing value then
+                set s to s & " val=" & ((value of e) as text)
+            end if
+        end if
+    end tell
+    return "[" & s & "]"
+end describeElement
+
+-- Dump every interactive element under the ControlCenter process for
+-- diagnostics on failure. Walks from the process root rather than
+-- `window 1` because the Screen Mirroring popover may be attached to a
+-- menu bar item rather than rendered as a top-level window.
+on dumpControls()
+    set out to ""
+    tell application "System Events"
+        tell process "ControlCenter"
+            set acc to {}
+            my collectElements(it, button, acc)
+            my collectElements(it, checkbox, acc)
+            my collectElements(it, menu button, acc)
+            my collectElements(it, pop up button, acc)
+            repeat with e in acc
+                if out is not "" then set out to out & " | "
+                set out to out & ((class of e) as text) & " " & my describeElement(e)
+            end repeat
+        end tell
+    end tell
+    if out is "" then return "(none)"
+    return out
+end dumpControls
+
+on dumpMenuBarItems()
+    set out to ""
+    tell application "System Events"
+        tell process "ControlCenter"
+            repeat with i in (every menu bar item of menu bar 1)
+                if out is not "" then set out to out & " | "
+                set out to out & my describeElement(i)
+            end repeat
+        end tell
+    end tell
+    return out
+end dumpMenuBarItems
+
+-- Find the Control Center menu bar item without assuming a specific name —
+-- locale ("Control Centre"), wording, or identifier varies across macOS
+-- versions. Try a list of known matchers, then fall back to a description
+-- containing "Control".
+on findControlCenter()
+    tell application "System Events"
+        tell process "ControlCenter"
+            repeat with itemName in {"Control Center", "Control Centre"}
+                if exists menu bar item itemName of menu bar 1 then
+                    return menu bar item itemName of menu bar 1
+                end if
+            end repeat
+            repeat with i in (every menu bar item of menu bar 1)
+                if (description of i) is not missing value then
+                    if (description of i) contains "Control" then return contents of i
+                end if
+            end repeat
+        end tell
+    end tell
+    return missing value
+end findControlCenter
+
+-- Sidecar device sub-options expose AXIdentifier
+-- "screen-mirroring-device-Sidecar:<uuid>" — five checkboxes share this id
+-- (Mirror Built-in, Mirror <other>, Use as Extended, Show Sidebar, Show
+-- Touch Bar). The first one is "Mirror Built-in", same target as the
+-- System Settings script. Name is missing, so identify by id prefix.
+-- Walks from the ControlCenter process root rather than a window: the
+-- popover may be attached to the menu bar item, not a top-level window.
+on findSidecarMirrorOption()
+    tell application "System Events"
+        tell process "ControlCenter"
+            return my findCheckboxByIdPrefix(it, "screen-mirroring-device-Sidecar:")
+        end tell
+    end tell
+end findSidecarMirrorOption
+
+on findCheckboxByIdPrefix(parent, idPrefix)
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            if class of e is checkbox then
+                if exists attribute "AXIdentifier" of e then
+                    set theId to value of attribute "AXIdentifier" of e
+                    if theId is not missing value then
+                        if theId starts with idPrefix then return contents of e
+                    end if
+                end if
+            end if
+            set found to my findCheckboxByIdPrefix(e, idPrefix)
+            if found is not missing value then return found
+        end repeat
+    end tell
+    return missing value
+end findCheckboxByIdPrefix
+
+try
+    tell application "System Events"
+        tell process "ControlCenter"
+            my speak("opening")
+            -- Prefer the dedicated Screen Mirroring menu bar item if the
+            -- user has it pinned ("Show in Menu Bar" in System Settings →
+            -- Control Center → Screen Mirroring); otherwise open the full
+            -- Control Center popover and find Screen Mirroring inside.
+            set opened to false
+            if exists menu bar item "Screen Mirroring" of menu bar 1 then
+                click menu bar item "Screen Mirroring" of menu bar 1
+                set opened to true
+            end if
+            if not opened then
+                set ccItem to my findControlCenter()
+                if ccItem is missing value then
+                    set seen to my dumpMenuBarItems()
+                    return "Control Center menu bar item not found. Items: " & seen
+                end if
+                click ccItem
+                delay 0.3
+                -- Module rows in Control Center expose their AXIdentifier
+                -- but not their name; matchesName() checks AXIdentifier so
+                -- this finds the checkbox even though name is missing.
+                set smCtrl to my findElement(window 1, checkbox, "controlcenter-screen-mirroring")
+                if smCtrl is missing value then
+                    set seen to my dumpControls()
+                    return "Screen Mirroring control not found. Saw: " & seen
+                end if
+                click smCtrl
+            end if
+
+            delay 1
+
+            set sidecar to my findSidecarMirrorOption()
+            if sidecar is missing value then
+                set seen to my dumpControls()
+                return "iPad not found. Devices seen: " & seen
+            end if
+
+            -- Already in target state — click would toggle and disconnect.
+            if (value of sidecar) is 1 then
+                my speak("already mirroring")
+                return "Already mirroring built-in"
+            end if
+
+            -- First click. From a disconnected state this connects the
+            -- iPad but macOS picks its own default mode (Extended) rather
+            -- than the mode of the clicked sub-option. From a wrong-mode
+            -- state this single click switches to mirror.
+            click sidecar
+            delay 1
+
+            -- Re-find: the popover re-renders after the click.
+            set sidecar to my findSidecarMirrorOption()
+            if sidecar is missing value then
+                return "Connected but mode unverified"
+            end if
+
+            if (value of sidecar) is 1 then
+                my speak("mirroring")
+                return "Mirroring built-in"
+            end if
+
+            -- Still val=0 means iPad connected in a non-mirror mode.
+            -- A second click on the Mirror Built-in option switches to it.
+            click sidecar
+            my speak("mirroring")
+            return "Switched to mirror built-in"
+        end tell
+    end tell
+on error errMsg
+    my speak("error " & errMsg)
+    return "error: " & errMsg
+end try

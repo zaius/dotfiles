@@ -1,0 +1,354 @@
+#!/usr/bin/osascript
+
+on speak(msg)
+    do shell script "say --rate 400 " & quoted form of msg & " &"
+end speak
+
+-- Recursive walk via `UI elements`. Avoids `entire contents`, which on this
+-- SwiftUI app returns a flat list whose references can go stale and surface
+-- as "Can't make item N into type specifier" errors mid-iteration.
+-- Pass `missing value` for elName to match any name. Errors bubble to the
+-- top-level handler.
+on findElement(parent, klass, elName)
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            if class of e is klass and my matchesName(e, elName) then
+                return contents of e
+            end if
+            set found to my findElement(e, klass, elName)
+            if found is not missing value then return found
+        end repeat
+    end tell
+    return missing value
+end findElement
+
+-- SwiftUI exposes labels inconsistently across `name` (AXTitle),
+-- `description` (AXDescription), `help` (AXHelp), and `AXIdentifier`.
+-- Match against any of them.
+on matchesName(e, elName)
+    if elName is missing value then return true
+    tell application "System Events"
+        if name of e is elName then return true
+        if description of e is elName then return true
+        if help of e is elName then return true
+        if exists attribute "AXIdentifier" of e then
+            if (value of attribute "AXIdentifier" of e) is elName then return true
+        end if
+    end tell
+    return false
+end matchesName
+
+-- Right pane is the widest group inside splitter group 1. The sidebar
+-- and the search field group above it are both narrower than the content
+-- pane, so width identifies the right pane reliably.
+on rightPane()
+    tell application "System Events"
+        tell process "System Settings"
+            set spg to splitter group 1 of group 1 of window 1
+            set widest to spg
+            set widestW to 0
+            repeat with g in (groups of spg)
+                set sz to value of attribute "AXSize" of g
+                if (item 1 of sz) > widestW then
+                    set widestW to (item 1 of sz)
+                    set widest to contents of g
+                end if
+            end repeat
+            return widest
+        end tell
+    end tell
+end rightPane
+
+on findInPane(klass, elName)
+    tell application "System Events"
+        return my findElement(my rightPane(), klass, elName)
+    end tell
+end findInPane
+
+on collectElements(parent, klass, acc)
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            if class of e is klass then set end of acc to contents of e
+            my collectElements(e, klass, acc)
+        end repeat
+    end tell
+    return acc
+end collectElements
+
+on hasShowSidebar()
+    tell application "System Events"
+        return (my findInPane(pop up button, "Show Sidebar")) is not missing value
+    end tell
+end hasShowSidebar
+
+on findUseAs()
+    tell application "System Events"
+        return my findInPane(pop up button, "Use as")
+    end tell
+end findUseAs
+
+-- The Add control is a `menu button`. Its name ("Add") and AXIdentifier
+-- ("plus") only appear when Built-in Display is the active selection;
+-- when another display is selected they're both missing. The description
+-- always reads "Display settings for <name>" (where <name> is whichever
+-- display is selected), so the prefix is the only stable matcher. Try
+-- name and id first (cheap exact match) and fall back to the prefix.
+on findAddButton()
+    tell application "System Events"
+        set allMenuBtns to my collectElements(my rightPane(), menu button, {})
+        repeat with e in allMenuBtns
+            if name of e is "Add" then return contents of e
+            if exists attribute "AXIdentifier" of e then
+                if (value of attribute "AXIdentifier" of e) is "plus" then return contents of e
+            end if
+            if (description of e) is not missing value then
+                if (description of e) starts with "Display settings for " then return contents of e
+            end if
+        end repeat
+    end tell
+    return missing value
+end findAddButton
+
+on getDisplayButtons()
+    set btns to {}
+    set allSizes to ""
+    tell application "System Events"
+        set allBtns to my collectElements(my rightPane(), button, {})
+        repeat with e in allBtns
+            set sz to value of attribute "AXSize" of e
+            set w to item 1 of sz
+            set h to item 2 of sz
+            if w > 80 and h > 80 then set end of btns to contents of e
+            set allSizes to allSizes & (w as integer) & "x" & (h as integer) & " "
+        end repeat
+    end tell
+    if (count of btns) is 0 then
+        my speak("no tiles. " & (count of allBtns) & " buttons sizes " & allSizes)
+    end if
+    return btns
+end getDisplayButtons
+
+on describeElement(e)
+    tell application "System Events"
+        set s to "name=" & ((name of e) as text)
+        set s to s & " desc=" & ((description of e) as text)
+        set s to s & " help=" & ((help of e) as text)
+        set s to s & " rd=" & ((role description of e) as text)
+        if exists attribute "AXIdentifier" of e then
+            set s to s & " id=" & ((value of attribute "AXIdentifier" of e) as text)
+        end if
+        if exists attribute "AXValue" of e then
+            set s to s & " val=" & ((value of e) as text)
+        end if
+        if exists attribute "AXSubrole" of e then
+            set s to s & " subr=" & ((value of attribute "AXSubrole" of e) as text)
+        end if
+        if exists attribute "AXPosition" of e then
+            set p to value of attribute "AXPosition" of e
+            if p is not missing value then
+                set s to s & " pos=" & ((item 1 of p) as integer) & "," & ((item 2 of p) as integer)
+            end if
+        end if
+        if exists attribute "AXSize" of e then
+            set sz to value of attribute "AXSize" of e
+            if sz is not missing value then
+                set s to s & " sz=" & ((item 1 of sz) as integer) & "x" & ((item 2 of sz) as integer)
+            end if
+        end if
+    end tell
+    return "[" & s & "]"
+end describeElement
+
+-- Dump every button-like control in the right pane so we can see which
+-- class and attribute combination identifies the Add control.
+on dumpControls()
+    set out to ""
+    tell application "System Events"
+        set rp to my rightPane()
+        set acc to {}
+        my collectElements(rp, button, acc)
+        my collectElements(rp, menu button, acc)
+        my collectElements(rp, pop up button, acc)
+        repeat with e in acc
+            if out is not "" then set out to out & " | "
+            set out to out & ((class of e) as text) & " " & my describeElement(e)
+        end repeat
+    end tell
+    if out is "" then return "(none)"
+    return out
+end dumpControls
+
+-- Recursive tree dump up to maxDepth, returning class + name + size for
+-- each element. Used in the failure path to see what AX is actually
+-- exposing under the window.
+on dumpTree(parent, depth, maxDepth)
+    if depth > maxDepth then return ""
+    set out to ""
+    tell application "System Events"
+        repeat with e in (UI elements of parent)
+            set indent to ""
+            set i to depth
+            repeat while i > 0
+                set indent to indent & "  "
+                set i to i - 1
+            end repeat
+            set cls to (class of e) as text
+            set tag to ""
+            if (name of e) is not missing value then
+                set tag to " [" & ((name of e) as text) & "]"
+            end if
+            set sz to ""
+            if exists attribute "AXSize" of e then
+                set s to value of attribute "AXSize" of e
+                if s is not missing value then
+                    set sz to " " & ((item 1 of s) as integer) & "x" & ((item 2 of s) as integer)
+                end if
+            end if
+            set out to out & indent & cls & tag & sz & "
+"
+            set out to out & my dumpTree(e, depth + 1, maxDepth)
+        end repeat
+    end tell
+    return out
+end dumpTree
+
+on dumpStructure()
+    set out to ""
+    tell application "System Events"
+        tell process "System Settings"
+            set winCount to count of windows
+            set out to "wins=" & winCount
+            repeat with i from 1 to winCount
+                set w to window i
+                set winName to name of w
+                if winName is missing value then set winName to "?"
+                set sz to value of attribute "AXSize" of w
+                set p to value of attribute "AXPosition" of w
+                set out to out & " | w" & i & "[" & winName & "] pos=" & ((item 1 of p) as integer) & "," & ((item 2 of p) as integer) & " sz=" & ((item 1 of sz) as integer) & "x" & ((item 2 of sz) as integer)
+            end repeat
+            set out to out & "
+TREE:
+" & my dumpTree(window 1, 0, 5)
+        end tell
+    end tell
+    return out
+end dumpStructure
+
+on selectIpadDisplay()
+    -- Click through each display tile; iPad is the one whose pane shows "Show Sidebar".
+    set displayBtns to my getDisplayButtons()
+    my speak("got " & (count of displayBtns) & " display buttons")
+    if (count of displayBtns) is 0 then error "no display buttons"
+    repeat with b in displayBtns
+        tell application "System Events"
+            set pos to value of attribute "AXPosition" of b
+            set sz to value of attribute "AXSize" of b
+        end tell
+        set cx to round ((item 1 of pos) + (item 1 of sz) / 2)
+        set cy to round ((item 2 of pos) + (item 2 of sz) / 2)
+        do shell script "/opt/homebrew/bin/cliclick c:" & cx & "," & cy
+        delay 0.2
+        if my hasShowSidebar() then return true
+    end repeat
+    return false
+end selectIpadDisplay
+
+-- Force a fresh launch. Long-running System Settings sessions have been
+-- observed where the embedded DisplaysExt extension's AX tree becomes
+-- opaque (UI elements of `application [DisplaysExt]` returns nothing).
+-- Restarting puts the process in a known state for each run.
+tell application "System Events"
+    if (count of (every process whose name is "System Settings")) > 0 then
+        tell application "System Settings" to quit
+    end if
+end tell
+tell application "System Settings" to activate
+
+try
+    tell application "System Events"
+        tell process "System Settings"
+            my speak("starting")
+            repeat 20 times
+                if exists window 1 then exit repeat
+                delay 0.1
+            end repeat
+            my speak("end repeat")
+
+            -- Sidebar contains section headers and dividers that lack the
+            -- static text path; check existence before reading.
+            set sidebar to outline 1 of scroll area 1 of group 1 of splitter group 1 of group 1 of window 1
+            repeat with r in (every row of sidebar)
+                if exists static text 1 of UI element 1 of r then
+                    if value of static text 1 of UI element 1 of r is "Displays" then
+                        select r
+                        exit repeat
+                    end if
+                end if
+            end repeat
+            my speak("end displays")
+
+            if name of window 1 is not "Displays" then
+                my speak("display pane not selected")
+                return "display pane not selected"
+            end if
+
+            set addBtn to my findAddButton()
+            if addBtn is missing value then
+                set struct to my dumpStructure()
+                set seen to my dumpControls()
+                my speak("Add button not found")
+                return "Add button not found. " & struct & ". Controls: " & seen
+            else
+                my speak("Add button found")
+            end if
+
+            if my selectIpadDisplay() then
+                my speak("found ipad")
+            else
+                my speak("No ipad connected - adding")
+                -- Re-lookup: the cached reference can go stale after selectIpadDisplay
+                -- re-renders the right-pane subtree.
+                set addBtn to my findAddButton()
+                if addBtn is missing value then
+                    my speak("Add button missing after click-through")
+                    return "Add button missing after click-through"
+                end if
+                -- AXPress is more reliable than `click` for SwiftUI menu buttons,
+                -- which can otherwise open-and-immediately-dismiss the menu.
+                tell application "System Events" to perform action "AXPress" of addBtn
+                delay 0.5
+                click menu item "iPad" of menu 1 of addBtn
+                delay 0.5
+
+                my speak("Waiting for connection")
+                delay 3
+
+                if not my selectIpadDisplay() then
+                    my speak("iPad display not selected")
+                    return "Could not select iPad display"
+                end if
+            end if
+
+            set useAsPopup to my findUseAs()
+            if useAsPopup is missing value then
+                my speak("could not find use as")
+                return "Use as popup not found"
+            end if
+
+            set currentVal to value of useAsPopup
+            if currentVal is "Mirror for Built-in Display" then
+                my speak("already mirroring")
+                return "Already mirroring"
+            end if
+
+            click useAsPopup
+            click menu item "Mirror for Built-in Display" of menu 1 of useAsPopup
+            my speak("mirroring enabled")
+            return "Sidecar mirroring enabled"
+        end tell
+    end tell
+on error errMsg
+    my speak("error " & errMsg)
+    log "FATAL: " & errMsg
+    return "error: " & errMsg
+end try
