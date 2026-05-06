@@ -51,4 +51,4 @@ home-link pythonrc.symlink
 home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link profile.symlink
-home-link eslintrc.json.symlink
+# home-link eslintrc.json.symlink

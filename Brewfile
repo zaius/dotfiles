@@ -3,6 +3,7 @@
 # --- CLI tools ---
 brew "bash"
 brew "bash-completion@2"
+brew "delta" # nicer git diffs
 brew "fzf"
 brew "htop"
 brew "mas"
@@ -11,6 +12,7 @@ brew "neovim"
 brew "nmap"
 brew "nvm"
 brew "pyenv"
+brew "tmux"
 brew "wget"
 brew "xz"
 
@@ -18,12 +20,13 @@ brew "xz"
 brew "eslint"
 brew "prettier"
 
-# --- AI coding CLIs ---
+# --- CLIs
 cask "claude-code"
 cask "codex"
+brew "azure-cli"
 
-# --- Secrets ---
-brew "1password-cli"
+# --- AI desktop apps ---
+cask "claude"
 
 # --- Terminals ---
 cask "ghostty"
@@ -31,18 +34,19 @@ cask "kitty"
 
 # --- Browsers ---
 cask "firefox"
-cask "chromium", args: { no_quarantine: true }
+cask "ungoogled-chromium" # quarantine stripped post-install in mac-brew.sh
 
 # --- Productivity / windowing ---
 cask "1password"
+cask "1password-cli"
 cask "dropbox"
 cask "karabiner-elements"
 cask "obsidian"
 cask "rectangle"
+cask "kitlangton-hex"
 
 # --- Dev / containers ---
 cask "orbstack"
-cask "kitlangton-hex"
 
 # --- Networking ---
 cask "tailscale-app"
@@ -54,6 +58,9 @@ cask "vimr"
 
 # --- Meetings ---
 cask "zoom"
+cask "slack"
+cask "discord"
+cask "granola"
 
 # --- Fonts ---
 cask "font-fira-code"
@@ -62,3 +69,8 @@ cask "font-fira-code"
 # Requires being signed into the App Store first; `mas` cannot sign you in.
 mas "Microsoft Word", id: 462054704
 mas "Microsoft Excel", id: 462058435
+
+# iOS apps still unsupported, but if that eventually changes
+# https://github.com/mas-cli/mas/issues/321
+# mas "amaran", id: 6503329243
+mas "amaran Desktop", id: 6590629064

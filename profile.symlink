@@ -18,9 +18,6 @@ export PATH=~/.dotfiles/bin:/usr/local/bin:$HOMEBREW_PREFIX/bin:$PATH
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
 fi
-if [[ -d /Applications/MacVim.app/Contents/bin ]]; then
-  export PATH=$PATH:/Applications/MacVim.app/Contents/bin
-fi
 if [[ -d /usr/local/git-fuzzy/bin ]]; then
   export PATH=$PATH:/usr/local/git-fuzzy/bin
 fi
@@ -35,24 +32,6 @@ if which go > /dev/null; then
   export GOBIN=$HOME/.go/bin
 fi
 
-export PNPM_HOME="/Users/zaius/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-. "$HOME/.cargo/env"
-
-# Beyond CLI
-if [[ -d $HOME/.local/bin ]]; then
-  export PATH=$PATH:$HOME/.local/bin
-  alias appshell='\
-    NOMAD_ADDR=http://prd-nomad.prd:4646 \
-    nomad alloc exec -namespace=staff -task=server \
-    $(beyond appshell --env prd --namespace staff run zaius-0) \
-    tmux att -t app-shell'
-fi
-
-
 ## VARIABLES
 
 export EDITOR=$HOMEBREW_PREFIX/bin/nvim
@@ -66,13 +45,10 @@ export HISTTIMEFORMAT="[%F %T] "
 # Change the file location because certain bash sessions truncate .bash_history file upon close.
 # http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
 export HISTFILE=~/.bash_history_v2
-
-
 shopt -s histappend
-export VAULT_ADDR="https://vault.prd:8200"
-export VAULT_CAPATH="$HOME/.vault_certs/"
-export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
 
+export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
+alias less="command $PAGER"
 
 
 ## PROMPT
@@ -104,11 +80,6 @@ function build_prompt() {
       "$HOME"/*) printf '\e]2;~%s\a' "${PWD#$HOME}" ;;
       *)         printf '\e]2;%s\a' "$PWD" ;;
     esac
-
-    # Nudge tmux to redraw the status bar now (re-evaluating
-    # automatic-rename-format with the OSC we just emitted) instead of
-    # waiting up to status-interval seconds for the next tick.
-    [ -n "$TMUX" ] && tmux refresh-client -S 2>/dev/null
 
     PS1="$bold"
     if [ $EXIT != 0 ]; then
@@ -158,15 +129,14 @@ fi
 
 
 ## COMPLETIONS
-# Defer bash_completion load until *after* the first command runs — saves
-# ~500ms at shell start. Tab is left bound to readline's default `complete`,
-# which already handles file/dir completion (so `cd xx<Tab>` works
-# immediately). The 500ms cost is paid silently between hitting Enter on the
-# first command and seeing the second prompt.
+# Defer bash_completion load until *after* the first command runs — saves ~500ms at
+# shell start. Tab is left bound to readline's default `complete`, which already handles
+# file/dir completion (so `cd xx<Tab>` works immediately). The 500ms cost is paid
+# silently between hitting Enter on the first command and seeing the second prompt.
 _lazy_bash_completion_count=0
 _lazy_bash_completion_loader() {
-  (( ++_lazy_bash_completion_count >= 2 )) || return
-  if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
+  (( ++_lazy_bash_completion_count >= 2 )) || return 0
+  if [ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]; then
     . /opt/homebrew/etc/profile.d/bash_completion.sh
   fi
   PROMPT_COMMAND="${PROMPT_COMMAND/_lazy_bash_completion_loader; /}"
@@ -176,21 +146,31 @@ _lazy_bash_completion_loader() {
 PROMPT_COMMAND="_lazy_bash_completion_loader; ${PROMPT_COMMAND}"
 
 
-# shell command completion for gcloud.
-if [ -f '/usr/local/google-cloud-sdk/completion.bash.inc' ];
-  then . '/usr/local/google-cloud-sdk/completion.bash.inc';
-fi
-
-
-
 ## ALIASES
 if which nvim > /dev/null; then
   alias vi="nvim"
 fi
 
-alias less="command $PAGER"
-# alias dc="docker-compose --file=docker-compose.local-client.yml"
-alias dc="docker compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.m1.yml"
+
+function ff() {
+  find . -iname "*$@*"
+}
+function ssh() {
+  command ssh $@ -t "tmux attach -t zaius -d || tmux attach -t 0 || bash -l"
+}
+
+# https://til.simonwillison.net/til/til/bash_escaping-a-string.md
+# https://news.ycombinator.com/item?id=24659282
+alias escapequotes='echo !:q'
+
+if which fzf > /dev/null; then
+  # $(brew --prefix)/opt/fzf/install
+  # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+  source ~/.dotfiles/bash/fzf.bash
+fi
+
+
+## GIT
 # Use `■` to delimit columns. There is no non-greedy matching in sed, so match 32 non ■
 # characters and truncate / add ellipsis.
 alias gb="\
@@ -223,62 +203,8 @@ function gsp() {
   fi
 }
 
-if which exa > /dev/null; then
-  alias ls="exa -l"
-else
-  alias ls="ls -lG"
-fi
-
-function ff() {
-  find . -iname "*$@*"
-}
-alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
-alias fixkitty='kitty +kitten ssh'
-alias icat='kitty +kitten icat'
-function ssh() {
-  command ssh $@ -t "tmux attach -t zaius -d || tmux attach -t 0 || bash -l"
-}
-
-# https://til.simonwillison.net/til/til/bash_escaping-a-string.md
-# https://news.ycombinator.com/item?id=24659282
-alias escapequotes='echo !:q'
-
-if which fzf > /dev/null; then
-  # $(brew --prefix)/opt/fzf/install
-  # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-  source ~/.dotfiles/bash/fzf.bash
-fi
-
-# -v ~/.ipython/:/root/.ipython \
-alias manage.py='dc run --rm uwsgi-beyond python manage.py'
-
-alias refresh-tags-ignore="cat .gitignore | sed 's/\/$//g' | sed '/^$/d' | sed '/^[\#\|\!]/d' > .ctagsignore"
-alias refresh-tags='refresh-tags-ignore; ctags --exclude="@.ctagsignore" --python-kinds=-i --languages=python -R server/; rm .ctagsignore'
-
-vault_secret_id() {
-  unset TF_VAR_vault_secret_id
-
-  secret_id=$(vault write -field secret_id -f auth/approle/role/terraform/secret-id)
-
-  if [ -n "$secret_id" ]; then
-    export TF_VAR_vault_secret_id=$secret_id
-    echo "Exported TF_VAR_vault_secret_id=$TF_VAR_vault_secret_id"
-  else
-    echo "Failed to get secret_id!"
-  fi
-}
-export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-
-function lastlog() {
-  vi -p response-log/$1/`command ls -rt response-log/$1 | tail -n 1`
-}
-export NOMAD_ADDR=http://stg-nomad.bpdev:4646
-
 
 ## PYENV
-# System python bins last - for pylsp / black from vim
-export PATH="$PATH:/Users/zaius/Library/Python/3.9/bin"
-
 if [[ -d $HOME/.pyenv/bin ]]; then
   export PATH="$HOME/.pyenv/bin:$PATH"
 fi
@@ -286,11 +212,6 @@ fi
 if which pyenv > /dev/null; then
   export PYENV_ROOT="$HOME/.pyenv"
   eval "$(pyenv init -)"
-
-  # Fix compilation of 3.6
-  # https://stackoverflow.com/questions/66482346/problems-installing-python-3-6-with-pyenv-on-mac-os-big-sur
-  export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/bzip2/lib"
-  export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/bzip2/include"
 fi
 
 
@@ -300,42 +221,23 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "~/.nvm/nvm.sh" ] && \. "~/.nvm/nvm.sh"  # This loads nvm
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
-# Keep quiet on mac when using bash
-# https://support.apple.com/en-us/HT208050
-export BASH_SILENCE_DEPRECATION_WARNING=1
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
+
+## Kitty
 if test -n "$KITTY_INSTALLATION_DIR"; then
-    export KITTY_SHELL_INTEGRATION="enabled"
-    source "$KITTY_INSTALLATION_DIR/shell-integration/bash/kitty.bash"
+  export KITTY_SHELL_INTEGRATION="enabled"
+  source "$KITTY_INSTALLATION_DIR/shell-integration/bash/kitty.bash"
 fi
+alias fixterm='curl https://raw.githubusercontent.com/kovidgoyal/kitty/master/terminfo/x/xterm-kitty | sudo tee /usr/share/terminfo/x/xterm-kitty > /dev/null'
+alias fixkitty='kitty +kitten ssh'
+alias icat='kitty +kitten icat'
 
-
-# Use local chromium for puppeteer so we can avoid rosetta
-if which chromium > /dev/null; then
-  export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-  export PUPPETEER_EXECUTABLE_PATH=`which chromium`
-fi
-
-
-alias nomad-shell='NOMAD_ADDR=http://prd-nomad.prd:4646 nomad alloc exec $(python /Users/zaius/code/beyond/server/shell.py -e prd -s zaius -q) tmux att -t app-shell'
-
-export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-
-# Added by OrbStack: command-line tools and integration
-source ~/.orbstack/shell/init.bash 2>/dev/null || :
-. "$HOME/.cargo/env"
-
-
-# if [[ -f /Users/zaius/miniconda3/bin/conda ]]; then
-#   eval "$(/Users/zaius/miniconda3/bin/conda shell.bash hook)"
-# fi
 
 # See: https://github.com/tailscale/tailscale/issues/11510
 if [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; then
   alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 fi
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
