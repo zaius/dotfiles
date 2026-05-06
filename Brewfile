@@ -42,6 +42,7 @@ cask "rectangle"
 
 # --- Dev / containers ---
 cask "orbstack"
+cask "kitlangton-hex"
 
 # --- Networking ---
 cask "tailscale-app"

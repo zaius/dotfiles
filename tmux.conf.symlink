@@ -29,7 +29,7 @@ bind-key -T copy-mode-vi 'y' send-keys -X copy-selection     # Yank selection in
 bind -Tcopy-mode WheelUpPane send -N1 -X scroll-up
 bind -Tcopy-mode WheelDownPane send -N1 -X scroll-down
 
-set -g default-terminal "screen-256color"
+set -g default-terminal "tmux-256color"
 
 # Set status bar
 set -g status-left-length 16

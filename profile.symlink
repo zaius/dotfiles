@@ -77,19 +77,6 @@ export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-l
 
 ## PROMPT
 
-title() {
-  # echo -ne "\033]0;$@\007"
-  true
-}
-# preexec breaks fzf
-# source ~/.dotfiles/preexec.bash
-preexec () {
-  title $@
-}
-precmd () {
-  title 'bash'
-}
-
 fromhex(){
     hex=${1#"#"}
     r=$(printf '0x%0.2s' "$hex")
@@ -118,6 +105,11 @@ function build_prompt() {
       *)         printf '\e]2;%s\a' "$PWD" ;;
     esac
 
+    # Nudge tmux to redraw the status bar now (re-evaluating
+    # automatic-rename-format with the OSC we just emitted) instead of
+    # waiting up to status-interval seconds for the next tick.
+    [ -n "$TMUX" ] && tmux refresh-client -S 2>/dev/null
+
     PS1="$bold"
     if [ $EXIT != 0 ]; then
         PS1+="$red$EXIT "
@@ -126,8 +118,37 @@ function build_prompt() {
 }
 
 export PROMPT_COMMAND=build_prompt
-# preexec overrides PROMPT_COMMAND - make sure it's called after.
-# preexec_install
+
+# Update the tmux/ghostty pane title to the command *about to run*, so
+# long-running commands (ssh, npm start, curl, …) show up in the tab
+# instead of the stale cwd that build_prompt left behind on the previous
+# prompt. PROMPT_COMMAND only fires between commands, hence this hook.
+#
+# We watch `history 1` instead of using an arming flag: bash only appends
+# to history when the user actually submits a command, so this naturally
+# skips PROMPT_COMMAND internals, completion (COMP_LINE), and fzf's
+# keybinding helpers (which never enter history) — that last one is why
+# the old twistedmatrix preexec.bash broke fzf for us.
+_preexec_last_history=
+_preexec_title() {
+  [[ -n $COMP_LINE ]] && return
+
+  local entry
+  entry=$(HISTTIMEFORMAT= history 1)
+  [[ "$entry" == "$_preexec_last_history" ]] && return
+  _preexec_last_history=$entry
+
+  local cmd=$entry
+  [[ $entry =~ ^[[:space:]]*[0-9]+[[:space:]]+(.*)$ ]] && cmd=${BASH_REMATCH[1]}
+  cmd=${cmd//$'\n'/ }
+  [[ -z $cmd ]] && return
+  (( ${#cmd} > 60 )) && cmd="${cmd:0:57}…"
+
+  printf '\e]2;%s\a' "$cmd"
+  [ -n "$TMUX" ] && tmux refresh-client -S 2>/dev/null
+}
+trap '_preexec_title' DEBUG
+_preexec_last_history=$(HISTTIMEFORMAT= history 1)
 
 # Case-insensitive tab complete
 if [ "$PS1" ] ; then
@@ -137,16 +158,22 @@ fi
 
 
 ## COMPLETIONS
-# Lazy-load bash_completion on first <Tab> — saves ~500ms per shell.
-_lazy_bash_completion() {
-  bind -r '\t' 2>/dev/null
-  bind '"\t": complete'
+# Defer bash_completion load until *after* the first command runs — saves
+# ~500ms at shell start. Tab is left bound to readline's default `complete`,
+# which already handles file/dir completion (so `cd xx<Tab>` works
+# immediately). The 500ms cost is paid silently between hitting Enter on the
+# first command and seeing the second prompt.
+_lazy_bash_completion_count=0
+_lazy_bash_completion_loader() {
+  (( ++_lazy_bash_completion_count >= 2 )) || return
   if [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]]; then
     . /opt/homebrew/etc/profile.d/bash_completion.sh
   fi
-  unset -f _lazy_bash_completion
+  PROMPT_COMMAND="${PROMPT_COMMAND/_lazy_bash_completion_loader; /}"
+  unset -f _lazy_bash_completion_loader
+  unset _lazy_bash_completion_count
 }
-bind -x '"\t": _lazy_bash_completion' 2>/dev/null
+PROMPT_COMMAND="_lazy_bash_completion_loader; ${PROMPT_COMMAND}"
 
 
 # shell command completion for gcloud.
@@ -303,3 +330,12 @@ source ~/.orbstack/shell/init.bash 2>/dev/null || :
 # if [[ -f /Users/zaius/miniconda3/bin/conda ]]; then
 #   eval "$(/Users/zaius/miniconda3/bin/conda shell.bash hook)"
 # fi
+
+# See: https://github.com/tailscale/tailscale/issues/11510
+if [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; then
+  alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+fi
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
