@@ -45,6 +45,11 @@ esac
 # Beyond CLI
 if [[ -d $HOME/.local/bin ]]; then
   export PATH=$PATH:$HOME/.local/bin
+  alias appshell='\
+    NOMAD_ADDR=http://prd-nomad.prd:4646 \
+    nomad alloc exec -namespace=staff -task=server \
+    $(beyond appshell --env prd --namespace staff run zaius-0) \
+    tmux att -t app-shell'
 fi
 
 

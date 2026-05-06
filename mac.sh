@@ -16,6 +16,9 @@ log() {
 
 
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+
+# Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 
@@ -24,6 +27,7 @@ $brew install \
   bash \
   fzf \
   bash-completion@2 \
+  libpq \
   pyenv \
   nvm \
   nomad \
@@ -43,17 +47,6 @@ mkdir ~/.nvm
 echo '/opt/homebrew/bin/bash' | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/bash zaius
 
-
-# Use system python
-/usr/bin/pip3 install \
-  black==23.1.0 \
-  neovim \
-  `# python-language-server is unmaintained` \
-  python-lsp-server[all]
-
-
-/opt/homebrew/bin/pyenv install 3.9.5
-/opt/homebrew/bin/pyenv install 3.10.6
 
 
 mkdir fira
@@ -78,31 +71,9 @@ $brew install chromium --no-quarantine
 defaults write -g ApplePressAndHoldEnabled -bool false
 
 
-$brew install google-cloud-sdk
-#
-# pip3 install gcloud gsutil
-#
-# Git color diffs
-$brew install \
-  git-delta \
-  libpq
-
-
-# Avoid wireguard sending all DNS requests via tunnel
-# In case wireguard mac ever supports PostUp, injecting the wifi nameservers into the
-# wireguard interface would likely be better. Didn't get as far as setting them, but
-# this gets them:
-#   scutil --dns | grep --before 2 'if_index.*en0' | grep nameserver | cut -d ' ' -f 5 | sort | uniq
-sudo mkdir -p /etc/resolver
-echo nameserver 10.128.0.1 | sudo tee /etc/resolver/prd
-echo search prd | sudo tee -a /etc/resolver/prd
-echo nameserver 10.128.0.1 | sudo tee /etc/resolver/internal
-echo search us-central1-f.c.beyond-pricing-1024.internal | sudo tee -a /etc/resolver/internal
 
 
 # TODO:
-# * wireguard
-# * cron
 # * orbstack
 # * dropbox
 # * 1pass
@@ -110,9 +81,19 @@ echo search us-central1-f.c.beyond-pricing-1024.internal | sudo tee -a /etc/reso
 # * rectangle
 # * karabiner
 # * zoom
+#
+#
+#
+# Firefox
+#   * ublock
+#   * 1pass
+#   * i still don't care about cookies
+#
+# Tailscale
 
 # Drag and drop
 app_urls=(
+  'https://release.files.ghostty.org/1.3.1/Ghostty.dmg'
   'https://updates.helftone.com/monodraw/downloads/monodraw-latest.dmg'
   'https://get.videolan.org/vlc/3.0.18/macosx/vlc-3.0.18-arm64.dmg'
   'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.2.8/Obsidian-1.2.8-universal.dmg',

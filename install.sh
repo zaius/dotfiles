@@ -8,6 +8,11 @@
 set -e
 base=~/.dotfiles
 
+# macOS: install Homebrew + Brewfile + GUI apps before linking dotfiles
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  bash "${base}/mac-brew.sh"
+fi
+
 home-link() {
   local src=${base}/${1}
   local default_dst=~/.$(basename ${1} .symlink)
