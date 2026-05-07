@@ -13,7 +13,7 @@ default="\[$(tput sgr0)\]"
 # PREFIX=$(brew --prefix)
 HOMEBREW_PREFIX=/opt/homebrew
 export PATH=/usr/local/sbin:$PATH
-export PATH=~/.dotfiles/bin:/usr/local/bin:$HOMEBREW_PREFIX/bin:$PATH
+export PATH=~/.dotfiles/bin:~/.local/bin:/usr/local/bin:$HOMEBREW_PREFIX/bin:$PATH
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin

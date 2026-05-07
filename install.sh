@@ -10,7 +10,7 @@ base=~/.dotfiles
 
 # macOS: install Homebrew + Brewfile + GUI apps before linking dotfiles
 if [[ "$(uname -s)" == "Darwin" ]]; then
-  bash "${base}/mac-brew.sh"
+  bash "${base}/mac.sh"
 fi
 
 home-link() {

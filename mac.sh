@@ -32,6 +32,11 @@ fi
 log "brew bundle"
 brew bundle --file="$here/Brewfile"
 
+pyenv install 3.14
+pyenv global 3.14
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+
 # --- Chromium: strip Gatekeeper quarantine (unsigned build, otherwise "damaged") ---
 if [ -d "/Applications/Chromium.app" ]; then
   log "Removing Gatekeeper quarantine from Chromium"
@@ -203,4 +208,46 @@ end tell
 EOF
 fi
 
-log "Done. Manual follow-ups: sign into 1Password, Dropbox, Tailscale."
+# --- Documents/Desktop -> Dropbox (run after Dropbox is signed in & synced) ---
+log "Sign into Dropbox now if you haven't — Documents/Desktop will be linked into it"
+read -r -p " -- Press enter once Dropbox is signed in and the folder exists (or to skip)..."
+
+dropbox_dir=""
+for candidate in "$HOME/Dropbox" "$HOME/Library/CloudStorage/Dropbox"; do
+  if [ -d "$candidate" ]; then
+    dropbox_dir="$candidate"
+    break
+  fi
+done
+
+if [ -z "$dropbox_dir" ]; then
+  log "Dropbox folder not found — skipping Documents/Desktop linking"
+else
+  for name in Documents Desktop; do
+    src="$HOME/$name"
+    dst="$dropbox_dir/$name"
+    if [ -L "$src" ]; then
+      log "$name is already a symlink — skipping"
+      continue
+    fi
+    if [ ! -d "$src" ]; then
+      log "$src missing — creating link to $dst"
+      mkdir -p "$dst"
+      ln -s "$dst" "$src"
+      continue
+    fi
+    mkdir -p "$dst"
+    # Anything other than .DS_Store / .localized counts as non-empty — prompt until cleared.
+    while :; do
+      leftover="$(find "$src" -mindepth 1 -not -name '.DS_Store' -not -name '.localized' -print -quit)"
+      [ -z "$leftover" ] && break
+      log "$src is not empty. Move its contents into $dst, then press enter to re-check (or Ctrl-C to abort)."
+      read -r -p " -- Waiting for $src to be empty..."
+    done
+    log "Replacing $src with link to $dst"
+    sudo rm -rf "$src"
+    sudo ln -s "$dst" "$src"
+  done
+fi
+
+log "Done. Manual follow-ups: sign into 1Password, Tailscale."

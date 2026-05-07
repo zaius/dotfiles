@@ -34,11 +34,13 @@ cask "kitty"
 
 # --- Browsers ---
 cask "firefox"
-cask "ungoogled-chromium" # quarantine stripped post-install in mac-brew.sh
+cask "tor"
+cask "ungoogled-chromium" # quarantine stripped post-install in mac.sh
 
 # --- Productivity / windowing ---
 cask "1password"
 cask "1password-cli"
+cask "bitwarden"
 cask "dropbox"
 cask "karabiner-elements"
 cask "obsidian"
@@ -67,6 +69,7 @@ cask "font-fira-code"
 
 # --- Mac App Store ---
 # Requires being signed into the App Store first; `mas` cannot sign you in.
+mas "Xcode", id: 497799835
 mas "Microsoft Word", id: 462054704
 mas "Microsoft Excel", id: 462058435
 
