@@ -35,6 +35,10 @@ brew bundle --file="$here/Brewfile"
 pyenv install 3.14
 pyenv global 3.14
 curl -LsSf https://astral.sh/uv/install.sh | sh
+# Note that vim is using system python, so we have to install vim dependencies there.
+# There's an argument to be made for moving vim to use pyenv I guess.
+/usr/bin/python3 -m pip install --user pynvim
+/usr/bin/python3 -m pip install --user black
 
 
 # --- Chromium: strip Gatekeeper quarantine (unsigned build, otherwise "damaged") ---
@@ -139,6 +143,18 @@ if [ -d "/Applications/Firefox.app" ]; then
   "Preferences": {
     "browser.startup.page": {
       "Value": 3,
+      "Status": "default"
+    },
+    "browser.compactmode.show": {
+      "Value": true,
+      "Status": "default"
+    },
+    "browser.uidensity": {
+      "Value": 1,
+      "Status": "default"
+    },
+    "browser.tabs.tabMinWidth": {
+      "Value": 50,
       "Status": "default"
     }
   },
