@@ -35,10 +35,17 @@ brew bundle --file="$here/Brewfile"
 pyenv install 3.14
 pyenv global 3.14
 curl -LsSf https://astral.sh/uv/install.sh | sh
-# Note that vim is using system python, so we have to install vim dependencies there.
-# There's an argument to be made for moving vim to use pyenv I guess.
-/usr/bin/python3 -m pip install --user pynvim
-/usr/bin/python3 -m pip install --user black
+
+# ALE execs these as subprocesses, so they only need to be on PATH (isolated uv tools).
+# pynvim/black instead live in the provider venv below — Neovim imports them in-process.
+uv tool install python-lsp-server[all]
+uv tool install flake8
+uv tool install black
+# Neovim python3 provider: dedicated venv built from the pyenv python so it doesn't
+# follow per-project pyenv switching. g:python3_host_prog in common.vim points here.
+nvim_venv="$HOME/.local/share/nvim/venv"
+uv venv --python "$(pyenv prefix 3.14)/bin/python" "$nvim_venv"
+uv pip install --python "$nvim_venv/bin/python" pynvim black
 
 
 # --- Chromium: strip Gatekeeper quarantine (unsigned build, otherwise "damaged") ---

@@ -35,6 +35,7 @@ fi
 ## VARIABLES
 
 export EDITOR=$HOMEBREW_PREFIX/bin/nvim
+export DOCKER_DEFAULT_PLATFORM=linux/arm64
 
 # https://stackoverflow.com/a/19533853
 # Undocumented feature which sets the size to "unlimited".

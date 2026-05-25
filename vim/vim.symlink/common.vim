@@ -3,11 +3,8 @@ if empty(glob('~/.vim/plugged'))
   autocmd VimEnter * PlugInstall
 endif
 
+" Resolve pylsp/flake8 from PATH (uv tools in ~/.local/bin), not a pinned python dir.
 let g:ale_use_global_executables = 1
-let pip_base = '/Users/zaius/Library/Python/3.9/bin'
-let g:ale_python_pylint_executable = pip_base . '/pylint'
-let g:ale_python_pylsp_executable = pip_base . '/pylsp'
-let g:ale_python_flake8_executable = pip_base . '/flake8'
 
 let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pylintrc'
 
@@ -413,13 +410,18 @@ autocmd Filetype python match Error /\t/
 " help fo-table for info
 autocmd FileType python set formatoptions=cqnrblj
 
-" Use system python for neovim - avoids issues with black when switching between pyenv
-" versions
-let g:python3_host_prog = '/usr/bin/python3'
-" Unfortunately this doesn't work until newer versions of black, but it would solve the
-" init of the virtualenv to the wrong version... i couldn't work it out, but next
-" install, go to the virtualenv and run:
-"   ~/.local/share/nvim/black/bin/pip install black==19.10b0
+" No plugin here uses the node/perl/ruby remote-plugin hosts (ALE's tsserver/eslint/etc.
+" are execed as subprocesses, not via a provider). Disable them to skip the startup probe
+" and the :checkhealth warnings. Only the python3 provider below is used.
+let g:loaded_node_provider = 0
+let g:loaded_perl_provider = 0
+let g:loaded_ruby_provider = 0
+
+" Dedicated provider venv built from the pyenv python (see mac.sh). Fixed path, so it
+" doesn't follow per-project pyenv switching and keeps black isolated from project envs.
+let g:python3_host_prog = expand('~/.local/share/nvim/venv/bin/python')
+" Use black from the python3 provider venv above (installed by mac.sh), not the plugin's
+" own ~/.local/share/nvim/black venv.
 let g:black_use_virtualenv = 0
 
 " vim-python/python-syntax

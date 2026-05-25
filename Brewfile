@@ -16,6 +16,10 @@ brew "tmux"
 brew "wget"
 brew "xz"
 
+# Youtube
+brew "ffmpeg"
+brew "yt-dlp"
+
 # --- JS toolchain ---
 brew "eslint"
 brew "prettier"
