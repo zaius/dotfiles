@@ -386,15 +386,6 @@
                             "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
-                },
-                {
-                    "identifiers": { "is_keyboard": true },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "f5" },
-                            "to": [{ "key_code": "f20" }]
-                        }
-                    ]
                 }
             ],
             "fn_function_keys": [
@@ -449,6 +440,12 @@
             ],
             "name": "External connected",
             "selected": true,
+            "simple_modifications": [
+                {
+                    "from": { "key_code": "f5" },
+                    "to": [{ "key_code": "f20" }]
+                }
+            ],
             "virtual_hid_keyboard": {
                 "caps_lock_delay_milliseconds": 0,
                 "country_code": 0,
