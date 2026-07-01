@@ -92,6 +92,8 @@ defaults write NSGlobalDomain KeyRepeat -int 1
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 # No emojis on fn
 defaults write com.apple.HIToolbox AppleFnUsageType -int 0
+# Don't add a period when double-tapping space.
+defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
 
 # Trackpad: max tracking speed.
 defaults write -g com.apple.trackpad.scaling -float 3.0
@@ -104,10 +106,23 @@ defaults write NSGlobalDomain AppleEnableSwipeNavigateWithScrolls -bool false
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 1
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 1
 
+# Cursor: bump pointer size a touch (default 1.0, max 4.0).
+defaults write com.apple.universalaccess mouseDriverCursorSize -float 1.5
+
 # View style codes: Nlsv = List, icnv = Icons, clmv = Columns, glyv = Gallery.
 defaults write com.apple.finder ShowPathbar -bool true
 defaults write com.apple.finder ShowStatusBar -bool true
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+# Keep the desktop clean — no mounted volumes or removable media icons.
+defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool false
+defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
+defaults write com.apple.finder ShowMountedServersOnDesktop -bool false
+defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool false
+# New Finder windows open at $HOME.
+defaults write com.apple.finder NewWindowTarget -string "PfHm"
+defaults write com.apple.finder NewWindowTargetPath -string "file://$HOME/"
+# Show all filename extensions.
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 killall Finder
 
 defaults write com.apple.dock autohide -bool true
@@ -119,6 +134,12 @@ killall Dock
 # Menu bar: show battery percentage.
 defaults write com.apple.controlcenter BatteryShowPercentage -bool true
 killall ControlCenter
+
+# Lock screen message.
+sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "If found, please email david@kel.so or text +1 415 519 6574"
+
+# Digital ocean?
+# doctl auth init --context mac
 
 # --- Rectangle: launch on login, hide menubar icon ---
 # Needs first launch + Accessibility permission before defaults will stick.
@@ -213,11 +234,29 @@ if [ ! -f "$HOME/.claude/settings.json" ]; then
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
   }
 }
 EOF
 fi
+
+# --- Playwright MCP: pin to chromium (default reaches for system Chrome) ---
+# Lives inside the marketplace checkout, so plugin updates can clobber it — rewrite
+# unconditionally so re-running this script restores the pin.
+pw_mcp_dir="$HOME/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/playwright"
+log "Pinning Playwright MCP to chromium"
+mkdir -p "$pw_mcp_dir"
+cat > "$pw_mcp_dir/.mcp.json" <<'EOF'
+{
+  "playwright": {
+    "command": "npx",
+    "args": ["@playwright/mcp@latest", "--executable-path", "/Applications/Chromium.app/Contents/MacOS/Chromium"]
+  }
+}
+EOF
 
 # --- Hex: launch on login (no built-in pref, register as login item) ---
 if [ -d "/Applications/Hex.app" ]; then

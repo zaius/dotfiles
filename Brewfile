@@ -1,5 +1,8 @@
 # Reinstallation manifest. Apply with: brew bundle --file=Brewfile
 
+# --- Taps ---
+tap "hashicorp/tap"
+
 # --- CLI tools ---
 brew "bash"
 brew "bash-completion@2"
@@ -20,21 +23,26 @@ brew "xz"
 brew "ffmpeg"
 brew "yt-dlp"
 
-# --- JS toolchain ---
-brew "eslint"
-brew "prettier"
 
+# --- Dev ---
+cask "orbstack"
+brew "hashicorp/tap/terraform"
+# --- Terminals ---
+cask "ghostty"
+cask "kitty"
 # --- CLIs
 cask "claude-code"
 cask "codex"
 brew "azure-cli"
+brew "doctl"
+# --- JS toolchain ---
+brew "eslint"
+brew "prettier"
+
 
 # --- AI desktop apps ---
 cask "claude"
 
-# --- Terminals ---
-cask "ghostty"
-cask "kitty"
 
 # --- Browsers ---
 cask "firefox"
@@ -50,9 +58,8 @@ cask "karabiner-elements"
 cask "obsidian"
 cask "rectangle"
 cask "kitlangton-hex"
+cask "monitorcontrol"
 
-# --- Dev / containers ---
-cask "orbstack"
 
 # --- Networking ---
 cask "tailscale-app"
@@ -66,7 +73,6 @@ cask "vimr"
 cask "zoom"
 cask "slack"
 cask "discord"
-cask "granola"
 
 # --- Fonts ---
 cask "font-fira-code"

@@ -58,3 +58,12 @@ Host homebridge.local
   User pi
   UserKnownHostsFile=/dev/null
   StrictHostKeyChecking no
+
+Host celery-vm-staging
+  User pd_azure_user
+
+Host celery-vm-prod
+  User pd_azure_user
+
+Host *.catla-torino.ts.net
+  User pd_azure_user

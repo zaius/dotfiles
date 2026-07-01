@@ -14,3 +14,11 @@ This clones the repo, installs Homebrew + everything in the `Brewfile` (CLI tool
 apps, fonts, App Store apps), switches your login shell to homebrew bash, and links the
 `.symlink` files into `~`. The first `git` invocation will prompt to install Xcode
 Command Line Tools if they're missing.
+
+## Manual steps remaining
+
+ * add google accounts
+   * add contact syncing
+   * no mail
+ * login to everything
+ * add ignored folders to spotlight
