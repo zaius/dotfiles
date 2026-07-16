@@ -128,9 +128,9 @@ endif
   Plug 'nathanaelkane/vim-indent-guides'
   Plug 'junegunn/fzf' " , { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
+  Plug 'dhruvasagar/vim-table-mode'
 
   " Syntax
-  Plug 'plasticboy/vim-markdown'
   Plug 'pangloss/vim-javascript'
   Plug 'cakebaker/scss-syntax.vim'
   Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
@@ -153,9 +153,15 @@ endif
 
   if exists("g:neovim")
     Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+    Plug 'MeanderingProgrammer/render-markdown.nvim'
   endif
 
 call plug#end()
+
+if exists("g:neovim")
+  " Run :TSInstall markdown markdown_inline
+  lua require('render-markdown').setup({})
+endif
 
 " Black vim version has to be tied to a specific tag, and vim-plug doesn't allow us to
 " install multiple tags of the same plugin. I tried just changing the binary, but the
@@ -400,6 +406,11 @@ map <Leader>f8 :set foldlevel=8<CR>
 map <Leader>f9 :set foldlevel=9<CR>
 set foldlevel=99
 
+set mouse=a
+set foldcolumn=auto:1   " or 'auto:1' in nvim for adaptive width
+set foldmethod=indent  " or syntax/marker/expr depending on filetype
+
+
 " Ideally...
 " autocmd filetype python source ~/.vim/pydoc.vim
 autocmd FileType python setlocal tabstop=4 shiftwidth=4
@@ -435,10 +446,6 @@ autocmd FileType html.handlebars set noeol
 
 " Markdown
 autocmd BufNewFile,BufRead *.md set filetype=markdown
-let g:vim_markdown_folding_disabled=1
-
-" New line (with `o`) in a markdown list shouldn't indent
-let g:vim_markdown_new_list_item_indent = 0
 
 
 " Open tag in new tab

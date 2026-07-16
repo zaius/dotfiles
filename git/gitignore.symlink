@@ -2,3 +2,4 @@
 .DS_Store
 docker-compose.local-client.yml
 .vimsettings
+.ropeproject/
