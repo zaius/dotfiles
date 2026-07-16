@@ -134,17 +134,36 @@ fi
 # shell start. Tab is left bound to readline's default `complete`, which already handles
 # file/dir completion (so `cd xx<Tab>` works immediately). The 500ms cost is paid
 # silently between hitting Enter on the first command and seeing the second prompt.
-_lazy_bash_completion_count=0
-_lazy_bash_completion_loader() {
-  (( ++_lazy_bash_completion_count >= 2 )) || return 0
-  if [ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]; then
-    . /opt/homebrew/etc/profile.d/bash_completion.sh
-  fi
-  PROMPT_COMMAND="${PROMPT_COMMAND/_lazy_bash_completion_loader; /}"
-  unset -f _lazy_bash_completion_loader
-  unset _lazy_bash_completion_count
+# _lazy_bash_completion_count=0
+# _lazy_bash_completion_loader() {
+#   (( ++_lazy_bash_completion_count >= 2 )) || return 0
+#   if [ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]; then
+#     . /opt/homebrew/etc/profile.d/bash_completion.sh
+#   fi
+#   PROMPT_COMMAND="${PROMPT_COMMAND/_lazy_bash_completion_loader; /}"
+#   unset -f _lazy_bash_completion_loader
+#   unset _lazy_bash_completion_count
+# }
+# PROMPT_COMMAND="_lazy_bash_completion_loader; ${PROMPT_COMMAND}"
+if [ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]; then
+  . /opt/homebrew/etc/profile.d/bash_completion.sh
+fi
+
+# Lightweight ssh host completion from ~/.ssh/config, registered eagerly.
+# Must come BEFORE fzf's completion.bash is sourced (further down): fzf snapshots
+# ssh's existing completion at load time and uses it as the plain-<Tab> fallback
+# when its `**` trigger isn't present. Because the full bash_completion ssh
+# completion lazy-loads only after the 2nd command, fzf would otherwise capture an
+# empty fallback and `ssh host<Tab>` would do nothing. This gives fzf a real
+# fallback (host names) while `ssh **<Tab>` still opens fzf's fuzzy picker.
+_ssh_hosts() {
+  local cur=${COMP_WORDS[COMP_CWORD]}
+  local hosts
+  hosts=$(awk '/^[Hh]ost /{for(i=2;i<=NF;i++) if($i !~ /[*?]/) print $i}' ~/.ssh/config 2>/dev/null)
+  COMPREPLY=( $(compgen -W "$hosts" -- "$cur") )
 }
-PROMPT_COMMAND="_lazy_bash_completion_loader; ${PROMPT_COMMAND}"
+#complete -F _ssh_hosts ssh
+# export FZF_COMPLETION_TRIGGER=''
 
 
 ## ALIASES
@@ -164,11 +183,11 @@ function ssh() {
 # https://news.ycombinator.com/item?id=24659282
 alias escapequotes='echo !:q'
 
-if which fzf > /dev/null; then
-  # $(brew --prefix)/opt/fzf/install
-  # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-  source ~/.dotfiles/bash/fzf.bash
-fi
+# I don't really use fzf in shell? seems like a lot of headache to get something in I
+# don't use much...
+# if which fzf > /dev/null; then
+#   source ~/.dotfiles/bash/fzf.bash
+# fi
 
 
 ## GIT
