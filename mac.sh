@@ -9,9 +9,58 @@ log() {
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# --- Cache sudo creds up front, keep alive until script exits ---
-sudo -v
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+# Mirror all output to a log file so silent steps can be tailed from another
+# terminal. Password input isn't captured (read -s reads straight from the tty).
+logfile="$HOME/mac-setup.log"
+exec > >(tee -a "$logfile") 2>&1
+log "Run started $(date '+%Y-%m-%d %H:%M:%S') — logging to $logfile"
+
+# --- Full Disk Access ---
+# defaults(1) can't write TCC-protected domains (com.apple.universalaccess,
+# used below) unless the terminal app has Full Disk Access — without it the
+# write errors out and set -e kills the run. Probe by reading a TCC-protected
+# plist; its POSIX perms are world-readable, so a failure can only mean TCC.
+fda_ok() { plutil -lint /Library/Preferences/com.apple.TimeMachine.plist >/dev/null 2>&1; }
+if ! fda_ok; then
+  log "This terminal needs Full Disk Access — opening System Settings"
+  open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
+  log "Add/enable your terminal app in the Full Disk Access list"
+  read -r -p " -- Press enter once granted to re-check..."
+  if ! fda_ok; then
+    # FDA only applies to processes launched after the grant, and the OS
+    # offers Quit & Reopen for a reason — the running terminal never gains it.
+    log "Still no Full Disk Access — quit & reopen the terminal, then re-run mac.sh"
+    exit 1
+  fi
+fi
+
+# --- Sudo: ask once up front, stay warm for the whole run ---
+# A `sudo -v` keep-alive loop isn't enough here: every `brew` invocation runs
+# `sudo --reset-timestamp` on startup (Library/Homebrew/brew.sh), killing the
+# cached credential, and `sudo -n` can never restore it without the password.
+# brew and the Homebrew installer both pass `-A` to sudo when SUDO_ASKPASS is
+# set, so an askpass helper lets everything re-auth silently. The password
+# lives in a 0600 file inside a 0700 tempdir and is deleted on exit.
+sudo_dir="$(mktemp -d)"
+trap 'rm -rf "$sudo_dir"' EXIT
+printf '#!/bin/sh\nexec cat "%s"\n' "$sudo_dir/pw" > "$sudo_dir/askpass"
+chmod 700 "$sudo_dir/askpass"
+export SUDO_ASKPASS="$sudo_dir/askpass"
+
+log "sudo password — you'll only be asked this once, it stays cached for the whole run"
+sudo -k # drop any existing timestamp so we actually validate the password
+while :; do
+  read -rs -p " -- macOS account password: " sudo_pass
+  echo
+  (umask 077 && printf '%s\n' "$sudo_pass" > "$sudo_dir/pw")
+  unset sudo_pass
+  sudo -A -v 2>/dev/null && break
+  log "Wrong password, try again"
+done
+
+# Route this script's own sudo calls through the askpass helper too, so they
+# survive brew's timestamp resets.
+sudo() { command sudo -A "$@"; }
 
 # --- Homebrew ---
 if ! command -v brew >/dev/null 2>&1; then
@@ -29,8 +78,8 @@ if grep -q '^mas ' "$here/Brewfile"; then
 fi
 
 # --- Everything from the Brewfile (idempotent) ---
-log "brew bundle"
-brew bundle --file="$here/Brewfile"
+log "brew bundle — mas apps (Xcode is ~8GB) download with no progress output; watch Launchpad"
+brew bundle --file="$here/Brewfile" --verbose
 
 pyenv install 3.14
 pyenv global 3.14

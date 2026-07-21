@@ -48,7 +48,7 @@ cask "claude"
 
 # --- Browsers ---
 cask "firefox"
-cask "tor"
+cask "tor-browser"
 cask "ungoogled-chromium" # quarantine stripped post-install in mac.sh
 
 # --- Productivity / windowing ---
