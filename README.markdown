@@ -7,13 +7,15 @@ bash install.sh to link all files ending with .symlink into your home directory.
 ## Fresh Mac
 
 ```bash
-git clone https://github.com/zaius/dotfiles.git ~/.dotfiles && bash ~/.dotfiles/install.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/zaius/dotfiles/master/install.sh)"
 ```
 
-This clones the repo, installs Homebrew + everything in the `Brewfile` (CLI tools, GUI
-apps, fonts, App Store apps), switches your login shell to homebrew bash, and links the
-`.symlink` files into `~`. The first `git` invocation will prompt to install Xcode
-Command Line Tools if they're missing.
+This installs the Xcode Command Line Tools if they're missing (click Install in the
+dialog), clones the repo to `~/.dotfiles`, installs Homebrew + everything in the
+`Brewfile` (CLI tools, GUI apps, fonts, App Store apps), switches your login shell to
+homebrew bash, and links the `.symlink` files into `~`. Use `bash -c "$(curl …)"`, not
+`curl … | bash` — the setup prompts read from the terminal. Re-running it (or
+`bash ~/.dotfiles/install.sh`) skips the clone.
 
 ## Manual steps remaining
 

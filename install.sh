@@ -8,6 +8,21 @@
 set -e
 base=~/.dotfiles
 
+# Run straight from curl on a fresh machine: clone the repo first. A fresh Mac
+# only has the /usr/bin/git stub, which pops the Command Line Tools installer
+# and exits, so trigger the install here and wait for it to finish.
+if [[ ! -d $base ]]; then
+  if [[ "$(uname -s)" == "Darwin" ]] && ! xcode-select -p >/dev/null 2>&1; then
+    echo "installing Command Line Tools - click Install in the dialog"
+    xcode-select --install
+    until xcode-select -p >/dev/null 2>&1; do sleep 5; done
+  fi
+  git clone https://github.com/zaius/dotfiles.git ${base}
+  # Fetch anonymously over https, but push over ssh since GitHub rejects
+  # password auth for https pushes.
+  git -C ${base} remote set-url --push origin git@github.com:zaius/dotfiles.git
+fi
+
 # macOS: install Homebrew + Brewfile + GUI apps before linking dotfiles
 if [[ "$(uname -s)" == "Darwin" ]]; then
   bash "${base}/mac.sh"
