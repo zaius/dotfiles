@@ -181,6 +181,9 @@ defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock orientation -string "right"
 # defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0.1
+# Empty the dock: no pinned apps, no Downloads stack.
+defaults write com.apple.dock persistent-apps -array
+defaults write com.apple.dock persistent-others -array
 killall Dock
 
 # Menu bar: show battery percentage.
