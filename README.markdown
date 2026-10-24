@@ -7,7 +7,7 @@ bash install.sh to link all files ending with .symlink into your home directory.
 ## Fresh Mac
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/zaius/dotfiles/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/zaius/dotfiles/main/install.sh)"
 ```
 
 This installs the Xcode Command Line Tools if they're missing (click Install in the
