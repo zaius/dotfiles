@@ -1,0 +1,9 @@
+#!/bin/bash
+set -ex
+
+uv cache clean --force
+brew cleanup --prune=all -s
+docker buildx prune -a -f
+
+swift package purge-cache
+rm -rf ~/Library/Caches/org.swift.swiftpm/
