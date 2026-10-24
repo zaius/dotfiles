@@ -23,11 +23,6 @@ if [[ ! -d $base ]]; then
   git -C ${base} remote set-url --push origin git@github.com:zaius/dotfiles.git
 fi
 
-# macOS: install Homebrew + Brewfile + GUI apps before linking dotfiles
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  bash "${base}/mac.sh"
-fi
-
 home-link() {
   local src=${base}/${1}
   local default_dst=~/.$(basename ${1} .symlink)
@@ -67,6 +62,13 @@ home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link profile.symlink
 # home-link eslintrc.json.symlink
+
+# macOS: install Homebrew + Brewfile + GUI apps. Run after linking so the CLI
+# logins and Karabiner write into the linked ~/.config, which home-link would
+# otherwise delete.
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  bash "${base}/mac.sh"
+fi
 
 # launchd agents (copied, not linked - launchd is unreliable with symlinked plists)
 if [[ "$(uname -s)" == "Darwin" ]]; then
