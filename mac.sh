@@ -385,8 +385,10 @@ fi
 
 # --- CLI logins: each opens a browser; skipped when already signed in ---
 # The tee at the top makes stdout a pipe, which these CLIs read as running
-# unattended, so hand them the terminal directly.
-on_tty() { "$@" </dev/tty >/dev/tty 2>&1; }
+# unattended, so hand them the terminal directly. Open it read-write on all
+# three fds: gh queries the background color over stdout and reads the reply
+# back from it, so a write-only stdout leaves the reply for its prompt to choke on.
+on_tty() { "$@" <>/dev/tty >&0 2>&0; }
 log "CLI logins: gh, gcloud, az, sentry-cli"
 gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol https
 gh alias set co 'pr checkout' --clobber >/dev/null
