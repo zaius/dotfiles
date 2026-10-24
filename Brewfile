@@ -7,15 +7,19 @@ tap "hashicorp/tap"
 brew "bash"
 brew "bash-completion@2"
 brew "delta" # nicer git diffs
+brew "duckdb"
 brew "fzf"
+brew "gh"
 brew "htop"
-brew "mas"
+brew "just"
+brew "mas" # mac app store installer
 brew "libpq"
+brew "postgresql@18" # provides psql; libpq is keg-only
 brew "neovim"
-brew "nmap"
-brew "nvm"
+# brew "nmap"
 brew "pspg"
 brew "pgcli"
+brew "pwgen"
 brew "pyenv"
 brew "restic" # nightly backups to B2, see bin/backup
 brew "tmux"
@@ -29,22 +33,33 @@ brew "yt-dlp"
 
 # --- Dev ---
 cask "orbstack"
+brew "go"
 brew "hashicorp/tap/terraform"
+brew "honcho" # Procfile runner
+brew "libpostal" # C library behind the postal python bindings in prettydata
+brew "xcodegen" # generates the Noted xcodeproj
 # --- Terminals ---
 cask "ghostty"
 cask "kitty"
 # --- CLIs
-cask "claude-code"
-cask "codex"
 brew "azure-cli"
+brew "cloudflare-wrangler"
 brew "doctl"
+cask "gcloud-cli"
+cask "sentry-cli"
 # --- JS toolchain ---
+brew "node"
+brew "pnpm"
 brew "eslint"
 brew "prettier"
 
 
-# --- AI desktop apps ---
+# --- AI ---
+cask "claude-code@latest"
+cask "codex"
 cask "claude"
+cask "chatgpt"
+brew "opencode"
 
 
 # --- Browsers ---
@@ -67,10 +82,12 @@ cask "monitorcontrol"
 # --- Networking ---
 cask "tailscale-app"
 
-# --- Media / drawing ---
+# --- Media / drawing / editing ---
 cask "monodraw"
 cask "vlc"
-cask "vimr"
+# Until they work out their crashing issues...
+# cask "vimr"
+cask "neovide"
 
 # --- Meetings ---
 cask "zoom"
