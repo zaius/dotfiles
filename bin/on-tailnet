@@ -1,0 +1,7 @@
+#!/bin/bash
+# Usage: on-tailnet <magicdns-suffix>
+# Exits 0 when Tailscale is up and connected to the tailnet with that MagicDNS
+# suffix, e.g. `on-tailnet catla-torino.ts.net`. ssh's `Match exec` uses this to
+# fall back to public IPs when MagicDNS names won't resolve.
+/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json --peers=false 2>/dev/null |
+  jq -e --arg suffix "$1" '.BackendState == "Running" and .MagicDNSSuffix == $suffix' >/dev/null

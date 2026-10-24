@@ -1,6 +1,7 @@
 [user]
         name = David Kelso
         email = david@kel.so
+        signingkey = ~/Dropbox/Keys/ssh/github.id_ecdsa.pub
 [color]
         diff = auto
         status = auto
@@ -25,3 +26,12 @@
 
 [alias]
       lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
+
+[gpg]
+        format = ssh
+[commit]
+        gpgsign = true
+[tag]
+        gpgsign = true
+[gpg "ssh"]
+        allowedSignersFile = ~/.config/git/allowed_signers

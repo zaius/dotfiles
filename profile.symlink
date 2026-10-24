@@ -179,8 +179,27 @@ fi
 function ff() {
   find . -iname "*$@*"
 }
+# Auto-attach tmux only for interactive logins: `ssh host` attaches, but
+# `ssh host "cmd"` (and -N/-W port forwards) must pass through untouched.
+# `command ssh` bypasses this function entirely.
 function ssh() {
-  command ssh $@ -t "tmux attach -t zaius -d || tmux attach -t 0 || bash -l"
+  local takes_value="BbcDEeFIiJLlmOoPpQRSWw"
+  local positional=0 skip=0 no_command=0 arg
+  for arg in "$@"; do
+    if (( skip )); then skip=0; continue; fi
+    case "$arg" in
+      -*)
+        [[ $arg == *[NWOQGV]* ]] && no_command=1
+        [[ ${#arg} -eq 2 && $takes_value == *"${arg: -1}"* ]] && skip=1
+        ;;
+      *) (( positional++ )) ;;
+    esac
+  done
+  if (( positional <= 1 && !no_command )); then
+    command ssh "$@" -t "tmux attach -t zaius -d || tmux attach -t 0 || bash -l"
+  else
+    command ssh "$@"
+  fi
 }
 
 # https://til.simonwillison.net/til/til/bash_escaping-a-string.md
