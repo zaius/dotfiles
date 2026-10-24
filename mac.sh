@@ -81,9 +81,12 @@ fi
 log "brew bundle — mas apps (Xcode is ~8GB) download with no progress output; watch Launchpad"
 brew bundle --file="$here/Brewfile" --verbose
 
-pyenv install 3.14
-pyenv global 3.14
+pyenv install --skip-existing 3.15
+pyenv global 3.15
 curl -LsSf https://astral.sh/uv/install.sh | sh
+# The installer drops uv in ~/.local/bin, which profile.symlink puts on PATH,
+# but install.sh only links that after this script finishes.
+export PATH="$HOME/.local/bin:$PATH"
 
 # ALE execs these as subprocesses, so they only need to be on PATH (isolated uv tools).
 # pynvim/black instead live in the provider venv below — Neovim imports them in-process.
@@ -93,7 +96,7 @@ uv tool install black
 # Neovim python3 provider: dedicated venv built from the pyenv python so it doesn't
 # follow per-project pyenv switching. g:python3_host_prog in common.vim points here.
 nvim_venv="$HOME/.local/share/nvim/venv"
-uv venv --python "$(pyenv prefix 3.14)/bin/python" "$nvim_venv"
+uv venv --clear --python "$(pyenv prefix 3.15)/bin/python" "$nvim_venv"
 uv pip install --python "$nvim_venv/bin/python" pynvim black
 
 
