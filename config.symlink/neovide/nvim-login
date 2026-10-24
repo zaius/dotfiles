@@ -1,0 +1,4 @@
+#!/opt/homebrew/bin/bash -l
+# Neovide launches nvim with `-bash -c`, which skips ~/.profile and leaves the
+# bare GUI PATH. The -l flag above sources ~/.profile before exec'ing nvim.
+exec nvim "$@"

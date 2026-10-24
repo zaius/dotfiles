@@ -10,7 +10,6 @@ let g:ale_python_pylint_options = '--rcfile /Users/zaius/code/beyond/server/.pyl
 
 let g:ale_sql_pgformatter_options = '--spaces 2 --wrap-limit 88'
 " let g:ale_python_pylint_use_global = 0
-" \ 'php': ['prettier'],
 
 let g:ale_sql_sqlformat_executable = 'cockroach'
 let g:ale_sql_sqlformat_options = 'sqlfmt'
@@ -36,7 +35,6 @@ let g:ale_linters = {
 \ 'typescript': ['tsserver', 'standard', 'eslint', 'prettier',],
 \ 'typescriptreact': ['tsserver', 'standard', 'eslint', 'prettier',],
 \ 'python': ['pylsp', 'flake8'],
-\ 'php': ['php', 'langserver', 'phan'],
 \ 'scss': ['scsslint'],
 \ 'sql': ['sql-lint'],
 \}
@@ -53,10 +51,6 @@ let g:ale_javascript_eslint_executable = '/opt/homebrew/bin/eslint'
 let g:ale_javascript_prettier_use_global = 0
 " let g:ale_javascript_prettier_executable = '/opt/homebrew/bin/prettier'
 " let g:ale_javascript_prettier_options = '--config /Users/zaius/code/beyond/client/.prettierrc.js'
-
-let g:ale_php_langserver_executable = expand('~/.composer/vendor/bin/php-language-server.php')
-let g:ale_php_phan_executable = expand('~/.composer/vendor/bin/phan_client')
-let g:ale_php_phan_use_client = 1
 
 let g:ale_fix_on_save = 1
 
@@ -296,6 +290,13 @@ if has("gui_macvim")
   " Make Macvim fullscreen actually fill screen
   set fuoptions=maxvert,maxhorz
 endif
+
+
+" Neovide
+if exists('g:neovide')
+    let g:neovide_cursor_animation_length = 0.0
+endif
+
 
 " Tab navigation
 " Can't use ctrl-J as it causes problems with newlines and neovim
