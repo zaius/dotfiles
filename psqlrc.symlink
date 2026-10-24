@@ -3,7 +3,7 @@
 -- Other good examples
 --  https://gist.github.com/jaytaylor/e5aa89c8f3aaab3f576f
 -- https://raw.githubusercontent.com/exhuma/dotfiles/refs/heads/master/.psqlrc
-\setenv PAGER 'pspg --style=24 --ignore-case'
+-- \setenv PAGER 'pspg --style=24 --ignore-case'
 \pset linestyle unicode
 \pset border 2
 

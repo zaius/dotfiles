@@ -52,7 +52,11 @@ export HISTTIMEFORMAT="[%F %T] "
 export HISTFILE=~/.bash_history_v2
 shopt -s histappend
 
-export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
+# Ensure less invoked from other programs keep the settings
+# export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
+export PAGER='less'
+# --no-init  - keep content on screen when quitting
+export LESS="--ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines --quit-if-one-screen --no-init"
 alias less="command $PAGER"
 export PYTHON_COLORS=1   # always emit color, even when piped
 
