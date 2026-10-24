@@ -221,6 +221,23 @@ if [ -d "/Applications/Rectangle.app" ]; then
   open -a Rectangle
 fi
 
+# --- Karabiner-Elements: approve its driver, background items and permissions ---
+# Each needs a click in System Settings, which the app's setup window links to.
+# karabiner_cli asks the running agent which step remains, and fails until the
+# agent itself is allowed to run in the background.
+karabiner_cli="/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
+karabiner_ready() {
+  [ "$("$karabiner_cli" --show-settings-window-guidance 2>/dev/null |
+    plutil -extract current_setup raw -o - - 2>/dev/null)" = none ]
+}
+if [ -x "$karabiner_cli" ] && ! karabiner_ready; then
+  log "Opening Karabiner-Elements — approve each step its setup window asks for"
+  open -a Karabiner-Elements
+  until karabiner_ready; do
+    read -r -p " -- Press enter once Karabiner's setup window is done to re-check..."
+  done
+fi
+
 # --- Firefox: enterprise policies (DoH via NextDNS, force-install extensions) ---
 # Plist lives outside the .app bundle so Firefox auto-updates can't wipe it.
 # JSON -> plutil -> defaults import is cleaner than `defaults write -dict` for nested policies.
