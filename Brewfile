@@ -43,7 +43,7 @@ brew "xcodegen" # generates the Noted xcodeproj
 cask "ghostty"
 cask "kitty"
 # --- CLIs
-brew "azure-cli"
+cask "azure-cli"
 brew "cloudflare-wrangler"
 brew "doctl"
 cask "gcloud-cli"
