@@ -33,6 +33,11 @@ if which go > /dev/null; then
   export GOBIN=$HOME/.go/bin
 fi
 
+if [[ -d $HOMEBREW_PREFIX/opt/rustup/bin ]]; then
+  export PATH=$PATH:$HOMEBREW_PREFIX/opt/rustup/bin
+fi
+
+
 # Give the opencode agent an lsp tool (definition, references, hover, symbols).
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
@@ -292,3 +297,6 @@ if [[ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]]; then
   alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 fi
 
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init.bash 2>/dev/null || :
