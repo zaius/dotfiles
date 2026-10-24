@@ -54,6 +54,7 @@ shopt -s histappend
 
 export PAGER='less --ignore-case --LONG-PROMPT --RAW-CONTROL-CHARS --chop-long-lines'
 alias less="command $PAGER"
+export PYTHON_COLORS=1   # always emit color, even when piped
 
 
 ## PROMPT
@@ -173,6 +174,15 @@ _ssh_hosts() {
 ## ALIASES
 if which nvim > /dev/null; then
   alias vi="nvim"
+fi
+
+# Colour `ls` where it's supported. GNU ls and newer BSD ls take `--color`, older
+# BSD ls only `-G`. Probe `--color` first: GNU ls accepts `-G` too, but there it
+# means "no group column".
+if ls --color=auto /dev/null > /dev/null 2>&1; then
+  alias ls="ls --color=auto"
+elif ls -G /dev/null > /dev/null 2>&1; then
+  alias ls="ls -G"
 fi
 
 
