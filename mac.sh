@@ -430,7 +430,9 @@ fi
 on_tty mkcert -install
 
 # --- Documents/Desktop -> Dropbox (run after Dropbox is signed in & synced) ---
-log "Sign into Dropbox now if you haven't — Documents/Desktop will be linked into it"
+log "Opening Dropbox — sign in if you aren't already; Documents/Desktop will be linked into it"
+log "WARNING: opt out of Dropbox on File Provider during setup — keep the folder at ~/Dropbox, not ~/Library/CloudStorage"
+open -a Dropbox || true
 read -r -p " -- Press enter once Dropbox is signed in and the folder exists (or to skip)..."
 
 dropbox_dir=""
