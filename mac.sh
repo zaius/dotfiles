@@ -215,9 +215,47 @@ if [ -d "/Applications/Firefox.app" ]; then
   "DNSOverHTTPS": {
     "Enabled": true,
     "ProviderURL": "https://dns.nextdns.io/4bf19c",
+    "Fallback": false,
+    "ExcludedDomains": ["rota.kestrel", "dagster.kestrel", "saq.pretty", "dagster.pretty", "rota.pretty"],
     "Locked": false
   },
+  "AutofillAddressEnabled": false,
+  "AutofillCreditCardEnabled": false,
+  "Handlers": {
+    "schemes": {
+      "mailto": {
+        "action": "useHelperApp",
+        "ask": false,
+        "handlers": [
+          {
+            "name": "Gmail",
+            "uriTemplate": "https://mail.google.com/mail/?extsrc=mailto&url=%s"
+          }
+        ]
+      }
+    }
+  },
   "Preferences": {
+    "browser.aboutConfig.showWarning": {
+      "Value": false,
+      "Status": "default"
+    },
+    "browser.formfill.enable": {
+      "Value": false,
+      "Status": "default"
+    },
+    "browser.newtabpage.activity-stream.widgets.sportsWidget.enabled": {
+      "Value": false,
+      "Status": "default"
+    },
+    "privacy.globalprivacycontrol.enabled": {
+      "Value": true,
+      "Status": "default"
+    },
+    "signon.firefoxRelay.feature": {
+      "Value": "disabled",
+      "Status": "default"
+    },
     "browser.startup.page": {
       "Value": 3,
       "Status": "default"
@@ -239,8 +277,8 @@ if [ -d "/Applications/Firefox.app" ]; then
     "Search": true,
     "TopSites": false,
     "SponsoredTopSites": false,
-    "Pocket": true,
-    "SponsoredPocket": false,
+    "Stories": true,
+    "SponsoredStories": false,
     "Locked": false
   },
   "3rdparty": {
