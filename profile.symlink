@@ -22,12 +22,13 @@ if [[ -d /usr/local/git-fuzzy/bin ]]; then
   export PATH=$PATH:/usr/local/git-fuzzy/bin
 fi
 
-# update PATH for the Google Cloud SDK.
-if [ -f '/usr/local/google-cloud-sdk/path.bash.inc' ]; then
-  . '/usr/local/google-cloud-sdk/path.bash.inc';
+# Google Cloud SDK: PATH for its bundled components, plus bash completion.
+if [[ -d $HOMEBREW_PREFIX/share/google-cloud-sdk ]]; then
+  . $HOMEBREW_PREFIX/share/google-cloud-sdk/path.bash.inc
+  . $HOMEBREW_PREFIX/share/google-cloud-sdk/completion.bash.inc
 fi
 if which go > /dev/null; then
-  export PATH=$PATH:/usr/local/opt/go/libexec/bin:$HOME/.go/bin
+  export PATH=$PATH:$HOME/.go/bin
   export GOPATH=$HOME/.go
   export GOBIN=$HOME/.go/bin
 fi
@@ -234,12 +235,6 @@ if which pyenv > /dev/null; then
   eval "$(pyenv init -)"
 fi
 
-
-## NVM / Node
-export NVM_DIR="$HOME/.nvm"
-# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "~/.nvm/nvm.sh" ] && \. "~/.nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
