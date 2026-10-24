@@ -3,3 +3,9 @@
 docker-compose.local-client.yml
 .vimsettings
 .ropeproject/
+.gemini/
+
+# Subspace agent artifacts (auto-added by Subspace)
+AGENTS.override.md
+
+**/.claude/settings.local.json

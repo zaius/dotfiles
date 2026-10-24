@@ -34,3 +34,6 @@ config.symlink/sentry/
 config.symlink/stripe/
 config.symlink/uv/uv-receipt.json
 config.symlink/zed/prompts/
+
+# Codex rewrites its config constantly
+codex/
