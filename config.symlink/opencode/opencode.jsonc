@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Enable the built-in language servers. Each starts when opencode opens a
+  // matching file and finds the server's requirements (e.g. pyright picks up
+  // $VIRTUAL_ENV or a .venv/venv at the project root). Overriding a built-in's
+  // command replaces its spawn logic, so leave pyright and typescript alone.
+  "lsp": true
+}

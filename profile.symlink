@@ -33,6 +33,9 @@ if which go > /dev/null; then
   export GOBIN=$HOME/.go/bin
 fi
 
+# Give the opencode agent an lsp tool (definition, references, hover, symbols).
+export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
+
 ## VARIABLES
 
 export EDITOR=$HOMEBREW_PREFIX/bin/nvim
