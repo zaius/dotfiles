@@ -184,6 +184,52 @@ killall Dock
 defaults write com.apple.controlcenter BatteryShowPercentage -bool true
 killall ControlCenter
 
+# --- Night Shift: 22:00-7:00, warmth slider ~2/3 toward "More Warm" ---
+# There's no user-domain defaults key for this. The prefs live in root's
+# CoreBrightness plist, nested under a CBUser-<GeneratedUID> key for this account,
+# so PlistBuddy rather than `defaults` — it addresses nested paths and takes an
+# explicit type (these are integers, not bools, and the CCT target is a real).
+ns_plist="/var/root/Library/Preferences/com.apple.CoreBrightness.plist"
+ns_key="CBUser-$(dscl . -read "/Users/$USER" GeneratedUID | awk '{print $2}')"
+
+# Set fails on a path that doesn't exist yet, Add fails on one that does — so try
+# Set first and fall back, which covers both a fresh Mac and a re-run.
+ns_put() { # <path-below-ns_key> <type> <value>
+  sudo /usr/libexec/PlistBuddy -c "Set :$ns_key:$1 $3" "$ns_plist" >/dev/null 2>&1 ||
+    sudo /usr/libexec/PlistBuddy -c "Add :$ns_key:$1 $2 $3" "$ns_plist" >/dev/null
+}
+ns_mkdict() { sudo /usr/libexec/PlistBuddy -c "Add :$1 dict" "$ns_plist" >/dev/null 2>&1 || true; }
+
+log "Night Shift: 22:00-7:00"
+ns_mkdict "$ns_key"
+ns_mkdict "$ns_key:CBBlueReductionStatus"
+ns_mkdict "$ns_key:CBBlueReductionStatus:BlueLightReductionSchedule"
+
+# Warmth slider position as a colour temperature; System Settings spans roughly
+# 4800K ("Less Warm") to 2700K ("More Warm").
+ns_put CBBlueLightReductionCCTTargetRaw real 3355.791
+# BlueReductionMode is an enum: 0 = no schedule, 1 = custom, 2 = sunset to sunrise.
+ns_put CBBlueReductionStatus:BlueReductionMode integer 1
+ns_put CBBlueReductionStatus:AutoBlueReductionEnabled integer 1
+ns_put CBBlueReductionStatus:Version integer 1
+ns_put CBBlueReductionStatus:BlueLightReductionSchedule:NightStartHour integer 22
+ns_put CBBlueReductionStatus:BlueLightReductionSchedule:NightStartMinute integer 0
+ns_put CBBlueReductionStatus:BlueLightReductionSchedule:DayStartHour integer 7
+ns_put CBBlueReductionStatus:BlueLightReductionSchedule:DayStartMinute integer 0
+# BlueReductionEnabled is deliberately not set — it's whether Night Shift is on
+# right now, which the schedule decides, not a preference.
+
+# corebrightnessd keeps these in memory and rewrites the plist from its own copy,
+# so the edit above is inert until it re-reads from disk.
+sudo launchctl kickstart -k system/com.apple.corebrightnessd
+sleep 2
+
+# Writing under a live login session is racy, so say so rather than assume it took.
+ns_mode="$(sudo /usr/libexec/PlistBuddy -c "Print :$ns_key:CBBlueReductionStatus:BlueReductionMode" "$ns_plist" 2>/dev/null || true)"
+if [ "$ns_mode" != "1" ]; then
+  log "Night Shift didn't stick (mode=${ns_mode:-unset}) — set it under System Settings > Displays > Night Shift, or re-run this script after a reboot"
+fi
+
 # Lock screen message.
 sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "If found, please email david@kel.so or text +1 415 519 6574"
 
