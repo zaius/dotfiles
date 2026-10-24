@@ -4,6 +4,9 @@ vim/vim.symlink/undo/*
 vim/vim.symlink/swap/*
 ~vim/vim.symlink/swap/.gitkeep
 vim/vim.symlink/plugged/
+vim/vim.symlink/neo/
+
+.build/
 
 ssh/known_hosts
 
@@ -17,3 +20,17 @@ ipython.symlink
 
 config.symlink/pgcli/
 !config.symlink/pgcli/config
+
+# Credentials, caches and app-written state under ~/.config
+config.symlink/configstore/
+config.symlink/fish/conf.d/uv.env.fish
+config.symlink/gcloud/
+config.symlink/gh/
+config.symlink/htop/
+config.symlink/karabiner/automatic_backups/
+config.symlink/nanoclaw/
+config.symlink/op/
+config.symlink/sentry/
+config.symlink/stripe/
+config.symlink/uv/uv-receipt.json
+config.symlink/zed/prompts/
