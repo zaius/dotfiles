@@ -1,0 +1,143 @@
+#!/bin/bash
+#
+# Snapshot ~/code and Claude/Codex/opencode/pi conversation history to
+# Backblaze B2 with restic. Run daily by launchd (so.kel.backup, see
+# launchd/); pass -n for a dry run listing what would change.
+#
+# Config lives outside the dotfiles repo: ~/.restic/env (B2 key + repo URL)
+# and ~/.restic/password. The passphrase must also live in 1Password -
+# without it the backups are unrecoverable.
+#
+# What gets backed up: everything except (a) the static excludes below, and
+# (b) whatever each repo's own .gitignore declares disposable - regenerated
+# from git on every run, so new build dirs and data files drop out of the
+# backup as soon as a project ignores them. Gitignored files whose names look
+# like local secrets/config (.env, keys, certs) are kept anyway.
+#
+# Restore cheat sheet:
+#   restic snapshots                  list restore points
+#   restic restore latest --target /tmp/restore --include /Users/zaius/code/foo
+#   restic dump latest /Users/zaius/code/foo/bar.py   single file to stdout
+#   restic dump latest $HOME/.restic/staging/opencode.db > opencode.db
+set -euo pipefail
+
+# launchd runs with a bare PATH that lacks homebrew
+PATH="/opt/homebrew/bin:$PATH"
+
+# Cap restic (a Go program) at two cores so a run never saturates the machine
+export GOMAXPROCS=2
+
+for f in ~/.restic/env ~/.restic/password; do
+  [[ -f $f ]] || { echo "$f missing - see comments in bin/backup" >&2; exit 1; }
+done
+grep -q BUCKET_NAME ~/.restic/env && { echo "~/.restic/env still has placeholder values" >&2; exit 1; }
+source ~/.restic/env
+export RESTIC_PASSWORD_FILE=$HOME/.restic/password
+
+src=$HOME/code
+
+# Bare names match that name anywhere; absolute paths pin one location.
+# Mostly a safety net for areas outside any git repo - inside repos
+# .gitignore does the work.
+static_excludes="
+.DS_Store
+*.pyc
+*.pyo
+node_modules
+.venv
+venv
+__pycache__
+dumps
+*.ipa
+*.apk
+*.apkm
+$src/export
+$src/kestrel/data
+$src/kestrel/base/data
+$src/yelp/ios/v25_extracted
+$src/yelp/frida-server
+$src/amaranth/amaran Desktop.app
+$src/amaranth/amaran.app
+$src/unifi/unifi/unifi-db
+$src/beyond/base.tgz
+$src/beyond/base/snapshots
+$src/prettydata/git-backup/backups
+$src/arction/backup.sql
+"
+
+# Gitignored files with these names get backed up anyway.
+keep_ignored() {
+  case "${1##*/}" in
+    .env|.env.*|.envrc|.gitignore|*.key|*.cert|*.crt|*.pem|*-config.php|local_settings.py|settings.local.json) return 0 ;;
+  esac
+  return 1
+}
+
+echo "backup started $(date '+%Y-%m-%d %H:%M:%S')"
+
+excl=$(mktemp)
+trap 'rm -f "$excl"' EXIT
+printf '%s\n' "$static_excludes" | sed '/^$/d' > "$excl"
+
+# Collect each repo's gitignored paths as absolute exclude rules. Directory
+# entries (trailing /) are always excluded; file entries pass through
+# keep_ignored first. Glob chars in literal paths get escaped.
+find "$src" -maxdepth 5 \( -name node_modules -o -name .venv -o -name venv -o -path "$src/kestrel/data" -o -path "$src/kestrel/base/data" \) -prune -o -name .git -type d -print0 |
+  while IFS= read -r -d '' gitdir; do
+    repo=${gitdir%/.git}
+    git -C "$repo" ls-files -z --others --ignored --exclude-standard --directory 2>/dev/null |
+      while IFS= read -r -d '' p; do
+        [[ "$p" != */ ]] && keep_ignored "$p" && continue
+        printf '%s/%s\n' "$repo" "${p%/}"
+      done
+  done | sed 's/[[*?]/\\&/g' >> "$excl"
+echo "excluding $(wc -l < "$excl" | tr -d ' ') rules"
+
+# opencode keeps every session in one live SQLite database, so copying the file
+# mid-write captures a torn page and loses whatever still sits in the WAL.
+# VACUUM INTO hands restic a consistent, checkpointed copy at a stable path.
+# Vacuuming to a scratch name keeps the last good copy if the database is busy,
+# so a running opencode never costs us a night of the wider backup.
+opencode_db=$HOME/.local/share/opencode/opencode.db
+opencode_staged=$HOME/.restic/staging/opencode.db
+if [[ -f $opencode_db ]]; then
+  mkdir -p "$(dirname "$opencode_staged")"
+  if sqlite3 "$opencode_db" "PRAGMA busy_timeout=30000; VACUUM INTO '$opencode_staged.new'" >/dev/null; then
+    mv -f "$opencode_staged.new" "$opencode_staged"
+    echo "staged opencode sessions ($(du -h "$opencode_staged" | cut -f1 | tr -d ' '))"
+  else
+    rm -f "$opencode_staged.new"
+    echo "warning: could not read opencode database, backing up the previous copy" >&2
+  fi
+fi
+
+restic cat config >/dev/null 2>&1 || restic init
+restic unlock # clear stale locks left by dead processes so they can't wedge the nightly run
+
+paths=("$src" "$HOME/.claude/projects" "$HOME/.claude/history.jsonl" "$HOME/.codex/sessions" "$HOME/.codex/history.jsonl" "$HOME/.pi/agent/sessions")
+# history.jsonl stores large pastes only as hashes into paste-cache/; Codex keeps
+# user-set thread names in session_index.jsonl rather than the rollouts.
+paths+=("$HOME/.claude/paste-cache" "$HOME/.codex/session_index.jsonl")
+# The staged database is the sessions themselves; snapshot/ holds the per-session
+# git repos behind opencode's revert, so the file states match the transcripts.
+if [[ -f $opencode_staged ]]; then paths+=("$opencode_staged"); fi
+if [[ -d $HOME/.local/share/opencode/snapshot ]]; then paths+=("$HOME/.local/share/opencode/snapshot"); fi
+
+args=(backup --exclude-file "$excl" --exclude-caches "${paths[@]}")
+if [[ "${1:-}" == "-n" ]]; then
+  args+=(--dry-run --verbose)
+fi
+
+# 3 = some source files couldn't be read (vanished mid-run etc.); routine for
+# a live tree, not worth failing the whole backup.
+rc=0
+restic "${args[@]}" || rc=$?
+[[ $rc -eq 0 || $rc -eq 3 ]] || exit $rc
+
+if [[ "${1:-}" != "-n" ]]; then
+  # Yearlies are kept forever so anything that ever existed locally for a
+  # month+ (e.g. conversations, even if a purge setting sneaks back in) stays
+  # recoverable indefinitely, at the cost of one snapshot per year.
+  restic forget --prune --keep-daily 7 --keep-weekly 5 --keep-monthly 24 --keep-yearly unlimited --quiet
+fi
+echo "backup finished $(date '+%Y-%m-%d %H:%M:%S')"

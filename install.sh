@@ -52,3 +52,14 @@ home-link tmux.conf.symlink
 home-link vim/vimrc.symlink
 home-link profile.symlink
 # home-link eslintrc.json.symlink
+
+# launchd agents (copied, not linked - launchd is unreliable with symlinked plists)
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  mkdir -p ~/Library/LaunchAgents
+  for plist in ${base}/launchd/*.plist; do
+    echo "installing launch agent $(basename ${plist})"
+    cp ${plist} ~/Library/LaunchAgents/
+    launchctl bootout gui/$(id -u)/$(basename ${plist} .plist) 2>/dev/null || true
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/$(basename ${plist})
+  done
+fi

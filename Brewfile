@@ -17,6 +17,7 @@ brew "nvm"
 brew "pspg"
 brew "pgcli"
 brew "pyenv"
+brew "restic" # nightly backups to B2, see bin/backup
 brew "tmux"
 brew "wget"
 brew "xz"
