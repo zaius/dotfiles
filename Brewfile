@@ -25,6 +25,7 @@ brew "restic" # nightly backups to B2, see bin/backup
 brew "tmux"
 brew "wget"
 brew "xz"
+brew "zstd" # unpacks bin/migrate archives
 
 # Youtube
 brew "ffmpeg"
@@ -34,7 +35,7 @@ brew "yt-dlp"
 # --- Dev ---
 cask "orbstack"
 brew "go"
-brew "hashicorp/tap/terraform"
+brew "hashicorp/tap/terraform", trusted: true
 brew "honcho" # Procfile runner
 brew "libpostal" # C library behind the postal python bindings in prettydata
 brew "xcodegen" # generates the Noted xcodeproj
