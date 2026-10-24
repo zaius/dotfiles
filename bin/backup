@@ -5,8 +5,9 @@
 # launchd/); pass -n for a dry run listing what would change.
 #
 # Config lives outside the dotfiles repo: ~/.restic/env (B2 key + repo URL)
-# and ~/.restic/password. The passphrase must also live in 1Password -
-# without it the backups are unrecoverable.
+# and ~/.restic/password. mac.sh writes both from the "Backblaze - mac-restic"
+# item in 1Password, whose passphrase field is the only other copy of the
+# passphrase - without it the backups are unrecoverable.
 #
 # What gets backed up: everything except (a) the static excludes below, and
 # (b) whatever each repo's own .gitignore declares disposable - regenerated

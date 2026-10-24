@@ -376,6 +376,59 @@ end tell
 EOF
 fi
 
+# --- 1Password: sign in first, every login below pulls its password from it ---
+if [ -d "/Applications/1Password.app" ]; then
+  log "Opening 1Password — sign in if you aren't already"
+  open -a 1Password
+  read -r -p " -- Press enter once signed in to continue..."
+fi
+
+# --- CLI logins: each opens a browser; skipped when already signed in ---
+# The tee at the top makes stdout a pipe, which these CLIs read as running
+# unattended, so hand them the terminal directly.
+on_tty() { "$@" </dev/tty >/dev/tty 2>&1; }
+log "CLI logins: gh, gcloud, az, sentry-cli"
+gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol https
+gh alias set co 'pr checkout' --clobber >/dev/null
+gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null | grep -q . || on_tty gcloud auth login
+gcloud config set disable_usage_reporting true --quiet 2>/dev/null
+az account show >/dev/null 2>&1 || on_tty az login
+[ -f "$HOME/.sentryclirc" ] || on_tty sentry-cli login
+
+# --- Secrets from 1Password: restic's B2 key and passphrase, the mkcert CA ---
+until op vault list >/dev/null 2>&1; do
+  log "Turn on 1Password > Settings > Developer > Integrate with 1Password CLI"
+  read -r -p " -- Press enter to retry..."
+done
+
+if [ ! -f "$HOME/.restic/password" ]; then
+  log "Writing ~/.restic/env and ~/.restic/password for bin/backup"
+  restic_item="op://Private/Backblaze - mac-restic"
+  mkdir -p "$HOME/.restic"
+  chmod 700 "$HOME/.restic"
+  op read --force --out-file "$HOME/.restic/password" "$restic_item/passphrase" >/dev/null
+  (
+    umask 077
+    {
+      echo 'export RESTIC_REPOSITORY="s3:s3.us-west-000.backblazeb2.com/kelso-mac-backup"'
+      echo "export AWS_ACCESS_KEY_ID=$(op read "$restic_item/username")"
+      echo "export AWS_SECRET_ACCESS_KEY=$(op read "$restic_item/password")"
+    } > "$HOME/.restic/env"
+  )
+fi
+
+# The kestrel and prettydata boxes serve certs this CA signed, so a fresh CA
+# would mean reissuing all of them.
+caroot="$(mkcert -CAROOT)"
+if [ ! -f "$caroot/rootCA-key.pem" ]; then
+  log "Restoring the mkcert CA"
+  mkdir -p "$caroot"
+  # op filed each attachment as "pem" under a section named for the file.
+  op read --force --out-file "$caroot/rootCA.pem" "op://Private/mkcert CA/rootCA/pem" >/dev/null
+  op read --force --out-file "$caroot/rootCA-key.pem" "op://Private/mkcert CA/rootCA-key/pem" >/dev/null
+fi
+on_tty mkcert -install
+
 # --- Documents/Desktop -> Dropbox (run after Dropbox is signed in & synced) ---
 log "Sign into Dropbox now if you haven't — Documents/Desktop will be linked into it"
 read -r -p " -- Press enter once Dropbox is signed in and the folder exists (or to skip)..."
@@ -418,4 +471,4 @@ else
   done
 fi
 
-log "Done. Manual follow-ups: sign into 1Password, Tailscale."
+log "Done. Manual follow-ups: sign into Tailscale."
