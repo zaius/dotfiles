@@ -203,6 +203,15 @@ if ! { clang -fobjc-arc -framework Foundation -o "$ns_dir/nightshift" "$here/mac
 fi
 rm -rf "$ns_dir"
 
+# --- Display resolution: largest Retina mode (logic lives in mac/resolution.m) ---
+log "Display: More Space"
+res_dir="$(mktemp -d)"
+if ! { clang -fobjc-arc -framework Foundation -framework CoreGraphics -o "$res_dir/resolution" "$here/mac/resolution.m" &&
+  "$res_dir/resolution"; }; then
+  log "Resolution didn't change — pick More Space under System Settings > Displays"
+fi
+rm -rf "$res_dir"
+
 # Lock screen message.
 sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "If found, please email david@kel.so or text +1 415 519 6574"
 
