@@ -400,6 +400,19 @@ if [ -d "/Applications/1Password.app" ]; then
   read -r -p " -- Press enter once signed in to continue..."
 fi
 
+# --- Firefox: make it the default browser, so the logins below open in it ---
+# A fresh Mac sends them to Safari.
+default_browser() {
+  osascript -l JavaScript -e 'ObjC.import("AppKit"); $.NSWorkspace.sharedWorkspace.URLForApplicationToOpenURL($.NSURL.URLWithString("https:")).path.js'
+}
+if [ -d "/Applications/Firefox.app" ] && [ "$(default_browser)" != /Applications/Firefox.app ]; then
+  log "Opening Firefox — keep it as the default when macOS asks (or System Settings > Desktop & Dock)"
+  open -a Firefox --args -setDefaultBrowser
+  until [ "$(default_browser)" = /Applications/Firefox.app ]; do
+    read -r -p " -- Press enter once Firefox is the default browser to re-check..."
+  done
+fi
+
 # --- CLI logins: each opens a browser; skipped when already signed in ---
 # The tee at the top makes stdout a pipe, which these CLIs read as running
 # unattended, so hand them the terminal directly. Open it read-write on all
