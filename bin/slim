@@ -1,0 +1,123 @@
+#!/bin/bash
+#
+# Delete regenerable build output and dependency installs under ~/code (or
+# the directories given as arguments) to shrink the tree before copying it to
+# another machine. Lists what it found with sizes and asks before deleting;
+# -n stops after the list.
+#
+# Regenerable means: directories whose name only ever holds generated files
+# (node_modules, .venv, Swift's .build, tool caches), any directory carrying a
+# CACHEDIR.TAG (Cargo's target/, uv caches), and any virtualenv (pyvenv.cfg)
+# whatever its name. Ambiguous names like build/ and dist/ stay, since some
+# projects keep source under them.
+#
+# A virtualenv with no pyproject/requirements file beside it can't be rebuilt
+# from the project, so its package list goes to requirements.frozen.txt next
+# to it first. Rebuild with: uv venv && uv pip install -r requirements.frozen.txt
+set -euo pipefail
+
+dry_run=
+if [[ "${1:-}" == "-n" ]]; then dry_run=1; shift; fi
+(( $# )) || set -- "$HOME/code"
+
+has_manifest() {
+  local f
+  for f in "$1"/{pyproject.toml,setup.py,Pipfile,uv.lock} "$1"/requirements*.txt; do
+    [[ -e $f ]] && return 0
+  done
+  return 1
+}
+
+# Reads names from the dist-info directories rather than asking the venv's
+# interpreter, which is often a dangling symlink to a removed Python.
+freeze() {
+  local info
+  {
+    grep -m1 -E '^version(_info)? *=' "$1/pyvenv.cfg" | sed 's/.*= */# python /' || true
+    for info in "$1"/lib/python*/site-packages/*.dist-info; do
+      [[ -d $info ]] || continue
+      info=${info##*/}
+      info=${info%.dist-info}
+      printf '%s==%s\n' "${info%%-*}" "${info#*-}"
+    done | sort -f
+  } > "${1%/*}/requirements.frozen.txt"
+}
+
+echo "scanning $*"
+
+# Content-based matches print the marker file, so the loop maps those back to
+# their directory. Sorting with / mapped to \001 puts every path straight after
+# its parent, which lets the second loop drop anything inside an earlier match
+# (e.g. __pycache__ inside a venv found by its pyvenv.cfg).
+targets=()
+last=
+while IFS= read -r -d '' p; do
+  [[ -n $last && $p == "$last"/* ]] && continue
+  targets+=("$p")
+  last=$p
+done < <(
+  find "$@" -name .git -prune -o \( -type d \( \
+      -name node_modules -o -name .venv -o -name .build -o -name __pycache__ -o -name '*.egg-info' \
+      -o -name .pytest_cache -o -name .mypy_cache -o -name .ruff_cache -o -name .tox -o -name .nox \
+      -o -name .next -o -name .turbo -o -name .parcel-cache -o -name .svelte-kit -o -name .angular \
+      -o -name DerivedData -o -name .gradle -o -path '*/.terraform/providers' \
+    \) -prune -print0 \) -o -type f \( -name CACHEDIR.TAG -o -name pyvenv.cfg \) -print0 |
+    while IFS= read -r -d '' p; do
+      if [[ $p == */CACHEDIR.TAG || $p == */pyvenv.cfg ]]; then p=${p%/*}; fi
+      printf '%s\0' "$p"
+    done |
+    LC_ALL=C tr / '\001' | LC_ALL=C sort -z | LC_ALL=C tr '\001' /
+)
+
+if (( ! ${#targets[@]} )); then
+  echo "nothing to remove"
+  exit 0
+fi
+
+echo "measuring ${#targets[@]} directories"
+printf '%s\0' "${targets[@]}" | xargs -0 du -sk | sort -rn |
+  awk -F'\t' -v home="$HOME" '
+    function h(k) { return k >= 1048576 ? sprintf("%.1fG", k / 1048576) : k >= 1024 ? sprintf("%.0fM", k / 1024) : k "K" }
+    {
+      total += $1
+      if ($1 < 10240) { small++; smallk += $1; next }
+      p = $2
+      if (index(p, home) == 1) p = "~" substr(p, length(home) + 1)
+      printf "%7s  %s\n", h($1), p
+    }
+    END {
+      if (small) printf "%7s  (%d smaller directories)\n", h(smallk), small
+      printf "%7s  total\n", h(total)
+    }'
+
+orphans=()
+for d in "${targets[@]}"; do
+  if [[ -e $d/pyvenv.cfg ]] && ! has_manifest "${d%/*}"; then
+    orphans+=("$d")
+  fi
+done
+if (( ${#orphans[@]} )); then
+  echo
+  echo "these venvs have no manifest, so their package lists go to requirements.frozen.txt beside them:"
+  printf '  %s\n' "${orphans[@]}"
+fi
+
+[[ -n $dry_run ]] && exit 0
+
+echo
+read -rp "Delete all of the above? [y/N] " answer
+[[ $answer == [yY]* ]] || exit 1
+
+for d in ${orphans[@]+"${orphans[@]}"}; do
+  freeze "$d"
+done
+
+i=0
+for d in "${targets[@]}"; do
+  printf '\rdeleting %d/%d' $((++i)) ${#targets[@]}
+  # Some package managers leave read-only directories, which block rm until
+  # they're writable again.
+  rm -rf "$d" 2>/dev/null || { chmod -R u+w "$d" && rm -rf "$d"; }
+done
+echo
+echo done
