@@ -38,6 +38,8 @@ brew "go"
 brew "hashicorp/tap/terraform", trusted: true
 brew "honcho" # Procfile runner
 brew "libpostal" # C library behind the postal python bindings in prettydata
+brew "mkcert" # local CA for the kestrel/prettydata certs, restored in mac.sh
+brew "nss" # certutil, so mkcert -install can trust the CA in Firefox
 brew "xcodegen" # generates the Noted xcodeproj
 # --- Terminals ---
 cask "ghostty"
