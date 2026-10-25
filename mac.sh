@@ -419,7 +419,7 @@ fi
 # three fds: gh queries the background color over stdout and reads the reply
 # back from it, so a write-only stdout leaves the reply for its prompt to choke on.
 on_tty() { "$@" <>/dev/tty >&0 2>&0; }
-log "CLI logins: gh, gcloud, az, sentry-cli"
+log "CLI logins: gh, gcloud, az"
 gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol https
 gh alias set co 'pr checkout' --clobber >/dev/null
 gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null | grep -q . || on_tty gcloud auth login
@@ -427,13 +427,20 @@ gcloud config set disable_usage_reporting true --quiet 2>/dev/null
 # Sign in to the PrettyData tenant directly: it requires MFA, which a plain
 # az login never prompts for, so az finds no subscriptions and exits non-zero.
 az account show >/dev/null 2>&1 || on_tty az login --tenant prettydata.co
-[ -f "$HOME/.sentryclirc" ] || on_tty sentry-cli login
 
-# --- Secrets from 1Password: restic's B2 key and passphrase, the mkcert CA ---
+# --- Secrets from 1Password: sentry-cli's token, restic's B2 key and passphrase, the mkcert CA ---
 until op vault list >/dev/null 2>&1; do
   log "Turn on 1Password > Settings > Developer > Integrate with 1Password CLI"
   read -r -p " -- Press enter to retry..."
 done
+
+if [ ! -f "$HOME/.sentryclirc" ]; then
+  log "Logging sentry-cli in with its 1Password token"
+  # Assign first so set -e catches a failed read; an empty token sends
+  # sentry-cli to its interactive prompt.
+  sentry_token="$(op read "op://Private/Sentry API - sentry-cli/password")"
+  sentry-cli login --auth-token "$sentry_token"
+fi
 
 if [ ! -f "$HOME/.restic/password" ]; then
   log "Writing ~/.restic/env and ~/.restic/password for bin/backup"
