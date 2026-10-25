@@ -71,7 +71,11 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # --- Mac App Store sign-in (mas can't auth, must happen in the GUI) ---
-if grep -q '^mas ' "$here/Brewfile"; then
+# Only stop for it while a Brewfile mas app is missing. mas list reads local
+# receipts, so it works signed out, and comes back empty before brew installs mas.
+missing_mas="$(comm -23 <(sed -n 's/^mas .*id: *\([0-9]*\).*/\1/p' "$here/Brewfile" | sort) \
+  <(mas list 2>/dev/null | awk '{print $1}' | sort))"
+if [ -n "$missing_mas" ]; then
   log "Opening App Store — sign in if you aren't already"
   open -a "App Store"
   read -r -p " -- Press enter once signed in to continue..."
@@ -83,10 +87,10 @@ brew bundle --file="$here/Brewfile" --verbose
 
 pyenv install --skip-existing 3.15
 pyenv global 3.15
-curl -LsSf https://astral.sh/uv/install.sh | sh
 # The installer drops uv in ~/.local/bin, which profile.symlink puts on PATH,
 # but install.sh only links that after this script finishes.
 export PATH="$HOME/.local/bin:$PATH"
+command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # ALE execs these as subprocesses, so they only need to be on PATH (isolated uv tools).
 # pynvim/black instead live in the provider venv below — Neovim imports them in-process.
@@ -96,12 +100,17 @@ uv tool install black
 # Neovim python3 provider: dedicated venv built from the pyenv python so it doesn't
 # follow per-project pyenv switching. g:python3_host_prog in common.vim points here.
 nvim_venv="$HOME/.local/share/nvim/venv"
-uv venv --clear --python "$(pyenv prefix 3.15)/bin/python" "$nvim_venv"
+nvim_python_bin="$(pyenv prefix 3.15)/bin"
+# Rebuild only when the venv is missing or was built from a different python.
+if ! grep -qx "home = $nvim_python_bin" "$nvim_venv/pyvenv.cfg" 2>/dev/null; then
+  uv venv --clear --python "$nvim_python_bin/python" "$nvim_venv"
+fi
 uv pip install --python "$nvim_venv/bin/python" pynvim black
 
 
 # --- Chromium: strip Gatekeeper quarantine (unsigned build, otherwise "damaged") ---
-if [ -d "/Applications/Chromium.app" ]; then
+if [ -d "/Applications/Chromium.app" ] &&
+  xattr -p com.apple.quarantine /Applications/Chromium.app >/dev/null 2>&1; then
   log "Removing Gatekeeper quarantine from Chromium"
   sudo xattr -rd com.apple.quarantine /Applications/Chromium.app || true
 fi
@@ -115,7 +124,8 @@ if ! grep -qx "$brew_bash" /etc/shells; then
   log "Registering $brew_bash in /etc/shells"
   echo "$brew_bash" | sudo tee -a /etc/shells >/dev/null
 fi
-if [ "${SHELL:-}" != "$brew_bash" ]; then
+# Ask Directory Services: $SHELL keeps the old shell until the next login.
+if [ "$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')" != "$brew_bash" ]; then
   log "chsh -> $brew_bash"
   sudo chsh -s "$brew_bash" "$USER"
 fi
@@ -124,19 +134,29 @@ fi
 # mkdir -p "$HOME/.nvm"
 
 # --- Computer name (Sharing / Bonjour / hostname) ---
-current_name="$(scutil --get ComputerName 2>/dev/null || true)"
-log "Current computer name: ${current_name:-<unset>}"
-read -r -p " -- New computer name (enter to keep): " new_name
-if [ -n "$new_name" ]; then
-  # LocalHostName/HostName need a DNS-safe label: spaces -> hyphens, drop other punctuation.
-  safe_name="$(echo "$new_name" | tr ' ' '-' | tr -cd 'A-Za-z0-9-')"
-  sudo scutil --set ComputerName "$new_name"
-  sudo scutil --set LocalHostName "$safe_name"
-  sudo scutil --set HostName "$safe_name"
-  dscacheutil -flushcache
+# A fresh Mac has no HostName and renaming below sets one, so only ask until then.
+if ! scutil --get HostName >/dev/null 2>&1; then
+  current_name="$(scutil --get ComputerName 2>/dev/null || true)"
+  log "Current computer name: ${current_name:-<unset>}"
+  read -r -p " -- New computer name (enter to keep): " new_name
+  if [ -n "$new_name" ]; then
+    # LocalHostName/HostName need a DNS-safe label: spaces -> hyphens, drop other punctuation.
+    safe_name="$(echo "$new_name" | tr ' ' '-' | tr -cd 'A-Za-z0-9-')"
+    sudo scutil --set ComputerName "$new_name"
+    sudo scutil --set LocalHostName "$safe_name"
+    sudo scutil --set HostName "$safe_name"
+    dscacheutil -flushcache
+  fi
 fi
 
 # --- macOS defaults ---
+# Snapshot the domains whose apps need a restart to pick up changes, so re-runs
+# don't close Finder windows or flash the Dock when nothing changed.
+finder_prefs="$(defaults export com.apple.finder -)"
+dock_prefs="$(defaults export com.apple.dock -)"
+controlcenter_prefs="$(defaults export com.apple.controlcenter -)"
+restart_if_changed() { [ "$(defaults export "$1" -)" = "$2" ] || killall "$3"; }
+
 # Disable press-and-hold so vim key-repeat works.
 defaults write -g ApplePressAndHoldEnabled -bool false
 # Fast key repeat, minimal delay
@@ -175,7 +195,7 @@ defaults write com.apple.finder NewWindowTarget -string "PfHm"
 defaults write com.apple.finder NewWindowTargetPath -string "file://$HOME/"
 # Show all filename extensions.
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-killall Finder
+restart_if_changed com.apple.finder "$finder_prefs" Finder
 
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock orientation -string "right"
@@ -184,11 +204,11 @@ defaults write com.apple.dock autohide-time-modifier -float 0.1
 # Empty the dock: no pinned apps, no Downloads stack.
 defaults write com.apple.dock persistent-apps -array
 defaults write com.apple.dock persistent-others -array
-killall Dock
+restart_if_changed com.apple.dock "$dock_prefs" Dock
 
 # Menu bar: show battery percentage.
 defaults write com.apple.controlcenter BatteryShowPercentage -bool true
-killall ControlCenter
+restart_if_changed com.apple.controlcenter "$controlcenter_prefs" ControlCenter
 
 # --- Night Shift (settings live in mac/nightshift.m) ---
 # There's no defaults key for this: corebrightnessd owns the settings and
@@ -220,10 +240,22 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "
 
 # --- Rectangle: launch on login, hide menubar icon ---
 # Needs first launch + Accessibility permission before defaults will stick.
-if [ -d "/Applications/Rectangle.app" ]; then
+# Reading the system TCC database works thanks to the Full Disk Access above.
+accessibility_allowed() {
+  [ -n "$(sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
+    "select 1 from access where service = 'kTCCServiceAccessibility' and client = '$1' and auth_value = 2" 2>/dev/null)" ]
+}
+rectangle_done() {
+  accessibility_allowed com.knollsoft.Rectangle &&
+    [ "$(defaults read com.knollsoft.Rectangle launchOnLogin 2>/dev/null)" = 1 ] &&
+    [ "$(defaults read com.knollsoft.Rectangle hideMenubarIcon 2>/dev/null)" = 1 ]
+}
+if [ -d "/Applications/Rectangle.app" ] && ! rectangle_done; then
   log "Opening Rectangle — grant Accessibility permission when prompted"
   open -a Rectangle
-  read -r -p " -- Press enter once Rectangle has Accessibility access to continue..."
+  until accessibility_allowed com.knollsoft.Rectangle; do
+    read -r -p " -- Press enter once Rectangle has Accessibility access to re-check..."
+  done
   defaults write com.knollsoft.Rectangle launchOnLogin -bool true
   defaults write com.knollsoft.Rectangle hideMenubarIcon -bool true
   osascript -e 'quit app "Rectangle"' >/dev/null 2>&1 || true
@@ -418,8 +450,8 @@ op_missing() {
   done
 }
 if [ -d "/Applications/1Password.app" ]; then
-  open -a 1Password
   while missing="$(op_missing)"; [ -n "$missing" ]; do
+    open -a 1Password
     log "Sign in to 1Password, then turn these on in its Settings:"
     sed 's/^/      /' <<<"$missing"
     read -r -p " -- Press enter to re-check..."
@@ -455,14 +487,20 @@ gcloud config set disable_usage_reporting true --quiet 2>/dev/null
 az account show >/dev/null 2>&1 || on_tty az login --tenant prettydata.co
 
 # --- Secrets from 1Password: sentry-cli's token, restic's B2 key and passphrase, the mkcert CA ---
+# Each restore calls op_unlock first, so re-runs with every secret in place
+# never raise 1Password's approval prompt.
 # With no accounts, op asks on /dev/tty whether to add one by hand, which no
 # redirect silences, so check for the app's accounts before anything else.
-until [ -n "$(op account list 2>/dev/null)" ] && op vault list >/dev/null 2>&1; do
-  log "Unlock 1Password and approve its prompt to let the CLI in"
-  read -r -p " -- Press enter to retry..."
-done
+op_unlock() {
+  until [ -n "$(op account list 2>/dev/null)" ] && op vault list >/dev/null 2>&1; do
+    open -a 1Password
+    log "Unlock 1Password and approve its prompt to let the CLI in"
+    read -r -p " -- Press enter to retry..."
+  done
+}
 
 if [ ! -f "$HOME/.sentryclirc" ]; then
+  op_unlock
   log "Logging sentry-cli in with its 1Password token"
   # Assign first so set -e catches a failed read; an empty token sends
   # sentry-cli to its interactive prompt.
@@ -471,6 +509,7 @@ if [ ! -f "$HOME/.sentryclirc" ]; then
 fi
 
 if [ ! -f "$HOME/.restic/password" ]; then
+  op_unlock
   log "Writing ~/.restic/env and ~/.restic/password for bin/backup"
   restic_item="op://Private/Backblaze - mac-restic"
   mkdir -p "$HOME/.restic"
@@ -490,6 +529,7 @@ fi
 # would mean reissuing all of them.
 caroot="$(mkcert -CAROOT)"
 if [ ! -f "$caroot/rootCA-key.pem" ]; then
+  op_unlock
   log "Restoring the mkcert CA"
   mkdir -p "$caroot"
   # op filed each attachment as "pem" under a section named for the file.
@@ -499,10 +539,14 @@ fi
 on_tty mkcert -install
 
 # --- Documents/Desktop -> Dropbox (run after Dropbox is signed in & synced) ---
-log "Opening Dropbox — sign in if you aren't already; Documents/Desktop will be linked into it"
-log "WARNING: opt out of Dropbox on File Provider during setup — keep the folder at ~/Dropbox, not ~/Library/CloudStorage"
-open -a Dropbox || true
-read -r -p " -- Press enter once Dropbox is signed in and the folder exists (or to skip)..."
+# Dropbox writes info.json at sign-in, so only stop for it while signed out
+# and a folder still needs linking.
+if { [ ! -L "$HOME/Documents" ] || [ ! -L "$HOME/Desktop" ]; } && [ ! -f "$HOME/.dropbox/info.json" ]; then
+  log "Opening Dropbox — sign in if you aren't already; Documents/Desktop will be linked into it"
+  log "WARNING: opt out of Dropbox on File Provider during setup — keep the folder at ~/Dropbox, not ~/Library/CloudStorage"
+  open -a Dropbox || true
+  read -r -p " -- Press enter once Dropbox is signed in and the folder exists (or to skip)..."
+fi
 
 dropbox_dir=""
 for candidate in "$HOME/Dropbox" "$HOME/Library/CloudStorage/Dropbox"; do
@@ -542,4 +586,8 @@ else
   done
 fi
 
-log "Done. Manual follow-ups: sign into Tailscale."
+# Stopped means signed in with the VPN off; the CLI prints nothing while the app isn't running.
+case "$(/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json 2>/dev/null | jq -r .BackendState)" in
+  Running | Stopped) log "Done." ;;
+  *) log "Done. Manual follow-ups: sign into Tailscale." ;;
+esac
