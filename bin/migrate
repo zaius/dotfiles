@@ -1,0 +1,256 @@
+#!/bin/bash
+#
+# Move what a new Mac won't get from Dropbox, Obsidian Sync, iCloud or the
+# dotfiles install script. backup packs it into a folder to copy across, and
+# restore unpacks that folder on the new Mac. The usage text below lists the
+# sections and what each one holds.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+usage: migrate backup DIR [SECTION...]
+       migrate restore DIR [SECTION...]
+
+backup saves what the new Mac won't get from Dropbox, Obsidian Sync, iCloud
+or the dotfiles install script into the folder DIR, creating it if needed.
+Nothing goes to the new Mac directly: copy the whole DIR folder across (an
+external drive is easiest).
+
+restore runs on the new Mac, after the dotfiles install and mac.sh, and
+unpacks a copied DIR into ~. It quits Firefox to swap in the old profile,
+but the coding agents have to be quit by hand first.
+
+Sections, all of them when none are named:
+  firefox   the whole Firefox profile (session, history, bookmarks, logins,
+            extensions) and tabs.txt, a plain list of open tabs; quit
+            Firefox before a backup
+  agents    Claude Code, Claude desktop, Codex, Gemini, opencode, pi,
+            subspace, mempalace, Zed agent threads and prompt library
+  history   shell and REPL histories
+  code      ~/code; run slim before a backup to drop build output and
+            dependencies
+
+Each section becomes DIR/SECTION.tar.zst, with paths relative to ~.
+
+mac.sh covers the rest: CLI logins (gh, gcloud, az, sentry-cli), and the
+restic keys and mkcert CA from 1Password. The Brewfile brings the fonts.
+
+example: migrate backup /Volumes/External/migrate
+         migrate restore /Volumes/External/migrate
+EOF
+}
+
+case ${1:-} in
+  backup|restore) ;;
+  -h|--help) usage; exit ;;
+  *) usage >&2; exit 1 ;;
+esac
+if (( $# < 2 )); then
+  usage >&2
+  exit 1
+fi
+cmd=$1
+dir=$2
+shift 2
+sections=" ${*:-firefox agents history code} "
+want() { [[ $sections == *" $1 "* ]]; }
+
+[[ $cmd == restore ]] || mkdir -p "$dir"
+dir=$(cd "$dir" && pwd)
+cd "$HOME"
+warnings=()
+as="Library/Application Support"
+
+# Prints the collected warnings and exits 1 when there are any.
+check_warnings() {
+  (( ${#warnings[@]} )) || return 0
+  echo
+  printf 'warning: %s\n' "${warnings[@]}"
+  exit 1
+}
+
+# pack NAME [--exclude=PATTERN...] PATH...
+# Archives whichever PATHs exist into $dir/NAME.tar.zst. A bare exclude
+# pattern matches that name at any depth; one containing / matches from ~.
+pack() {
+  local name=$1 opts=(--exclude='*.sock') paths=() p
+  shift
+  for p in "$@"; do
+    if [[ $p == --exclude=* ]]; then
+      opts+=("$p")
+    elif [[ -e $p ]]; then
+      paths+=("$p")
+    fi
+  done
+  echo "== $name"
+  if (( ! ${#paths[@]} )); then
+    warnings+=("$name: none of its paths exist")
+    return
+  fi
+  if ! tar --no-mac-metadata -cf - "${opts[@]}" "${paths[@]}" | zstd -T0 -f -o "$dir/$name.tar.zst"; then
+    warnings+=("$name: tar reported errors, see above")
+  fi
+}
+
+# unpack NAME: extracts $dir/NAME.tar.zst into ~.
+unpack() {
+  echo "== $1"
+  if ! zstd -dc "$dir/$1.tar.zst" | tar -xpf - -C "$HOME"; then
+    warnings+=("$1: unpacking reported errors, see above")
+    return 1
+  fi
+}
+
+backup() {
+  case $dir/ in
+    "$HOME"/code/*) echo "DIR can't be inside ~/code" >&2; exit 1 ;;
+  esac
+
+  # Firefox only writes its final session and history on quit.
+  if want firefox && pgrep -xq firefox; then
+    echo "quit Firefox first" >&2
+    exit 1
+  fi
+
+  if want firefox; then
+    pack firefox --exclude="$as/Firefox/Crash Reports" --exclude="$as/Firefox/Pending Pings" \
+      "$as/Firefox" "$as/Mozilla"
+
+    # Firefox writes sessionstore.jsonlz4 on a clean quit and recovery.jsonlz4
+    # while running; whichever is newer has the latest tabs.
+    for profile in "$as"/Firefox/Profiles/*/; do
+      session=$profile/sessionstore.jsonlz4
+      [[ $profile/sessionstore-backups/recovery.jsonlz4 -nt $session ]] && session=$profile/sessionstore-backups/recovery.jsonlz4
+      [[ -f $session ]] || continue
+      echo "## ${profile%/}"
+      uv run --quiet --no-project --with lz4 python - "$session" <<'EOF'
+import json, sys, lz4.block
+
+# mozlz4: an 8-byte magic header, then a size-prefixed lz4 block.
+with open(sys.argv[1], "rb") as f:
+    session = json.loads(lz4.block.decompress(f.read()[8:]))
+for n, window in enumerate(session["windows"], 1):
+    print(f"# Window {n}")
+    for tab in window["tabs"]:
+        if tab.get("entries"):
+            entry = tab["entries"][tab.get("index", len(tab["entries"])) - 1]
+            print(entry.get("url", ""), entry.get("title", ""), sep="  ")
+    print()
+EOF
+    done > "$dir/tabs.txt" || warnings+=("firefox: couldn't write tabs.txt")
+  fi
+
+  if want agents; then
+    # Claude desktop re-downloads its VM bundle and Claude Code binaries.
+    # ~/.codex/config.toml links to the gitignored copy in the dotfiles.
+    local desktop=$as/Claude
+    pack agents \
+      --exclude="$desktop/vm_bundles" --exclude="$desktop/claude-code" --exclude="$desktop/claude-code-vm" \
+      --exclude="$desktop/Cache" --exclude="$desktop/Code Cache" --exclude="$desktop/GPUCache" --exclude="$desktop/Crashpad" \
+      .claude .claude.json .codex .gemini .opencode .local/share/opencode .local/state/opencode .pi .mempalace \
+      .subspace "$desktop" "$as/Codex" "$as/Zed/threads" "$as/Zed/db" \
+      .dotfiles/codex/config.toml.symlink .dotfiles/config.symlink/zed/prompts
+  fi
+
+  if want history; then
+    pack history \
+      .bash_history .bash_history_v2 .zsh_history .python_history .psql_history-* .sqlite_history \
+      .duckdb_history .pdbhistory .viminfo .dotfiles/config.symlink/pgcli/history \
+      .dotfiles/ipython.symlink/profile_default/history.sqlite
+  fi
+
+  if want code; then
+    # Safety net for anything slim wasn't run on; these always regenerate.
+    pack code --exclude=node_modules --exclude=.venv --exclude=__pycache__ code
+  fi
+
+  cat > "$dir/README.txt" <<'EOF'
+Restoring on the new Mac
+========================
+
+1. Install the dotfiles and run mac.sh.
+2. Quit Claude Code, Claude desktop, Codex, opencode and Zed.
+3. Run: migrate restore <this folder>
+
+To unpack a single archive by hand: zstd -dc NAME.tar.zst | tar -xpf - -C ~
+EOF
+
+  echo
+  du -sh "$dir"/* 2>/dev/null
+  check_warnings
+  echo
+  echo "Now copy $dir to the new Mac. Once mac.sh has run there:"
+  echo "  migrate restore <the copied folder>"
+}
+
+restore() {
+  if ! command -v zstd >/dev/null; then
+    echo "zstd is missing: run mac.sh first" >&2
+    exit 1
+  fi
+
+  local found=() s
+  for s in history agents code firefox; do
+    want "$s" || continue
+    if [[ -f $dir/$s.tar.zst ]]; then
+      found+=("$s")
+    else
+      echo "skipping $s: no $s.tar.zst in $dir"
+    fi
+  done
+  if (( ! ${#found[@]} )); then
+    echo "nothing to restore" >&2
+    exit 1
+  fi
+  sections=" ${found[*]} "
+
+  # A running agent keeps writing its config and session files, which would
+  # overwrite the copies this unpacks.
+  if want agents && pgrep -ixq 'claude|codex|opencode|zed'; then
+    echo "quit Claude Code, Claude desktop, Codex, opencode and Zed first" >&2
+    exit 1
+  fi
+
+  echo "This unpacks ${found[*]} from $dir into ~, overwriting files already there."
+  if want firefox; then
+    echo "It also quits Firefox and moves its current profile aside."
+  fi
+  read -rp "Continue? [y/N] " answer
+  [[ $answer == [yY]* ]] || exit 1
+
+  for s in history agents code; do
+    if want "$s"; then
+      unpack "$s" || true
+    fi
+  done
+
+  if want firefox; then
+    if pgrep -xq firefox; then
+      osascript -e 'quit app "Firefox"'
+      while pgrep -xq firefox; do sleep 1; done
+    fi
+    # The archive's profiles.ini points Firefox at the old profile. Moving the
+    # fresh one mac.sh made aside keeps tar from merging the two.
+    local ff=$as/Firefox
+    if [[ -e $ff ]]; then
+      local aside
+      aside="$ff.before-migrate-$(date +%Y%m%d-%H%M%S)"
+      mv "$ff" "$aside"
+      echo "moved the existing profile to ~/$aside"
+    fi
+    if unpack firefox; then
+      open -a Firefox
+      echo "$dir/tabs.txt lists the old tabs in case the session doesn't come back"
+    fi
+  fi
+
+  check_warnings
+  if want code; then
+    echo
+    echo "Rebuild projects as you touch them: uv sync, npm install, cargo build,"
+    echo "swift build, terraform init. Where slim froze a venv's packages:"
+    echo "  uv venv && uv pip install -r requirements.frozen.txt"
+  fi
+}
+
+"$cmd"
