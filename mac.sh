@@ -411,7 +411,9 @@ gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol http
 gh alias set co 'pr checkout' --clobber >/dev/null
 gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null | grep -q . || on_tty gcloud auth login
 gcloud config set disable_usage_reporting true --quiet 2>/dev/null
-az account show >/dev/null 2>&1 || on_tty az login
+# Sign in to the PrettyData tenant directly: it requires MFA, which a plain
+# az login never prompts for, so az finds no subscriptions and exits non-zero.
+az account show >/dev/null 2>&1 || on_tty az login --tenant prettydata.co
 [ -f "$HOME/.sentryclirc" ] || on_tty sentry-cli login
 
 # --- Secrets from 1Password: restic's B2 key and passphrase, the mkcert CA ---
