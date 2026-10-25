@@ -394,10 +394,27 @@ EOF
 fi
 
 # --- 1Password: sign in first, every login below pulls its password from it ---
+# 1Password signs its settings file and resets any value it didn't write, so
+# these get flipped in the app; the script only reads the file to check them.
+op_settings="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/Library/Application Support/1Password/Data/settings/settings.json"
+op_wanted=(
+  "developers.cliSharedLockState.enabled=Developer > Integrate with 1Password CLI"
+  "security.deviceClipboardSharing=Security > Use Universal Clipboard to copy to other devices"
+  "security.holdToggleReveal=Security > Hold Option to toggle revealed fields"
+)
+op_missing() {
+  local s
+  for s in "${op_wanted[@]}"; do
+    jq -e --arg k "${s%%=*}" '.[$k] == true' "$op_settings" >/dev/null 2>&1 || echo "${s#*=}"
+  done
+}
 if [ -d "/Applications/1Password.app" ]; then
-  log "Opening 1Password — sign in if you aren't already"
   open -a 1Password
-  read -r -p " -- Press enter once signed in to continue..."
+  while missing="$(op_missing)"; [ -n "$missing" ]; do
+    log "Sign in to 1Password, then turn these on in its Settings:"
+    sed 's/^/      /' <<<"$missing"
+    read -r -p " -- Press enter to re-check..."
+  done
 fi
 
 # --- Firefox: make it the default browser, so the logins below open in it ---
@@ -429,8 +446,10 @@ gcloud config set disable_usage_reporting true --quiet 2>/dev/null
 az account show >/dev/null 2>&1 || on_tty az login --tenant prettydata.co
 
 # --- Secrets from 1Password: sentry-cli's token, restic's B2 key and passphrase, the mkcert CA ---
-until op vault list >/dev/null 2>&1; do
-  log "Turn on 1Password > Settings > Developer > Integrate with 1Password CLI"
+# With no accounts, op asks on /dev/tty whether to add one by hand, which no
+# redirect silences, so check for the app's accounts before anything else.
+until [ -n "$(op account list 2>/dev/null)" ] && op vault list >/dev/null 2>&1; do
+  log "Unlock 1Password and approve its prompt to let the CLI in"
   read -r -p " -- Press enter to retry..."
 done
 
