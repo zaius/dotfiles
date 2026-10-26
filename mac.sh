@@ -538,6 +538,59 @@ if [ ! -f "$caroot/rootCA-key.pem" ]; then
 fi
 on_tty mkcert -install
 
+# --- App signing: Xcode account, Developer ID cert, Sparkle key, notarytool profiles ---
+# Xcode makes this Mac its own Apple Development cert once it has an account,
+# so only the release-signing pieces come from 1Password. Files staged in
+# $sudo_dir go away with it on exit.
+xcode_signed_in() {
+  defaults export com.apple.dt.Xcode - 2>/dev/null |
+    plutil -extract DVTDeveloperAccountManagerAppleIDLists json -o - - 2>/dev/null |
+    jq -e '[.[] | length] | add > 0' >/dev/null
+}
+if [ -d /Applications/Xcode.app ]; then
+  until xcode_signed_in; do
+    open -a Xcode
+    log "Sign in to Xcode with your Apple ID: Settings > Accounts > +"
+    read -r -p " -- Press enter to re-check..."
+  done
+fi
+
+if ! security find-identity -p codesigning | grep -q "Developer ID Application: .*(P9U2E575US)"; then
+  op_unlock
+  log "Importing the Developer ID Application cert"
+  op read --force --out-file "$sudo_dir/developer-id.p12" "op://Private/Noted - Developer ID cert/DeveloperID.p12" >/dev/null
+  security import "$sudo_dir/developer-id.p12" -P "$(op read "op://Private/Noted - Developer ID cert/password")" -T /usr/bin/codesign
+fi
+
+# Only generate_keys writes the keychain items Sparkle's tools read, so fetch
+# it from the Sparkle release both apps build against. Noted's key sits under
+# Sparkle's default ed25519 account, Amaranth's under its own.
+for key in Noted:ed25519 Amaranth:amaranth; do
+  app=${key%%:*}
+  account=${key#*:}
+  if ! security find-generic-password -s https://sparkle-project.org -a "$account" >/dev/null 2>&1; then
+    op_unlock
+    log "Importing $app's Sparkle update-signing key"
+    if [ ! -x "$sudo_dir/bin/generate_keys" ]; then
+      curl -fsSL https://github.com/sparkle-project/Sparkle/releases/download/2.9.3/Sparkle-2.9.3.tar.xz |
+        tar -xJf - -C "$sudo_dir" ./bin/generate_keys
+    fi
+    op read --force --out-file "$sudo_dir/sparkle.key" "op://Private/$app - Sparkle key/sparkle.key" >/dev/null
+    "$sudo_dir/bin/generate_keys" --account "$account" -f "$sudo_dir/sparkle.key"
+  fi
+done
+
+# notarytool keeps its profiles where security(1) can't see them, so ask it;
+# a missing profile fails without touching the network.
+for app in noted amaranth; do
+  if ! xcrun notarytool history --keychain-profile "$app-notary" >/dev/null 2>&1; then
+    op_unlock
+    log "Saving the $app-notary notarytool profile"
+    xcrun notarytool store-credentials "$app-notary" --apple-id david@kel.so --team-id P9U2E575US \
+      --password "$(op read "op://Private/Apple - notarytool-$app/password")"
+  fi
+done
+
 # --- Documents/Desktop -> Dropbox (run after Dropbox is signed in & synced) ---
 # Dropbox writes info.json at sign-in, so only stop for it while signed out
 # and a folder still needs linking.

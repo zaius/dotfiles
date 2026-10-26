@@ -32,8 +32,9 @@ Sections, all of them when none are named:
 
 Each section becomes DIR/SECTION.tar.zst, with paths relative to ~.
 
-mac.sh covers the rest: CLI logins (gh, gcloud, az, sentry-cli), and the
-restic keys and mkcert CA from 1Password. The Brewfile brings the fonts.
+mac.sh covers the rest: CLI logins (gh, gcloud, az, sentry-cli), and from
+1Password the restic keys, mkcert CA, Developer ID cert, Sparkle key and
+notarytool profiles. The Brewfile brings the fonts.
 
 example: migrate backup /Volumes/External/migrate
          migrate restore /Volumes/External/migrate
