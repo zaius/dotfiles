@@ -35,6 +35,7 @@ brew "yt-dlp"
 # --- Dev ---
 cask "orbstack"
 brew "go"
+brew "uv"
 brew "hashicorp/tap/terraform", trusted: true
 brew "honcho" # Procfile runner
 brew "libpostal" # C library behind the postal python bindings in prettydata

@@ -87,10 +87,6 @@ brew bundle --file="$here/Brewfile" --verbose
 
 pyenv install --skip-existing 3.15
 pyenv global 3.15
-# The installer drops uv in ~/.local/bin, which profile.symlink puts on PATH,
-# but install.sh only links that after this script finishes.
-export PATH="$HOME/.local/bin:$PATH"
-command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # ALE execs these as subprocesses, so they only need to be on PATH (isolated uv tools).
 # pynvim/black instead live in the provider venv below — Neovim imports them in-process.
