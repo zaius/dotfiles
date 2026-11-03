@@ -15,11 +15,15 @@
 # backup as soon as a project ignores them. Gitignored files whose names look
 # like local secrets/config (.env, keys, certs) are kept anyway.
 #
+# Every Mac backs up to the same repo, and restic tags each snapshot with its
+# hostname and keeps each Mac's history separately. Without --host, `latest`
+# means the newest snapshot from any Mac.
+#
 # Restore cheat sheet:
-#   restic snapshots                  list restore points
-#   restic restore latest --target /tmp/restore --include /Users/zaius/code/foo
-#   restic dump latest /Users/zaius/code/foo/bar.py   single file to stdout
-#   restic dump latest $HOME/.restic/staging/opencode.db > opencode.db
+#   restic snapshots --host $(hostname)   list this Mac's restore points
+#   restic restore latest --host $(hostname) --target /tmp/restore --include /Users/zaius/code/foo
+#   restic dump latest --host $(hostname) /Users/zaius/code/foo/bar.py   single file to stdout
+#   restic dump latest --host $(hostname) $HOME/.restic/staging/opencode.db > opencode.db
 set -euo pipefail
 
 # launchd runs with a bare PATH that lacks homebrew
@@ -124,7 +128,11 @@ paths+=("$HOME/.claude/paste-cache" "$HOME/.codex/session_index.jsonl")
 if [[ -f $opencode_staged ]]; then paths+=("$opencode_staged"); fi
 if [[ -d $HOME/.local/share/opencode/snapshot ]]; then paths+=("$HOME/.local/share/opencode/snapshot"); fi
 
-args=(backup --exclude-file "$excl" --exclude-caches "${paths[@]}")
+# Each Mac runs this at 03:30, and prune needs the repo to itself, so wait out
+# another Mac's run instead of failing.
+lock_wait=(--retry-lock 2h)
+
+args=(backup "${lock_wait[@]}" --exclude-file "$excl" --exclude-caches "${paths[@]}")
 if [[ "${1:-}" == "-n" ]]; then
   args+=(--dry-run --verbose)
 fi
@@ -139,6 +147,6 @@ if [[ "${1:-}" != "-n" ]]; then
   # Yearlies are kept forever so anything that ever existed locally for a
   # month+ (e.g. conversations, even if a purge setting sneaks back in) stays
   # recoverable indefinitely, at the cost of one snapshot per year.
-  restic forget --prune --keep-daily 7 --keep-weekly 5 --keep-monthly 24 --keep-yearly unlimited --quiet
+  restic forget "${lock_wait[@]}" --prune --keep-daily 7 --keep-weekly 5 --keep-monthly 24 --keep-yearly unlimited --quiet
 fi
 echo "backup finished $(date '+%Y-%m-%d %H:%M:%S')"
