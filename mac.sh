@@ -405,18 +405,6 @@ cat > "$pw_mcp_dir/.mcp.json" <<'EOF'
 }
 EOF
 
-# --- Hex: launch on login (no built-in pref, register as login item) ---
-if [ -d "/Applications/Hex.app" ]; then
-  log "Registering Hex as a login item"
-  osascript <<'EOF' >/dev/null
-tell application "System Events"
-  if not (exists login item "Hex") then
-    make login item at end with properties {path:"/Applications/Hex.app", hidden:false}
-  end if
-end tell
-EOF
-fi
-
 # --- 1Password: sign in first, every login below pulls its password from it ---
 # 1Password signs its settings file and resets any value it didn't write, so
 # these get flipped in the app; the script only reads the file to check them.

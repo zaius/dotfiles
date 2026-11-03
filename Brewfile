@@ -79,7 +79,6 @@ cask "dropbox"
 cask "karabiner-elements"
 cask "obsidian"
 cask "rectangle"
-cask "kitlangton-hex"
 cask "monitorcontrol"
 
 
