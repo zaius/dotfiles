@@ -150,7 +150,9 @@ fi
 # don't close Finder windows or flash the Dock when nothing changed.
 finder_prefs="$(defaults export com.apple.finder -)"
 dock_prefs="$(defaults export com.apple.dock -)"
-controlcenter_prefs="$(defaults export com.apple.controlcenter -)"
+# Menu bar module visibility lives in the per-host domain, so snapshot both.
+controlcenter_export() { defaults export com.apple.controlcenter -; defaults -currentHost export com.apple.controlcenter -; }
+controlcenter_prefs="$(controlcenter_export)"
 restart_if_changed() { [ "$(defaults export "$1" -)" = "$2" ] || killall "$3"; }
 
 # Disable press-and-hold so vim key-repeat works.
@@ -204,7 +206,11 @@ restart_if_changed com.apple.dock "$dock_prefs" Dock
 
 # Menu bar: show battery percentage.
 defaults write com.apple.controlcenter BatteryShowPercentage -bool true
-restart_if_changed com.apple.controlcenter "$controlcenter_prefs" ControlCenter
+# Menu bar: hide the Spotlight icon (⌘-space still works). 8 keeps a module
+# out of the menu bar; System Settings also sets MenuItemHidden, so mirror it.
+defaults -currentHost write com.apple.controlcenter Spotlight -int 8
+defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
+[ "$(controlcenter_export)" = "$controlcenter_prefs" ] || killall ControlCenter
 
 # --- Night Shift (settings live in mac/nightshift.m) ---
 # There's no defaults key for this: corebrightnessd owns the settings and
