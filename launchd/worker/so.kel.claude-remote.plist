@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>so.kel.claude-remote</string>
+  <!-- Claude Code Remote Control server: start and drive sessions on this Mac
+       from claude.ai/code or the Claude app. A login shell gives them the same
+       PATH, CLIs and MCP servers as a terminal. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/bash</string>
+    <string>-lc</string>
+    <string>exec claude remote-control</string>
+  </array>
+  <!-- Sessions start here. Claude never saves trust for ~, so it can't be home. -->
+  <key>WorkingDirectory</key>
+  <string>/Users/zaius/code</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- profile.symlink calls tput, which errors without one. -->
+    <key>TERM</key>
+    <string>xterm-256color</string>
+  </dict>
+  <!-- Remote Control exits after about 10 minutes offline; bring it back. -->
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/zaius/Library/Logs/claude-remote.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zaius/Library/Logs/claude-remote.log</string>
+</dict>
+</plist>

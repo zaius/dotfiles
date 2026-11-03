@@ -8,6 +8,8 @@ log() {
 }
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# laptop, or worker for the always-on Mac (see install.sh).
+role="$(cat "$here/.role" 2>/dev/null || echo laptop)"
 
 # Mirror all output to a log file so silent steps can be tailed from another
 # terminal. Password input isn't captured (read -s reads straight from the tty).
@@ -73,7 +75,12 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # --- Mac App Store sign-in (mas can't auth, must happen in the GUI) ---
 # Only stop for it while a Brewfile mas app is missing. mas list reads local
 # receipts, so it works signed out, and comes back empty before brew installs mas.
-missing_mas="$(comm -23 <(sed -n 's/^mas .*id: *\([0-9]*\).*/\1/p' "$here/Brewfile" | sort) \
+# A worker leaves out the laptop-only apps, as the Brewfile does.
+mas_lines="$(grep '^mas ' "$here/Brewfile")"
+if [ "$role" = worker ]; then
+  mas_lines="$(grep -v ' if laptop$' <<<"$mas_lines" || true)"
+fi
+missing_mas="$(comm -23 <(sed -n 's/^mas .*id: *\([0-9]*\).*/\1/p' <<<"$mas_lines" | sort) \
   <(mas list 2>/dev/null | awk '{print $1}' | sort))"
 if [ -n "$missing_mas" ]; then
   log "Opening App Store — sign in if you aren't already"
@@ -448,7 +455,8 @@ fi
 # three fds: gh queries the background color over stdout and reads the reply
 # back from it, so a write-only stdout leaves the reply for its prompt to choke on.
 on_tty() { "$@" <>/dev/tty >&0 2>&0; }
-log "CLI logins: gh, gcloud, az"
+log "CLI logins: claude, gh, gcloud, az"
+claude auth status --json 2>/dev/null | jq -e .loggedIn >/dev/null || on_tty claude auth login
 gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol https
 gh alias set co 'pr checkout' --clobber >/dev/null
 gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null | grep -q . || on_tty gcloud auth login
@@ -610,8 +618,75 @@ else
   done
 fi
 
+# --- Worker: stay awake and reachable, and come back after a reboot ---
+if [ "$role" = worker ]; then
+  log "Worker: no sleep, Remote Login, Screen Sharing, manual macOS updates"
+  # The display still sleeps. disablesleep keeps a laptop running with its lid shut.
+  sudo pmset -a sleep 0 disksleep 0 womp 1
+  sudo pmset -a disablesleep 1
+  # Only desktops can boot back up by themselves after a power cut.
+  if pmset -g cap | grep -qw autorestart; then
+    sudo pmset -a autorestart 1
+  fi
+  # An automatic macOS update restarts the Mac whenever it lands.
+  sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
+
+  # launchd listens on 22 once Remote Login is on, and on 5900 for Screen Sharing.
+  listening() { nc -z localhost "$1" >/dev/null 2>&1; }
+  if ! listening 22; then
+    sudo systemsetup -setremotelogin on >/dev/null 2>&1 || true
+  fi
+  if ! listening 5900; then
+    sudo launchctl enable system/com.apple.screensharing
+    sudo launchctl bootstrap system /System/Library/LaunchDaemons/com.apple.screensharing.plist 2>/dev/null || true
+  fi
+  until listening 22 && listening 5900; do
+    open "x-apple.systempreferences:com.apple.Sharing-Settings.extension"
+    log "Turn on Remote Login and Screen Sharing in General > Sharing"
+    read -r -p " -- Press enter to re-check..."
+  done
+
+  # Launch agents, OrbStack, Dropbox and Tailscale all run in the login
+  # session, so after a reboot nothing comes back until someone logs in.
+  # FileVault rules out logging in automatically.
+  if fdesetup isactive >/dev/null; then
+    log "FileVault is on: after a reboot, log in at the Mac itself to bring the worker back"
+  elif [ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" != "$USER" ]; then
+    log "Turning on automatic login — enter your macOS password again"
+    on_tty sudo sysadminctl -autologin set -userName "$USER" -password -
+  fi
+
+  # Claude Desktop runs its scheduled tasks only while it's open, and has no
+  # launch-on-login pref of its own.
+  if [ -d /Applications/Claude.app ]; then
+    log "Registering Claude as a login item"
+    osascript <<'EOF' >/dev/null
+tell application "System Events"
+  if not (exists login item "Claude") then
+    make login item at end with properties {path:"/Applications/Claude.app", hidden:false}
+  end if
+end tell
+EOF
+  fi
+
+  # launchd/worker/so.kel.claude-remote.plist serves Remote Control sessions
+  # from ~/code, and under launchd it can't answer the first run's prompts.
+  mkdir -p "$HOME/code"
+  if ! jq -e --arg dir "$HOME/code" '.projects[$dir].hasTrustDialogAccepted' "$HOME/.claude.json" >/dev/null 2>&1; then
+    log "In another terminal run: cd ~/code && claude remote-control"
+    log "Accept its prompts, then quit it with Ctrl-C once it says it's ready"
+    read -r -p " -- Press enter once done..."
+  fi
+fi
+
+ts_status="$(/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json --peers=false 2>/dev/null || true)"
+# Tailscale signs a Mac out every 180 days unless its key expiry is off,
+# which would cut the worker off the tailnet.
+if [ "$role" = worker ] && jq -e .Self.KeyExpiry <<<"$ts_status" >/dev/null 2>&1; then
+  log "Turn off key expiry for this Mac at https://login.tailscale.com/admin/machines"
+fi
 # Stopped means signed in with the VPN off; the CLI prints nothing while the app isn't running.
-case "$(/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json 2>/dev/null | jq -r .BackendState)" in
+case "$(jq -r .BackendState <<<"$ts_status" 2>/dev/null)" in
   Running | Stopped) log "Done." ;;
   *) log "Done. Manual follow-ups: sign into Tailscale." ;;
 esac

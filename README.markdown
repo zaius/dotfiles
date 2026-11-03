@@ -17,6 +17,29 @@ homebrew bash, and links the `.symlink` files into `~`. Use `bash -c "$(curl …
 `curl … | bash` — the setup prompts read from the terminal. Re-running it (or
 `bash ~/.dotfiles/install.sh`) skips the clone.
 
+## Worker Mac
+
+An always-on Mac for background Claude sessions, scheduled tasks and daemons:
+
+```bash
+DOTFILES_ROLE=worker bash -c "$(curl -fsSL https://raw.githubusercontent.com/zaius/dotfiles/main/install.sh)"
+```
+
+The role sticks (in the gitignored `.role`), so re-runs need no variable. A worker skips
+the Brewfile lines marked `if laptop`, never sleeps, turns on Remote Login and Screen
+Sharing, stops installing macOS updates by itself, logs in automatically when FileVault is
+off, and opens Claude Desktop at login for its scheduled tasks. It also runs the launch
+agents in `launchd/worker/`: `so.kel.claude-remote` serves Remote Control sessions from
+`~/code`, which you can start from claude.ai/code or the Claude app. Logs go to
+`~/Library/Logs/claude-remote.log`.
+
+Afterwards, by hand:
+
+ * turn off Tailscale key expiry for the Mac (mac.sh reminds you)
+ * clone the repos it should work on into `~/code`
+ * add user-scoped MCP servers (`claude mcp add --scope user …`): they live in
+   `~/.claude.json`, which stays per Mac
+
 ## Manual steps remaining
 
  * add google accounts

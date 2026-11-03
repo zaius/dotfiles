@@ -1,4 +1,6 @@
 secrets.yml
+# This Mac's role, written by install.sh
+.role
 vim/vim.symlink/.netrwhist
 vim/vim.symlink/undo/*
 vim/vim.symlink/swap/*

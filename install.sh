@@ -23,6 +23,18 @@ if [[ ! -d $base ]]; then
   git -C ${base} remote set-url --push origin git@github.com:zaius/dotfiles.git
 fi
 
+# The role picks which apps and launch agents a Mac gets: laptop (the default),
+# or worker for an always-on Mac that runs background agents and daemons. Set
+# DOTFILES_ROLE on the first install; later runs read it back from .role.
+if [[ -n ${DOTFILES_ROLE:-} ]]; then
+  case $DOTFILES_ROLE in
+    laptop|worker) echo "$DOTFILES_ROLE" > ${base}/.role ;;
+    *) echo "DOTFILES_ROLE must be laptop or worker"; exit 1 ;;
+  esac
+fi
+role=$(cat ${base}/.role 2>/dev/null || echo laptop)
+echo "role: ${role}"
+
 home-link() {
   local src=${base}/${1}
   local default_dst=~/.$(basename ${1} .symlink)
@@ -76,10 +88,12 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   bash "${base}/mac.sh"
 fi
 
-# launchd agents (copied, not linked - launchd is unreliable with symlinked plists)
+# launchd agents (copied, not linked - launchd is unreliable with symlinked plists).
+# launchd/ holds the agents every Mac runs, launchd/<role>/ the role's own.
 if [[ "$(uname -s)" == "Darwin" ]]; then
   mkdir -p ~/Library/LaunchAgents
-  for plist in ${base}/launchd/*.plist; do
+  for plist in ${base}/launchd/*.plist ${base}/launchd/${role}/*.plist; do
+    [[ -e $plist ]] || continue
     echo "installing launch agent $(basename ${plist})"
     cp ${plist} ~/Library/LaunchAgents/
     launchctl bootout gui/$(id -u)/$(basename ${plist} .plist) 2>/dev/null || true

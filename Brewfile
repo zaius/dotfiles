@@ -1,5 +1,11 @@
 # Reinstallation manifest. Apply with: brew bundle --file=Brewfile
 
+# Lines ending in `if laptop` skip the worker, the always-on Mac installed with
+# DOTFILES_ROLE=worker (see install.sh). brew hides every variable but its own
+# HOMEBREW_ ones from a Brewfile, so read the role install.sh saved instead.
+role_file = File.expand_path("~/.dotfiles/.role")
+laptop = !File.exist?(role_file) || File.read(role_file).strip != "worker"
+
 # --- Taps ---
 tap "hashicorp/tap"
 
@@ -62,40 +68,40 @@ brew "prettier"
 cask "claude-code@latest"
 cask "codex"
 cask "claude"
-cask "chatgpt"
+cask "chatgpt" if laptop
 brew "opencode"
 
 
 # --- Browsers ---
 cask "firefox"
-cask "tor-browser"
+cask "tor-browser" if laptop
 cask "ungoogled-chromium" # quarantine stripped post-install in mac.sh
 
 # --- Productivity / windowing ---
 cask "1password"
 cask "1password-cli"
-cask "bitwarden"
+cask "bitwarden" if laptop
 cask "dropbox"
-cask "karabiner-elements"
+cask "karabiner-elements" if laptop
 cask "obsidian"
-cask "rectangle"
-cask "monitorcontrol"
+cask "rectangle" if laptop
+cask "monitorcontrol" if laptop
 
 
 # --- Networking ---
 cask "tailscale-app"
 
 # --- Media / drawing / editing ---
-cask "monodraw"
-cask "vlc"
+cask "monodraw" if laptop
+cask "vlc" if laptop
 # Until they work out their crashing issues...
 # cask "vimr"
-cask "neovide"
+cask "neovide" if laptop
 
 # --- Meetings ---
-cask "zoom"
-cask "slack"
-cask "discord"
+cask "zoom" if laptop
+cask "slack" if laptop
+cask "discord" if laptop
 
 # --- Fonts ---
 cask "font-fira-code"
@@ -103,10 +109,10 @@ cask "font-fira-code"
 # --- Mac App Store ---
 # Requires being signed into the App Store first; `mas` cannot sign you in.
 mas "Xcode", id: 497799835
-mas "Microsoft Word", id: 462054704
-mas "Microsoft Excel", id: 462058435
+mas "Microsoft Word", id: 462054704 if laptop
+mas "Microsoft Excel", id: 462058435 if laptop
 
 # iOS apps still unsupported, but if that eventually changes
 # https://github.com/mas-cli/mas/issues/321
 # mas "amaran", id: 6503329243
-mas "amaran Desktop", id: 6590629064
+mas "amaran Desktop", id: 6590629064 if laptop
