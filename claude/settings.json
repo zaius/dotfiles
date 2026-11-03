@@ -1,0 +1,135 @@
+{
+  "cleanupPeriodDays": 3650,
+  "env": {
+    "CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "opus[1m]",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; case \"$f\" in *.py) MATCHES=$(grep -n 'except Exception\\|except:' \"$f\" | grep -v 'noqa: BLE001') && jq -n --arg m \"$MATCHES\" '{decision:\"block\",reason:(\"Broad exception catch detected. Use a specific exception type or allow to bubble:\\n\" + $m)}' && exit 0 || true;; esac; }"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== Project Guidelines (AGENTS.md) ===' && cat AGENTS.md 2>/dev/null || echo 'AGENTS.md not found in current directory'"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-session-start-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-session-start-memory.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-capture-session-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-capture-session-memory.sh",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-on-stop-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-on-stop-memory.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-rag-docs-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-rag-docs-memory.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-rag-cross-workspace-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-rag-cross-workspace-memory.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-rag-workspace-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-rag-workspace-memory.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -x ~/.claude/subspace-hooks/subspace-claude-rag-project-memory.sh ] || ~/.claude/subspace-hooks/subspace-claude-rag-project-memory.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true,
+    "slack@claude-plugins-official": true,
+    "sentry-cli@claude-plugins-official": true,
+    "mattpocock-skills@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "tui": "fullscreen",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark",
+  "switchModelsOnFlag": true,
+  "idleCompaction": false,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true
+}

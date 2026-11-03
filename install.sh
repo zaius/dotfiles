@@ -63,6 +63,12 @@ home-link vim/vimrc.symlink
 home-link profile.symlink
 # home-link eslintrc.json.symlink
 
+# Claude Code: settings and global instructions. The rest of ~/.claude is this
+# Mac's own state (transcripts, memory, installed plugins).
+mkdir -p ~/.claude
+home-link claude/settings.json ~/.claude/settings.json
+home-link claude/CLAUDE.md ~/.claude/CLAUDE.md
+
 # macOS: install Homebrew + Brewfile + GUI apps. Run after linking so the CLI
 # logins and Karabiner write into the linked ~/.config, which home-link would
 # otherwise delete.

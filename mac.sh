@@ -390,25 +390,6 @@ EOF
   rm -f "$ff_json" "$ff_plist"
 fi
 
-# --- Claude Code: pre-seed enabled plugins so first launch only needs a trust confirm ---
-# Plugin install requires auth, but seeding settings.json shortcuts the manual /plugin step.
-if [ ! -f "$HOME/.claude/settings.json" ]; then
-  log "Seeding ~/.claude/settings.json"
-  mkdir -p "$HOME/.claude"
-  cat > "$HOME/.claude/settings.json" <<'EOF'
-{
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
-  }
-}
-EOF
-fi
-
 # --- Playwright MCP: pin to chromium (default reaches for system Chrome) ---
 # Lives inside the marketplace checkout, so plugin updates can clobber it — rewrite
 # unconditionally so re-running this script restores the pin.
