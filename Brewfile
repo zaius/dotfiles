@@ -41,6 +41,7 @@ brew "yt-dlp"
 # --- Dev ---
 cask "orbstack"
 brew "go"
+brew "rust"
 brew "uv"
 brew "hashicorp/tap/terraform", trusted: true
 brew "honcho" # Procfile runner
@@ -102,6 +103,7 @@ cask "neovide" if laptop
 cask "zoom" if laptop
 cask "slack" if laptop
 cask "discord" if laptop
+cask "whatsapp" if laptop
 
 # --- Fonts ---
 cask "font-fira-code"
