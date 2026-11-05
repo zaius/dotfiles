@@ -64,6 +64,24 @@ done
 # survive brew's timestamp resets.
 sudo() { command sudo -A "$@"; }
 
+# --- Computer name (Sharing / Bonjour / hostname) ---
+# Ask before anything signs in: Tailscale and Dropbox register this Mac under
+# whatever it's called when they first see it. A fresh Mac has no HostName and
+# renaming below sets one, so only ask until then.
+if ! scutil --get HostName >/dev/null 2>&1; then
+  current_name="$(scutil --get ComputerName 2>/dev/null || true)"
+  log "Current computer name: ${current_name:-<unset>}"
+  read -r -p " -- New computer name (enter to keep): " new_name
+  if [ -n "$new_name" ]; then
+    # LocalHostName/HostName need a DNS-safe label: spaces -> hyphens, drop other punctuation.
+    safe_name="$(echo "$new_name" | tr ' ' '-' | tr -cd 'A-Za-z0-9-')"
+    sudo scutil --set ComputerName "$new_name"
+    sudo scutil --set LocalHostName "$safe_name"
+    sudo scutil --set HostName "$safe_name"
+    dscacheutil -flushcache
+  fi
+fi
+
 # --- Homebrew ---
 if ! command -v brew >/dev/null 2>&1; then
   log "Installing Homebrew"
@@ -144,22 +162,6 @@ fi
 
 # --- nvm working dir ---
 # mkdir -p "$HOME/.nvm"
-
-# --- Computer name (Sharing / Bonjour / hostname) ---
-# A fresh Mac has no HostName and renaming below sets one, so only ask until then.
-if ! scutil --get HostName >/dev/null 2>&1; then
-  current_name="$(scutil --get ComputerName 2>/dev/null || true)"
-  log "Current computer name: ${current_name:-<unset>}"
-  read -r -p " -- New computer name (enter to keep): " new_name
-  if [ -n "$new_name" ]; then
-    # LocalHostName/HostName need a DNS-safe label: spaces -> hyphens, drop other punctuation.
-    safe_name="$(echo "$new_name" | tr ' ' '-' | tr -cd 'A-Za-z0-9-')"
-    sudo scutil --set ComputerName "$new_name"
-    sudo scutil --set LocalHostName "$safe_name"
-    sudo scutil --set HostName "$safe_name"
-    dscacheutil -flushcache
-  fi
-fi
 
 # --- macOS defaults ---
 # Snapshot the domains whose apps need a restart to pick up changes, so re-runs
@@ -660,12 +662,16 @@ if [ "$role" = worker ]; then
 
   # Launch agents, OrbStack, Dropbox and Tailscale all run in the login
   # session, so after a reboot nothing comes back until someone logs in.
-  # FileVault rules out logging in automatically.
+  # FileVault rules out logging in automatically. sysadminctl -autologin can
+  # hang after reading the password, so flip it in System Settings instead.
   if fdesetup isactive >/dev/null; then
     log "FileVault is on: after a reboot, log in at the Mac itself to bring the worker back"
-  elif [ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" != "$USER" ]; then
-    log "Turning on automatic login — enter your macOS password again"
-    on_tty sudo sysadminctl -autologin set -userName "$USER" -password -
+  else
+    until [ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" = "$USER" ]; do
+      open "x-apple.systempreferences:com.apple.Users-Groups-Settings.extension"
+      log "Set Users & Groups > Automatically log in as: $(id -F)"
+      read -r -p " -- Press enter to re-check..."
+    done
   fi
 
   # Claude Desktop runs its scheduled tasks only while it's open, and has no
