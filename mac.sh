@@ -463,7 +463,10 @@ fi
 # unattended, so hand them the terminal directly. Open it read-write on all
 # three fds: gh queries the background color over stdout and reads the reply
 # back from it, so a write-only stdout leaves the reply for its prompt to choke on.
-on_tty() { "$@" <>/dev/tty >&0 2>&0; }
+# Open the terminal by its device path (stdin is still the terminal): claude
+# runs on Bun, whose kqueue event loop rejects descriptors opened via /dev/tty.
+tty_dev="$(tty)" || tty_dev=/dev/tty
+on_tty() { "$@" <>"$tty_dev" >&0 2>&0; }
 log "CLI logins: claude, gh, gcloud, az"
 claude auth status --json 2>/dev/null | jq -e .loggedIn >/dev/null || on_tty claude auth login
 gh auth status >/dev/null 2>&1 || on_tty gh auth login --web --git-protocol https
