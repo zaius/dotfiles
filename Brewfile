@@ -12,10 +12,12 @@ tap "hashicorp/tap"
 # --- CLI tools ---
 brew "bash"
 brew "bash-completion@2"
+brew "carapace" # flag completions with descriptions
 brew "delta" # nicer git diffs
 brew "duckdb"
 brew "fzf"
 brew "gh"
+brew "grep" # GNU grep, put ahead of BSD grep on PATH in profile.symlink
 brew "htop"
 brew "just"
 brew "mas" # mac app store installer

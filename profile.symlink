@@ -14,6 +14,11 @@ default="\[$(tput sgr0)\]"
 HOMEBREW_PREFIX=/opt/homebrew
 export PATH=/usr/local/sbin:$PATH
 export PATH=~/.dotfiles/bin:~/.local/bin:/usr/local/bin:$HOMEBREW_PREFIX/bin:$PATH
+# GNU grep over BSD grep: same flags plus -P, and a --help that bash-completion
+# can parse for flag completion.
+if [[ -d $HOMEBREW_PREFIX/opt/grep/libexec/gnubin ]]; then
+  export PATH=$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$PATH
+fi
 
 if [[ -d /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin ]]; then
   export PATH=$PATH:/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
@@ -162,6 +167,23 @@ fi
 if [ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]; then
   . /opt/homebrew/etc/profile.d/bash_completion.sh
 fi
+
+# Carapace completes flags, with descriptions, for ~1000 commands (grep, find, git…).
+# It replaces bash-completion's own completions, which only scrape `--help` or skip
+# descriptions, but not the ones a tool ships itself (brew, gh, gcloud, uv…):
+# bash-completion registers those at load time, so snapshot them and put them back.
+# Run it in a function: functions don't inherit the DEBUG trap above, which would
+# otherwise fork `history` for each of the ~100 replayed `complete` lines.
+_load_carapace() {
+  local before
+  before=$(complete -p | grep -v _comp_complete_longopt)
+  source <(carapace _carapace bash)
+  eval "$before"
+}
+if [[ $PS1 ]] && command -v carapace > /dev/null; then
+  _load_carapace
+fi
+unset -f _load_carapace
 
 # Lightweight ssh host completion from ~/.ssh/config, registered eagerly.
 # Must come BEFORE fzf's completion.bash is sourced (further down): fzf snapshots
