@@ -664,10 +664,13 @@ if [ "$role" = worker ]; then
   # session, so after a reboot nothing comes back until someone logs in.
   # FileVault rules out logging in automatically. sysadminctl -autologin can
   # hang after reading the password, so flip it in System Settings instead.
+  # Without the password in /etc/kcpassword, the Mac stops at the login window
+  # even with autoLoginUser set.
   if fdesetup isactive >/dev/null; then
     log "FileVault is on: after a reboot, log in at the Mac itself to bring the worker back"
   else
-    until [ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" = "$USER" ]; do
+    until [ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null)" = "$USER" ] &&
+      sudo test -f /etc/kcpassword; do
       open "x-apple.systempreferences:com.apple.Users-Groups-Settings.extension"
       log "Set Users & Groups > Automatically log in as: $(id -F)"
       read -r -p " -- Press enter to re-check..."
