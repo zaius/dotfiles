@@ -27,8 +27,8 @@ DOTFILES_ROLE=worker bash -c "$(curl -fsSL https://raw.githubusercontent.com/zai
 
 The role sticks (in the gitignored `.role`), so re-runs need no variable. A worker skips
 the Brewfile lines marked `if laptop`, never sleeps, turns on Remote Login and Screen
-Sharing, stops installing macOS updates by itself, logs in automatically when FileVault is
-off, and opens Claude Desktop at login for its scheduled tasks. It also runs the launch
+Sharing, stops installing macOS updates by itself, and logs in automatically when FileVault
+is off. It also runs the launch
 agents in `launchd/worker/`: `so.kel.claude-remote` serves Remote Control sessions from
 `~/code`, which you can start from claude.ai/code or the Claude app. Logs go to
 `~/Library/Logs/claude-remote.log`.
@@ -36,6 +36,8 @@ agents in `launchd/worker/`: `so.kel.claude-remote` serves Remote Control sessio
 Afterwards, by hand:
 
  * turn off Tailscale key expiry for the Mac (mac.sh reminds you)
+ * turn on Run on startup in Claude Desktop's settings: it runs scheduled tasks only
+   while open
  * clone the repos it should work on into `~/code`
  * add user-scoped MCP servers (`claude mcp add --scope user …`): they live in
    `~/.claude.json`, which stays per Mac

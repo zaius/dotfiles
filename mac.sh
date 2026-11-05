@@ -677,19 +677,6 @@ if [ "$role" = worker ]; then
     done
   fi
 
-  # Claude Desktop runs its scheduled tasks only while it's open, and has no
-  # launch-on-login pref of its own.
-  if [ -d /Applications/Claude.app ]; then
-    log "Registering Claude as a login item"
-    osascript <<'EOF' >/dev/null
-tell application "System Events"
-  if not (exists login item "Claude") then
-    make login item at end with properties {path:"/Applications/Claude.app", hidden:false}
-  end if
-end tell
-EOF
-  fi
-
   # launchd/worker/so.kel.claude-remote.plist serves Remote Control sessions
   # from ~/code, and under launchd it can't answer the first run's prompts.
   mkdir -p "$HOME/code"
