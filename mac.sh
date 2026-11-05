@@ -92,6 +92,15 @@ fi
 log "brew bundle — mas apps (Xcode is ~8GB) download with no progress output; watch Launchpad"
 brew bundle --file="$here/Brewfile" --verbose
 
+# --- Xcode license: compilers and xcrun refuse to run until it's accepted ---
+# Call Xcode's own xcodebuild: xcode-select may still point at the Command Line
+# Tools, whose xcodebuild only reports that it needs Xcode.
+xcodebuild=/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
+if [ -x "$xcodebuild" ] && ! "$xcodebuild" -license check >/dev/null 2>&1; then
+  log "Accepting the Xcode license"
+  sudo "$xcodebuild" -license accept
+fi
+
 pyenv install --skip-existing 3.15
 pyenv global 3.15
 
